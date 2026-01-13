@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request
+from flask_cors import CORS
 import json
 import os
 from collections import Counter
@@ -7,6 +8,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes
 
 # Path to the data file
 DATA_FILE = 'metric-data.json'
