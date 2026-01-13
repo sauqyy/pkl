@@ -1,7 +1,10 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import json
 import os
 from collections import Counter
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -17,9 +20,36 @@ BASE_URL = "https://ptfwdindonesia-prod.saas.appdynamics.com"
 APP_NAME = "SmartNano"
 METRIC_PATH = "Overall Application Performance|Average Response Time (ms)"
 
-def load_data():
+# Email Configuration (Placeholders - Please Update)
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+SENDER_EMAIL = "your_email@gmail.com"
+SENDER_PASSWORD = "your_app_password"
+RECIPIENT_EMAIL = "your_email@gmail.com"
+
+def send_email_alert(error_message):
+    """Sends an email alert when an error occurs."""
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = RECIPIENT_EMAIL
+        msg['Subject'] = f"Alert: AppDynamics API Error - {APP_NAME}"
+        
+        body = f"An error occurred while fetching data from AppDynamics:\n\n{error_message}"
+        msg.attach(MIMEText(body, 'plain'))
+        
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        print("Email alert sent successfully.")
+    except Exception as e:
+        print(f"Failed to send email alert: {e}")
+
+def load_data(duration=60):
     """
-    Fetches live data from AppDynamics API (Last 15 minutes).
+    Fetches live data from AppDynamics API based on duration.
     Falls back to local file if API fails.
     """
     encoded_metric = urllib.parse.quote(METRIC_PATH)
@@ -27,12 +57,12 @@ def load_data():
         f"{BASE_URL}/controller/rest/applications/{APP_NAME}/metric-data?"
         f"metric-path={encoded_metric}&"
         f"time-range-type=BEFORE_NOW&"
-        f"duration-in-mins=60&"
+        f"duration-in-mins={duration}&"
         f"output=JSON&"
         f"rollup=false"
     )
     
-    print("Fetching live data...")
+    print(f"Fetching live data for last {duration} minutes...")
     req = urllib.request.Request(url)
     req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
     
@@ -44,7 +74,9 @@ def load_data():
                 json.dump(data, f, indent=2)
             return data
     except Exception as e:
-        print(f"API Error: {e}. Falling back to cached file.")
+        error_msg = f"API Error: {e}"
+        print(f"{error_msg}. Falling back to cached file.")
+        send_email_alert(error_msg)
         
     # Fallback
     if not os.path.exists(DATA_FILE):
@@ -64,7 +96,8 @@ def index():
 
 @app.route('/api/data')
 def get_data():
-    raw_data = load_data()
+    duration = request.args.get('duration', default=60, type=int)
+    raw_data = load_data(duration)
     
     # Data structures for visualization
     response_times = []
