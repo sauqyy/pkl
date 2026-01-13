@@ -360,5 +360,69 @@ def get_error_analysis():
         print(e)
         return jsonify({'error': str(e)})
 
+@app.route('/loadanalysis')
+def load_analysis_page():
+    return render_template('loadanalysis.html')
+
+@app.route('/api/load-analysis')
+def get_load_analysis():
+    data_file = 'load_data.json'
+    if not os.path.exists(data_file):
+        # Fallback to empty if not ready
+        return jsonify({'error': 'Load data (load_data.json) not found. Script is likely still running.', 'total': 0})
+    
+    try:
+        with open(data_file, 'r') as f:
+            raw_data = json.load(f)
+            
+        df = pd.DataFrame(raw_data)
+        if df.empty:
+             return jsonify({'error': 'No data in load_data.json'})
+
+        # Preprocessing
+        df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms') + pd.Timedelta(hours=7)
+        
+        # Timeframe
+        timeframe = request.args.get('timeframe', 'all')
+        now = df['dt'].max()
+        
+        if timeframe == '7d': df = df[df['dt'] >= now - pd.Timedelta(days=7)]
+        elif timeframe == '30d': df = df[df['dt'] >= now - pd.Timedelta(days=30)]
+        elif timeframe == '6m': df = df[df['dt'] >= now - pd.Timedelta(days=180)]
+        elif timeframe == '1y': df = df[df['dt'] >= now - pd.Timedelta(days=365)]
+        
+        df['hour'] = df['dt'].dt.hour
+        df['day_name'] = df['dt'].dt.day_name()
+        
+        # Aggregation
+        # Heatmap
+        heatmap_pivot = df.groupby(['day_name', 'hour'])['sum'].sum().reset_index().pivot(index='day_name', columns='hour', values='sum').fillna(0)
+        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
+        
+        # Hourly
+        hourly_dist = df.groupby('hour')['sum'].sum().reindex(range(24), fill_value=0).tolist()
+        
+        # Daily
+        daily_dist = df.groupby('day_name')['sum'].sum().reindex(days_order, fill_value=0).tolist()
+        
+        # Stats
+        total_load = int(df['sum'].sum())
+        peak_hour = f"{np.argmax(hourly_dist)}:00"
+        peak_day = days_order[np.argmax(daily_dist)]
+        
+        return jsonify({
+            'heatmap': heatmap_pivot.to_dict(orient='split'),
+            'hourly': hourly_dist,
+            'daily': daily_dist,
+            'total': total_load,
+            'peak_hour': peak_hour,
+            'peak_day': peak_day
+        })
+        
+    except Exception as e:
+        print(f"Load Analysis Error: {e}")
+        return jsonify({'error': str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
