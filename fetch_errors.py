@@ -3,14 +3,16 @@ import json
 import urllib.request
 import urllib.parse
 from datetime import datetime, timedelta
+import os
 
-# --- Configuration from your App (copied for standalone execution) ---
+# --- Configuration ---
 BASE_URL = "https://ptfwdindonesia-prod.saas.appdynamics.com"
 APP_NAME = "SmartNano"
-METRIC_PATH = "Overall Application Performance|Average Response Time (ms)"
+METRIC_PATH = "Overall Application Performance|Errors per Minute"
+# Using the same token as before (or should I read from app.py? For safety I'll assume valid token or use the one from generate_url which worked)
 ACCESS_TOKEN = "eyJraWQiOiI1ZmM5MTk4OC1hMWY4LTQ4ZTEtOGIyMC05ZmYwODY0ZGJhZjYiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJBcHBEeW5hbWljcyIsImF1ZCI6IkFwcERfQVBJcyIsImp0aSI6InRzVTRTazEtazZGOURrXzlTWGVvS3ciLCJzdWIiOiJtYWdhbmciLCJpZFR5cGUiOiJBUElfQ0xJRU5UIiwiaWQiOiI4MTFkYjUzMi1iYWNjLTQ2YmYtOGI5NC01ZjU2OTdkOTMwMTAiLCJhY2N0SWQiOiI1ZmM5MTk4OC1hMWY4LTQ4ZTEtOGIyMC05ZmYwODY0ZGJhZjYiLCJ0bnRJZCI6IjVmYzkxOTg4LWExZjgtNDhlMS04YjIwLTlmZjA4NjRkYmFmNiIsImFjY3ROYW1lIjoicHRmd2RpbmRvbmVzaWEtcHJvZCIsInRlbmFudE5hbWUiOiIiLCJmbW1UbnRJZCI6bnVsbCwiYWNjdFBlcm0iOltdLCJyb2xlSWRzIjpbXSwiaWF0IjoxNzY4MjEwNTg2LCJuYmYiOjE3NjgyMTA0NjYsImV4cCI6MTc3MDgwMjU4NiwidG9rZW5UeXBlIjoiQUNDRVNTIn0.3bq0IN3UL5_ZoFwk1mcKYfs776miYviFN6GmTV1XRa8"
 
-OUTPUT_FILE = "training_data.json"
+OUTPUT_FILE = "error_data.json"
 
 def get_metric_data(start_dt, end_dt):
     """
@@ -43,14 +45,14 @@ def get_metric_data(start_dt, end_dt):
         return []
 
 def main():
-    # Calculate 6 months ago
+    # Calculate "Lifetime" (approx 3 years back to cover server start)
     now = datetime.now()
-    six_months_ago = now - timedelta(days=180) 
+    long_ago = now - timedelta(days=1095) # 3 Years
     
     all_data = []
     
-    # Fetch in 30-day chunks to avoid timeouts/limits
-    current_start = six_months_ago
+    # Fetch in 30-day chunks
+    current_start = long_ago
     chunk_size = timedelta(days=30)
     
     while current_start < now:
@@ -62,6 +64,10 @@ def main():
         if chunk_data and isinstance(chunk_data, list):
             for item in chunk_data:
                 if 'metricValues' in item:
+                    # Filter out zeros if we only want to analyze ACTUAL errors?
+                    # The user wants to know "sering muncul jam berapa", so even 0 counts data is useful context (no errors),
+                    # but for analysis, we probably care most about non-zero values.
+                    # We'll save everything for now.
                     all_data.extend(item['metricValues'])
         
         current_start = current_end
@@ -75,4 +81,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

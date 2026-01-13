@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Analysis - AppDynamics</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .chart-box {
+            height: 350px;
+            position: relative;
+            width: 100%;
+        }
+
+        .grid-heatmap {
+            display: grid;
+            grid-template-columns: 80px repeat(24, 1fr);
+            gap: 2px;
+            margin-top: 1rem;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: transparent;
+            position: relative;
+        }
+
+        .heatmap-cell:hover {
+            color: #fff;
+            transform: scale(1.2);
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .heatmap-row-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+        }
+
+        .heatmap-col-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="container">
+            <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>Lifetime Error Analysis</h1>
+                    <div style="color: #64748b;">Historical Analysis of "Errors per Minute" (Last 3 Years)</div>
+                </div>
+                <div>
+                    <select id="timeframe-select" onchange="fetchAnalysis()"
+                        style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem; cursor: pointer;">
+                        <option value="all" selected>All Time (Lifetime)</option>
+                        <option value="1y">Last 1 Year</option>
+                        <option value="6m">Last 6 Months</option>
+                        <option value="30d">Last 30 Days</option>
+                        <option value="7d">Last 7 Days</option>
+                    </select>
+                </div>
+            </header>
+
+            <!-- Stats Row -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                <div class="card">
+                    <div class="stat-label">Total Errors Detected</div>
+                    <div class="stat-value" id="total-errors">Loading...</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Peak Error Time (Sering Muncul Jam)</div>
+                    <div class="stat-value" id="peak-hour" style="color: #ef4444;">--:--</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Highest Error Day (Sering Muncul Hari)</div>
+                    <div class="stat-value" id="peak-day" style="color: #f59e0b;">--</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Weekly Heatmap: When do errors happen?</h2>
+                <div class="grid-heatmap" id="heatmap">
+                    <!-- JS will populate -->
+                </div>
+                <div
+                    style="display:flex; justify-content:space-between; margin-top:0.5rem; font-size:0.8rem; color:#94a3b8;">
+                    <span>0:00 (Midnight)</span>
+                    <span>12:00 (Noon)</span>
+                    <span>23:00</span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="card">
+                    <h3>Hourly Distribution</h3>
+                    <div class="chart-box">
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Daily Distribution</h3>
+                    <div class="chart-box">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let hourlyChartInstance = null;
+        let dailyChartInstance = null;
+
+        async function fetchAnalysis() {
+            try {
+                const timeframe = document.getElementById('timeframe-select').value;
+                const response = await fetch(`/api/error-analysis?timeframe=${timeframe}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("Analysis error: " + data.error);
+                    return;
+                }
+
+                // Update Stats
+                document.getElementById('total-errors').innerText = data.total.toLocaleString();
+                document.getElementById('peak-hour').innerText = data.peak_hour;
+                document.getElementById('peak-day').innerText = data.peak_day;
+
+                renderHeatmap(data.heatmap);
+                renderCharts(data.hourly, data.daily);
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderHeatmap(heatmap) {
+            const container = document.getElementById('heatmap');
+            container.innerHTML = '';
+
+            // Header Row (Hours)
+            container.appendChild(document.createElement('div')); // Empty corner
+            for (let h = 0; h < 24; h++) {
+                const div = document.createElement('div');
+                div.className = 'heatmap-col-label';
+                div.innerText = h;
+                container.appendChild(div);
+            }
+
+            // Data Rows
+            const days = heatmap.index;
+            const values = heatmap.data;
+
+            // Find max for color scaling
+            let maxVal = 0;
+            values.forEach(row => row.forEach(val => maxVal = Math.max(maxVal, val)));
+
+            days.forEach((day, i) => {
+                const label = document.createElement('div');
+                label.className = 'heatmap-row-label';
+                label.innerText = day.substring(0, 3); // Mon, Tue...
+                container.appendChild(label);
+
+                for (let h = 0; h < 24; h++) {
+                    const val = values[i][h];
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    cell.innerText = val;
+
+                    // Color Logic
+                    if (val === 0) {
+                        cell.style.background = '#f1f5f9';
+                    } else {
+                        const intensity = Math.min((val / maxVal) * 0.8 + 0.2, 1); // 0.2 to 1.0 alpha
+                        cell.style.background = `rgba(239, 68, 68, ${intensity})`; // Red heatmap
+                        if (intensity > 0.5) cell.style.color = '#fff'; // ensure text visibility on dark red
+                    }
+
+                    cell.title = `${day} ${h}:00 - ${val} Errors`;
+                    container.appendChild(cell);
+                }
+            });
+        }
+
+        function renderCharts(hourly, daily) {
+            // Destroy existing charts if they exist
+            if (hourlyChartInstance) hourlyChartInstance.destroy();
+            if (dailyChartInstance) dailyChartInstance.destroy();
+
+            // Hourly Chart
+            hourlyChartInstance = new Chart(document.getElementById('hourlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: Array.from({ length: 24 }, (_, i) => i + ":00"),
+                    datasets: [{
+                        label: 'Errors by Hour',
+                        data: hourly,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Daily Chart
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            dailyChartInstance = new Chart(document.getElementById('dailyChart'), {
+                type: 'bar', // or 'doughnut'
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Errors by Day',
+                        data: daily,
+                        backgroundColor: [
+                            '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#94a3b8', '#f87171', '#ef4444'
+                        ], // Highlight weekends? Or just uniform
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y' // Horizontal bar
+                }
+            });
+        }
+
+        fetchAnalysis();
+    </script>
+</body>
+
+</html>
