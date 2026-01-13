@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppDynamics Realtime Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            /* Light Gray */
+            --card-bg: #ffffff;
+            /* Pure White */
+            --text-primary: #1e293b;
+            /* Dark Slate */
+            --text-secondary: #64748b;
+            /* Gray */
+            --accent-color: #0ea5e9;
+            /* Sky Blue */
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 350px !important;
+        }
+
+        /* Stats Styling */
+        .stat-item {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Application Metrics</h1>
+            <div class="subtitle">Realtime Performance Dashboard</div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-count">0</div>
+                <div class="stat-label">Total Points</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-avg">0 ms</div>
+                <div class="stat-label">Avg Response</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-max">0 ms</div>
+                <div class="stat-label">Max Latency</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-min">0 ms</div>
+                <div class="stat-label">Min Latency</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Line Chart (Trend) -->
+            <div class="card full-width">
+                <h2>Response Time Trend</h2>
+                <canvas id="lineChart"></canvas>
+            </div>
+
+            <!-- Bar Chart (Frequency) -->
+            <div class="card">
+                <h2>Frequency Distribution</h2>
+                <canvas id="frequencyChart"></canvas>
+            </div>
+
+            <!-- Doughnut Chart (Buckets) -->
+            <div class="card">
+                <h2>Performance Buckets</h2>
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store chart instances
+        let lineChart = null;
+        let frequencyChart = null;
+        let doughnutChart = null;
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function renderDashboard(data) {
+            updateStats(data.raw_values);
+            updateLineChart(data.timeline);
+            updateFrequencyChart(data.frequency);
+            updateDoughnutChart(data.buckets);
+        }
+
+        function updateStats(values) {
+            if (!values || values.length === 0) return;
+
+            const total = values.length;
+            const sum = values.reduce((a, b) => a + b, 0);
+            const avg = (sum / total).toFixed(1);
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+
+            document.getElementById('stat-count').innerText = total;
+            document.getElementById('stat-avg').innerText = `${avg} ms`;
+            document.getElementById('stat-max').innerText = `${max} ms`;
+            document.getElementById('stat-min').innerText = `${min} ms`;
+
+            // Color code average
+            const avgEl = document.getElementById('stat-avg');
+            avgEl.style.color = avg > 200 ? '#ef4444' : (avg > 100 ? '#f59e0b' : '#0ea5e9');
+        }
+
+        function updateLineChart(timeline) {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            const dataPoints = timeline.map(item => ({ x: item.time, y: item.value }));
+
+            if (lineChart) {
+                lineChart.data.datasets[0].data = dataPoints;
+                lineChart.update();
+                return;
+            }
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Response Time (ms)',
+                        data: dataPoints,
+                        borderColor: '#0ea5e9',
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'minute' },
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateFrequencyChart(freqData) {
+            const ctx = document.getElementById('frequencyChart').getContext('2d');
+            const labels = Object.keys(freqData);
+            const values = Object.values(freqData);
+
+            if (frequencyChart) {
+                frequencyChart.data.labels = labels;
+                frequencyChart.data.datasets[0].data = values;
+                frequencyChart.update();
+                return;
+            }
+
+            frequencyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Count',
+                        data: values,
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Response Time (ms)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function updateDoughnutChart(bucketData) {
+            const ctx = document.getElementById('doughnutChart').getContext('2d');
+            const labels = Object.keys(bucketData);
+            const values = Object.values(bucketData);
+
+            if (doughnutChart) {
+                doughnutChart.data.labels = labels;
+                doughnutChart.data.datasets[0].data = values;
+                doughnutChart.update();
+                return;
+            }
+
+            doughnutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#22c55e', // Fast (Green)
+                            '#f59e0b', // Normal (Yellow)
+                            '#ef4444'  // Slow (Red)
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+
+        // Initial Load
+        fetchData();
+        // Refresh periodically
+        setInterval(fetchData, 30000);
+    </script>
+</body>
+
+</html>
