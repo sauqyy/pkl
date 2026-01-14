@@ -6,6 +6,9 @@ from collections import Counter
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 CORS(app) # Enable CORS for all routes
@@ -94,7 +97,86 @@ def load_data(duration=60):
 
 @app.route('/')
 def index():
+    return render_template('executive_dashboard.html')
+
+@app.route('/response-time')
+def response_time_dashboard():
     return render_template('dashboard.html')
+
+@app.route('/api/summary')
+def get_summary_data():
+    summary = {
+        'response_time': 0,
+        'load': 0,
+        'errors': 0,
+        'slow_calls': 0
+    }
+    
+    # 1. Response Time (Current/Avg)
+    try:
+        data = load_data(60) # Last 60 mins
+        if data and isinstance(data, list) and len(data) > 0:
+             values = data[0].get('metricValues', [])
+             if values:
+                 summary['response_time'] = round(sum(v['value'] for v in values) / len(values))
+    except: pass
+
+    # 2. Errors (Total Last 30 Days)
+    try:
+        if os.path.exists('error_data.json'):
+            with open('error_data.json', 'r') as f:
+                errors = json.load(f)
+                # Filter last 30 days based on DATA availability to match detailed dashboard
+                df = pd.DataFrame(errors)
+                if not df.empty:
+                    df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms')
+                    # Match get_error_analysis logic: Add 7 hours (WIB) and anchor to max date
+                    df['dt'] = df['dt'] + timedelta(hours=7) 
+                    now_date = df['dt'].max()
+                    start_date = now_date - timedelta(days=30)
+                    
+                    recent_errors = df[df['dt'] >= start_date]
+                    summary['errors'] = int(recent_errors['sum'].sum())
+    except: pass
+
+    # 3. Load (Calls per Minute)
+    # To get Total Calls from CPM: Summing the 'sum' field (which is sum of CPMs per minute) gives Total Calls.
+    try:
+        if os.path.exists('load_data.json'):
+            with open('load_data.json', 'r') as f:
+                load_df = pd.DataFrame(json.load(f))
+                if not load_df.empty:
+                    # Last 30 days sum
+                    load_df['dt'] = pd.to_datetime(load_df['startTimeInMillis'], unit='ms')
+                    # Consistency: Add 7h and anchor to max
+                    load_df['dt'] = load_df['dt'] + timedelta(hours=7)
+                    now_load = load_df['dt'].max()
+                    start_load = now_load - timedelta(days=30)
+                    
+                    mask = load_df['dt'] >= start_load
+                    # 'sum' field contains the sum of rates (Calls per Minute * Minutes) for Rate metrics
+                    summary['load'] = int(load_df[mask]['sum'].sum())
+    except: pass
+    
+    # 4. Slow Calls (Number of Slow Calls)
+    # This is a Count metric, so 'sum' or 'value' works, but 'sum' is safer for aggregation.
+    try:
+        if os.path.exists('slow_calls_data.json'):
+            with open('slow_calls_data.json', 'r') as f:
+                slow_data = json.load(f)
+                slow_df = pd.DataFrame(slow_data)
+                if not slow_df.empty:
+                    slow_df['dt'] = pd.to_datetime(slow_df['startTimeInMillis'], unit='ms')
+                    # Consistency: Add 7h and anchor to max
+                    slow_df['dt'] = slow_df['dt'] + timedelta(hours=7)
+                    now_slow = slow_df['dt'].max()
+                    start_slow = now_slow - timedelta(days=30)
+                    
+                    mask = slow_df['dt'] >= start_slow
+                    summary['slow_calls'] = int(slow_df[mask]['sum'].sum())
+    except: pass
+    
+    return jsonify(summary)
 
 @app.route('/forecasting')
 def forecasting():
@@ -424,6 +506,101 @@ def get_load_analysis():
         
     except Exception as e:
         print(f"Load Analysis Error: {e}")
+        return jsonify({'error': str(e)})
+
+@app.route('/slow-calls-analysis')
+def slow_calls_analysis_page():
+    return render_template('slow_calls_analysis.html')
+
+@app.route('/api/slow-calls-analysis')
+def get_slow_calls_analysis():
+    # Helper to load specific file
+    metric_type = request.args.get('type', 'slow') # 'slow' or 'veryslow'
+    
+    if metric_type == 'veryslow':
+        data_file = 'very_slow_calls_data.json'
+    else:
+        data_file = 'slow_calls_data.json'
+
+    if not os.path.exists(data_file):
+        # Graceful fallback if one file assumes existence but other doesn't
+        return jsonify({'error': f'Data file ({data_file}) not found. Script likely running.', 'total': 0})
+    
+    try:
+        with open(data_file, 'r') as f:
+            raw_data = json.load(f)
+            
+        df = pd.DataFrame(raw_data)
+        if df.empty:
+             return jsonify({'error': f'No data in {data_file}', 'total': 0})
+
+        # Preprocessing
+        df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms') + pd.Timedelta(hours=7)
+        
+        # Timeframe
+        timeframe = request.args.get('timeframe', 'all')
+        now = df['dt'].max()
+        
+        if timeframe == '7d': df = df[df['dt'] >= now - pd.Timedelta(days=7)]
+        elif timeframe == '30d': df = df[df['dt'] >= now - pd.Timedelta(days=30)]
+        elif timeframe == '6m': df = df[df['dt'] >= now - pd.Timedelta(days=180)]
+        elif timeframe == '1y': df = df[df['dt'] >= now - pd.Timedelta(days=365)]
+        
+        df['hour'] = df['dt'].dt.hour
+        df['day_name'] = df['dt'].dt.day_name()
+        
+        # Aggregation
+        # Heatmap
+        heatmap_pivot = df.groupby(['day_name', 'hour'])['sum'].sum().reset_index().pivot(index='day_name', columns='hour', values='sum').fillna(0)
+        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
+        
+        # Hourly
+        hourly_dist = df.groupby('hour')['sum'].sum().reindex(range(24), fill_value=0).tolist()
+        
+        # Daily
+        daily_dist = df.groupby('day_name')['sum'].sum().reindex(days_order, fill_value=0).tolist()
+        
+        # Stats (Total is sum of ALL events in period, not count of entries)
+        total_calls = int(df['sum'].sum())
+        peak_hour = f"{np.argmax(hourly_dist)}:00"
+        peak_day = days_order[np.argmax(daily_dist)]
+        
+        # New Visuals Logic
+        # 1. Trend Analysis (Daily Sum)
+        # Group by Date (YYYY-MM-DD)
+        df['date_str'] = df['dt'].dt.strftime('%Y-%m-%d')
+        daily_trend = df.groupby('date_str')['sum'].sum().reset_index()
+        trend_data = {
+            'labels': daily_trend['date_str'].tolist(),
+            'values': daily_trend['sum'].tolist()
+        }
+        
+        # 2. Business Hours Impact
+        # Business Hours: 08:00 to 18:00 (inclusive of 08, exclusive of 18? Let's say 8-18)
+        # actually 08:00 to 17:59 usually. Let's say hour >= 8 and hour < 18
+        business_hours_mask = (df['hour'] >= 8) & (df['hour'] < 18)
+        business_calls = df[business_hours_mask]['sum'].sum()
+        off_hours_calls = total_calls - business_calls
+        
+        impact_data = {
+            'Business Hours (8-18)': int(business_calls),
+            'Off-Hours': int(off_hours_calls)
+        }
+        
+        return jsonify({
+            'heatmap': heatmap_pivot.to_dict(orient='split'),
+            'hourly': hourly_dist,
+            'daily': daily_dist,
+            'total': total_calls,
+            'peak_hour': peak_hour,
+            'peak_day': peak_day,
+            'trend': trend_data,
+            'impact': impact_data
+        })
+        
+    except Exception as e:
+        print(f"Slow Calls Analysis Error: {e}")
         return jsonify({'error': str(e)})
 
 if __name__ == '__main__':

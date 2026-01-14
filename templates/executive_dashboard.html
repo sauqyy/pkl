@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Overview - Executive Dashboard</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 200px;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #cbd5e1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+
+        .value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: #0f172a;
+        }
+
+        .subtext {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .link-text {
+            color: #3b82f6;
+            font-weight: 500;
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Colors */
+        .blue-theme .icon-box {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .red-theme .icon-box {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .orange-theme .icon-box {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .teal-theme .icon-box {
+            background: #ccfbf1;
+            color: #0d9488;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>System Overview</h1>
+
+        <div class="dashboard-grid">
+            <!-- Response Time -->
+            <div class="card blue-theme" onclick="window.location.href='/response-time'">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-bolt"></i></div>
+                    <div class="title">Response Time</div>
+                </div>
+                <div class="value" id="resp-time">-- <span style="font-size: 1.5rem;">ms</span></div>
+                <div class="subtext">Current Average</div>
+                <div class="link-text">View Details <i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Errors -->
+            <div class="card red-theme" onclick="window.location.href='/erroranalysis'">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="title">Errors</div>
+                </div>
+                <div class="value" id="errors">--</div>
+                <div class="subtext">Total (Last 30 Days)</div>
+                <div class="link-text">Analyze Errors <i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Load -->
+            <div class="card teal-theme" onclick="window.location.href='/loadanalysis'">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-server"></i></div>
+                    <div class="title">System Load</div>
+                </div>
+                <!-- Showing "Total Calls" here as simple aggregate -->
+                <div class="value" id="load">--</div>
+                <div class="subtext">Total Calls (Last 30 Days)</div>
+                <div class="link-text">Check Load <i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Slow Calls -->
+            <div class="card orange-theme" onclick="window.location.href='/slow-calls-analysis'">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="title">Slow Calls</div>
+                </div>
+                <div class="value" id="slow-calls">--</div>
+                <div class="subtext">Total Slow (Last 30 Days)</div>
+                <div class="link-text">Investigate Latency <i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Forecasting (Optional, maybe not "important" enough for summary, but we can add if needed. 
+                 User said "don't put everything". I'll skip forecasting for now unless requested) -->
+        </div>
+    </div>
+
+    <script>
+        async function fetchSummary() {
+            try {
+                const response = await fetch('/api/summary');
+                const data = await response.json();
+
+                document.getElementById('resp-time').innerHTML = `${data.response_time} <span style="font-size: 1.5rem;">ms</span>`;
+                document.getElementById('errors').innerText = data.errors.toLocaleString();
+                document.getElementById('load').innerText = formatNumber(data.load);
+                document.getElementById('slow-calls').innerText = data.slow_calls.toLocaleString();
+
+            } catch (e) {
+                console.error("Error fetching summary:", e);
+            }
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
+
+        fetchSummary();
+        // Auto-refresh every 60s
+        setInterval(fetchSummary, 60000);
+    </script>
+</body>
+
+</html>
