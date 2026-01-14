@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slow Calls Analysis</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Chart Layouts */
+        .chart-box {
+            height: 350px;
+            position: relative;
+            width: 100%;
+        }
+
+        /* Grid for KPI */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        /* Grid for Bottom Charts */
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Custom Heatmap Grid */
+        .grid-heatmap {
+            display: grid;
+            grid-template-columns: 80px repeat(24, 1fr);
+            gap: 2px;
+            margin-top: 1rem;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: transparent;
+            position: relative;
+        }
+
+        .heatmap-cell:hover {
+            color: #fff;
+            transform: scale(1.2);
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .heatmap-row-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+        }
+
+        .heatmap-col-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="container">
+            <header>
+                <div>
+                    <h1>Slow Calls Analysis</h1>
+                    <div style="color: #64748b;" id="page-subtitle">Historical Analysis of "Slow Calls"</div>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <!-- Metric Selector -->
+                    <select id="metric-select" onchange="fetchAnalysis()"
+                        style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem; cursor: pointer; background: #fff;">
+                        <option value="slow" selected>Slow Calls (>X ms)</option>
+                        <option value="veryslow">Very Slow Calls (>Y ms)</option>
+                    </select>
+
+                    <!-- Timeframe Selector -->
+                    <select id="timeframe-select" onchange="fetchAnalysis()"
+                        style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem; cursor: pointer;">
+                        <option value="all">All Time</option>
+                        <option value="1y">Last 1 Year</option>
+                        <option value="6m">Last 6 Months</option>
+                        <option value="30d" selected>Last 30 Days</option>
+                        <option value="7d">Last 7 Days</option>
+                    </select>
+                </div>
+            </header>
+
+            <!-- Stats Row -->
+            <div class="kpi-grid">
+                <div class="card">
+                    <div class="stat-label">Total Slow Calls</div>
+                    <div class="stat-value" id="total-calls">-</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Peak Time (Jam Paling Lambat)</div>
+                    <div class="stat-value" id="peak-hour" style="color: #ef4444;">--:--</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Peak Day (Hari Paling Lambat)</div>
+                    <div class="stat-value" id="peak-day" style="color: #f59e0b;">--</div>
+                </div>
+            </div>
+
+            <!-- Trend Line (Prominent) -->
+            <div class="card">
+                <h3>Daily Trend: Are things getting better?</h3>
+                <div class="chart-box" style="height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Heatmap -->
+            <div class="card">
+                <h2>Intensity Heatmap: When do slow calls happen?</h2>
+                <div class="grid-heatmap" id="heatmap"></div>
+                <div
+                    style="display:flex; justify-content:space-between; margin-top:0.5rem; font-size:0.8rem; color:#94a3b8;">
+                    <span>0:00 (Midnight)</span>
+                    <span>12:00 (Noon)</span>
+                    <span>23:00</span>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Hourly Dist + Business Impact -->
+            <div class="bottom-grid">
+                <div class="card">
+                    <h3>Hourly Distribution</h3>
+                    <div class="chart-box">
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+                <!-- Replaced Daily Dist with Impact Chart for variety -->
+                <div class="card">
+                    <h3>Business Impact (Hours)</h3>
+                    <div style="height: 350px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="impactChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let hourlyChartInstance = null;
+        let trendChartInstance = null;
+        let impactChartInstance = null;
+
+        async function fetchAnalysis() {
+            try {
+                const timeframe = document.getElementById('timeframe-select').value;
+                const metricType = document.getElementById('metric-select').value;
+
+                // Update Title dynamically
+                const subtitle = document.getElementById('page-subtitle');
+                if (metricType === 'veryslow') {
+                    subtitle.innerText = 'Historical Analysis of "Very Slow Calls"';
+                } else {
+                    subtitle.innerText = 'Historical Analysis of "Slow Calls"';
+                }
+
+                const response = await fetch(`/api/slow-calls-analysis?timeframe=${timeframe}&type=${metricType}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert("Analysis error: " + data.error);
+                    return;
+                }
+
+                // Update Stats
+                document.getElementById('total-calls').innerText = data.total.toLocaleString();
+                document.getElementById('peak-hour').innerText = data.peak_hour;
+                document.getElementById('peak-day').innerText = data.peak_day;
+
+                renderHeatmap(data.heatmap);
+                renderCharts(data);
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderHeatmap(heatmap) {
+            const container = document.getElementById('heatmap');
+            container.innerHTML = '';
+
+            // Header Row (Hours)
+            container.appendChild(document.createElement('div'));
+            for (let h = 0; h < 24; h++) {
+                const div = document.createElement('div');
+                div.className = 'heatmap-col-label';
+                div.innerText = h;
+                container.appendChild(div);
+            }
+
+            const days = heatmap.index;
+            const values = heatmap.data;
+            let maxVal = 0;
+            values.forEach(row => row.forEach(val => maxVal = Math.max(maxVal, val)));
+
+            days.forEach((day, i) => {
+                const label = document.createElement('div');
+                label.className = 'heatmap-row-label';
+                label.innerText = day.substring(0, 3);
+                container.appendChild(label);
+
+                for (let h = 0; h < 24; h++) {
+                    const val = values[i][h];
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    cell.innerText = val;
+
+                    if (val === 0) {
+                        cell.style.background = '#f1f5f9';
+                    } else {
+                        const intensity = Math.min((val / maxVal) * 0.8 + 0.2, 1);
+                        cell.style.background = `rgba(239, 68, 68, ${intensity})`;
+                        if (intensity > 0.5) cell.style.color = '#fff';
+                    }
+                    cell.title = `${day} ${h}:00 - ${val} Slow Calls`;
+                    container.appendChild(cell);
+                }
+            });
+        }
+
+        function renderCharts(data) {
+            // Trend Chart
+            if (trendChartInstance) trendChartInstance.destroy();
+            trendChartInstance = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: data.trend.labels,
+                    datasets: [{
+                        label: 'Slow Calls Trend',
+                        data: data.trend.values,
+                        borderColor: '#0ea5e9', // Blue
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } },
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4] } }
+                    }
+                }
+            });
+
+            // Hourly Chart
+            if (hourlyChartInstance) hourlyChartInstance.destroy();
+            hourlyChartInstance = new Chart(document.getElementById('hourlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: Array.from({ length: 24 }, (_, i) => i + ":00"),
+                    datasets: [{
+                        label: 'Avg Slow Calls',
+                        data: data.hourly,
+                        backgroundColor: '#ef4444',
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Business Impact Chart (Donut)
+            if (impactChartInstance) impactChartInstance.destroy();
+            impactChartInstance = new Chart(document.getElementById('impactChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Business Hours (8-18)', 'Off-Hours'],
+                    datasets: [{
+                        data: [data.impact['Business Hours (8-18)'], data.impact['Off-Hours']],
+                        backgroundColor: ['#ef4444', '#94a3b8'], // Red for critical biz hours
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'When do most issues occur?' }
+                    }
+                }
+            });
+        }
+
+        fetchAnalysis();
+    </script>
+</body>
+
+</html>
