@@ -5,6 +5,9 @@ from collections import Counter
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 
@@ -92,7 +95,86 @@ def load_data(duration=60):
 
 @app.route('/')
 def index():
+    return render_template('executive_dashboard.html')
+
+@app.route('/response-time')
+def response_time_dashboard():
     return render_template('dashboard.html')
+
+@app.route('/api/summary')
+def get_summary_data():
+    summary = {
+        'response_time': 0,
+        'load': 0,
+        'errors': 0,
+        'slow_calls': 0
+    }
+    
+    # 1. Response Time (Current/Avg)
+    try:
+        data = load_data(60) # Last 60 mins
+        if data and isinstance(data, list) and len(data) > 0:
+             values = data[0].get('metricValues', [])
+             if values:
+                 summary['response_time'] = round(sum(v['value'] for v in values) / len(values))
+    except: pass
+
+    # 2. Errors (Total Last 30 Days)
+    try:
+        if os.path.exists('error_data.json'):
+            with open('error_data.json', 'r') as f:
+                errors = json.load(f)
+                # Filter last 30 days based on DATA availability to match detailed dashboard
+                df = pd.DataFrame(errors)
+                if not df.empty:
+                    df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms')
+                    # Match get_error_analysis logic: Add 7 hours (WIB) and anchor to max date
+                    df['dt'] = df['dt'] + timedelta(hours=7) 
+                    now_date = df['dt'].max()
+                    start_date = now_date - timedelta(days=30)
+                    
+                    recent_errors = df[df['dt'] >= start_date]
+                    summary['errors'] = int(recent_errors['sum'].sum())
+    except: pass
+
+    # 3. Load (Calls per Minute)
+    # To get Total Calls from CPM: Summing the 'sum' field (which is sum of CPMs per minute) gives Total Calls.
+    try:
+        if os.path.exists('load_data.json'):
+            with open('load_data.json', 'r') as f:
+                load_df = pd.DataFrame(json.load(f))
+                if not load_df.empty:
+                    # Last 30 days sum
+                    load_df['dt'] = pd.to_datetime(load_df['startTimeInMillis'], unit='ms')
+                    # Consistency: Add 7h and anchor to max
+                    load_df['dt'] = load_df['dt'] + timedelta(hours=7)
+                    now_load = load_df['dt'].max()
+                    start_load = now_load - timedelta(days=30)
+                    
+                    mask = load_df['dt'] >= start_load
+                    # 'sum' field contains the sum of rates (Calls per Minute * Minutes) for Rate metrics
+                    summary['load'] = int(load_df[mask]['sum'].sum())
+    except: pass
+    
+    # 4. Slow Calls (Number of Slow Calls)
+    # This is a Count metric, so 'sum' or 'value' works, but 'sum' is safer for aggregation.
+    try:
+        if os.path.exists('slow_calls_data.json'):
+            with open('slow_calls_data.json', 'r') as f:
+                slow_data = json.load(f)
+                slow_df = pd.DataFrame(slow_data)
+                if not slow_df.empty:
+                    slow_df['dt'] = pd.to_datetime(slow_df['startTimeInMillis'], unit='ms')
+                    # Consistency: Add 7h and anchor to max
+                    slow_df['dt'] = slow_df['dt'] + timedelta(hours=7)
+                    now_slow = slow_df['dt'].max()
+                    start_slow = now_slow - timedelta(days=30)
+                    
+                    mask = slow_df['dt'] >= start_slow
+                    summary['slow_calls'] = int(slow_df[mask]['sum'].sum())
+    except: pass
+    
+    return jsonify(summary)
 
 @app.route('/forecasting')
 def forecasting():

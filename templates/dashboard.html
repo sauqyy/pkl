@@ -47,14 +47,29 @@
         header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
         }
 
         h1 {
             font-size: 1.8rem;
             font-weight: 700;
             margin: 0;
+        }
+
+        .home-link {
+            text-decoration: none;
+            color: var(--accent-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--accent-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .subtitle {
@@ -233,6 +248,7 @@
                 <h1>Realtime Overview</h1>
                 <div class="subtitle" id="last-updated">Updating...</div>
             </div>
+            <a href="/" class="home-link"><i class="fas fa-home"></i> Home</a>
 
             <div class="controls-wrapper">
                 <div class="custom-select">
