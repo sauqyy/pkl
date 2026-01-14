@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Search, Calendar as CalendarIcon, PanelRight } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { fetchDashboardData, DashboardData } from "@/lib/api"
+import { useSidebar } from "@/components/SidebarContext"
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState("60")
+  const { toggleSidebar } = useSidebar()
 
   useEffect(() => {
     const load = async () => {
@@ -52,16 +54,40 @@ export default function Dashboard() {
   const max = data.raw_values.length > 0 ? Math.max(...data.raw_values) : 0;
   const min = data.raw_values.length > 0 ? Math.min(...data.raw_values) : 0;
   
+  // Dynamic subtitle based on period
+  const getPeriodLabel = (minutes: string) => {
+    switch(minutes) {
+      case "15": return "15 minutes";
+      case "60": return "1 hour";
+      case "360": return "6 hours";
+      case "1440": return "24 hours";
+      default: return `${minutes} minutes`;
+    }
+  };
+  
   return (
     <div className="space-y-6">
       {/* Top Bar with Sidebar Toggle and Title */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between relative z-50">
         <div className="flex items-center gap-3">
-          <button className="p-2 hover:bg-accent rounded-md transition-colors">
-            <PanelRight className="h-5 w-5" />
+          <button 
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.error('Toggle sidebar clicked (ERROR LEVEL)');
+              console.log('Toggle sidebar clicked');
+              toggleSidebar();
+            }} 
+            className="p-2 hover:bg-accent rounded-md transition-colors cursor-pointer relative z-50 border border-transparent hover:border-border"
+            aria-label="Toggle sidebar"
+          >
+            <PanelRight className="h-5 w-5 pointer-events-none" />
           </button>
           <div className="h-6 w-px bg-border"></div>
-          <h1 className="text-lg font-semibold">Dashboard</h1>
+          <div>
+            <h1 className="text-lg font-semibold">Dashboard</h1>
+            <p className="text-xs text-muted-foreground">Trend for the last {getPeriodLabel(period)}</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
             <div className="relative">
@@ -115,7 +141,7 @@ export default function Dashboard() {
         <Card className="col-span-2 bg-card">
             <CardHeader>
                 <CardTitle className="text-base font-semibold">Response Time Trend</CardTitle>
-                <p className="text-xs text-muted-foreground mt-1">Trend for the last 3 months</p>
+                <p className="text-xs text-muted-foreground mt-1">Trend for the last {getPeriodLabel(period)}</p>
             </CardHeader>
             <CardContent>
                 <div className="h-[300px] w-full">
@@ -157,7 +183,7 @@ export default function Dashboard() {
                                 stroke="none"
                             >
                                 {pieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
                             <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
