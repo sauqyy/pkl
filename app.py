@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request
+from flask_cors import CORS
 import json
 import os
 from collections import Counter
@@ -10,6 +11,7 @@ import numpy as np
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes
 
 # Path to the data file
 DATA_FILE = 'metric-data.json'
