@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PanelRight } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { Heatmap } from "@/components/Heatmap"
+import { useSidebar } from "@/components/SidebarContext"
 
 interface ErrorAnalysisData {
   total: number;
@@ -20,6 +21,7 @@ interface ErrorAnalysisData {
 export default function ErrorAnalysis() {
   const [data, setData] = useState<ErrorAnalysisData | null>(null)
   const [timeframe, setTimeframe] = useState("all")
+  const { toggleSidebar } = useSidebar()
 
   const fetchAnalysis = async () => {
     try {
@@ -45,7 +47,13 @@ export default function ErrorAnalysis() {
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button className="p-2 hover:bg-accent rounded-md transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSidebar();
+            }}
+            className="p-2 hover:bg-accent rounded-md transition-colors cursor-pointer"
+          >
             <PanelRight className="h-5 w-5" />
           </button>
           <div className="h-6 w-px bg-border"></div>

@@ -19,7 +19,7 @@ export function Heatmap({ data, colorScheme = 'blue' }: HeatmapProps) {
   values.forEach(row => row.forEach(val => maxVal = Math.max(maxVal, val)));
 
   const getColor = (val: number) => {
-    if (val === 0) return '#0A0A0A'; // Same as background
+    if (val === 0) return 'rgba(100, 100, 100, 0.1)'; // Subtle gray for no data
     
     const intensity = Math.min((val / maxVal) * 0.8 + 0.2, 1);
     
@@ -55,16 +55,18 @@ export function Heatmap({ data, colorScheme = 'blue' }: HeatmapProps) {
             {Array.from({ length: 24 }, (_, h) => {
               const val = values[i][h];
               const bgColor = getColor(val);
-              const textColor = val > 0 && (val / maxVal) > 0.5 ? '#fff' : 'transparent';
+              const shouldShowWhiteText = val > 0 && (val / maxVal) > 0.5;
               
               return (
                 <div
                   key={`cell-${i}-${h}`}
-                  className="aspect-square rounded flex items-center justify-center text-[10px] hover:scale-110 hover:z-10 transition-transform cursor-pointer border border-border/50"
-                  style={{ backgroundColor: bgColor, color: textColor }}
+                  className="group aspect-square rounded flex items-center justify-center text-[10px] hover:scale-110 hover:z-10 transition-all cursor-pointer border border-border/50"
+                  style={{ backgroundColor: bgColor }}
                   title={`${day} ${h}:00 - ${val} ${colorScheme === 'blue' ? 'Calls' : 'Errors'}`}
                 >
-                  {formatValue(val)}
+                  <span className={`opacity-0 group-hover:opacity-100 transition-opacity font-semibold ${shouldShowWhiteText ? 'text-white' : 'text-foreground'}`}>
+                    {formatValue(val)}
+                  </span>
                 </div>
               );
             })}

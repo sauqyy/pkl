@@ -1,4 +1,4 @@
-import { LayoutDashboard, LineChart, Clock, Loader, MessageSquare, Sun, Moon } from "lucide-react";
+import { LineChart, Clock, Server, AlertTriangle, Hourglass, Sun, Moon, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HandalinLogo from "@/assets/handalin.svg";
 import { Link, useLocation } from "react-router-dom";
@@ -35,11 +35,12 @@ export function Sidebar({ className, collapsed = false }: SidebarProps) {
             </div>
           )}
           <div className="space-y-1">
-            <SidebarItem icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" to="/" collapsed={collapsed} />
+            <SidebarItem icon={<Home className="h-4 w-4" />} label="Executive Dashboard" to="/" collapsed={collapsed} />
             <SidebarItem icon={<LineChart className="h-4 w-4" />} label="Forecasting" to="/forecasting" collapsed={collapsed} />
             <SidebarItem icon={<Clock className="h-4 w-4" />} label="Response Time" to="/response-time" collapsed={collapsed} />
-            <SidebarItem icon={<Loader className="h-4 w-4" />} label="Load Analysis" to="/load-analysis" collapsed={collapsed} />
-            <SidebarItem icon={<MessageSquare className="h-4 w-4" />} label="Error Analysis" to="/error-analysis" collapsed={collapsed} />
+            <SidebarItem icon={<Server className="h-4 w-4" />} label="Load Analysis" to="/load-analysis" collapsed={collapsed} />
+            <SidebarItem icon={<AlertTriangle className="h-4 w-4" />} label="Error Analysis" to="/error-analysis" collapsed={collapsed} />
+            <SidebarItem icon={<Hourglass className="h-4 w-4" />} label="Slow Calls" to="/slow-calls-analysis" collapsed={collapsed} />
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { PanelRight, RefreshCw } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { useSidebar } from "@/components/SidebarContext"
 
 interface ForecastData {
   history: Array<{ timestamp: number; value: number }>;
@@ -12,6 +13,7 @@ interface ForecastData {
 export default function Forecasting() {
   const [data, setData] = useState<ForecastData | null>(null)
   const [loading, setLoading] = useState(true)
+  const { toggleSidebar } = useSidebar()
 
   const fetchForecast = async () => {
     try {
@@ -43,7 +45,13 @@ export default function Forecasting() {
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button className="p-2 hover:bg-accent rounded-md transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSidebar();
+            }}
+            className="p-2 hover:bg-accent rounded-md transition-colors cursor-pointer"
+          >
             <PanelRight className="h-5 w-5" />
           </button>
           <div className="h-6 w-px bg-border"></div>
