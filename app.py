@@ -722,6 +722,7 @@ def get_jvm_data():
         'data': results,
         'insights': insights
     })
+@app.route('/business-transactions')
 def business_transactions_page():
     return render_template('business_transactions.html')
 
