@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Transactions Analysis</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS (via CDN for simplicity as consistent with user likely setup or manual css) -->
+    <!-- Reusing existing manual styles for consistency -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        h2,
+        h3 {
+            margin-top: 0;
+            color: #334155;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-box {
+            height: 350px;
+            position: relative;
+            width: 100%;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .health-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bg-green {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .bg-yellow {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+
+        .bg-red {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="container">
+            <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>Business Transactions Analysis</h1>
+                    <div style="color: #64748b;">Deep dive into transaction health, latency, and volume from Excel Data
+                    </div>
+                    <a href="/"
+                        style="text-decoration:none; color:#3b82f6; font-size:0.9rem; margin-top:0.5rem; display:block;">
+                        <i class="fas fa-home"></i> Back to Executive Dashboard
+                    </a>
+                </div>
+                <div>
+                    <button onclick="fetchData()"
+                        style="padding: 0.5rem 1rem; background:#3b82f6; color:white; border:none; border-radius:8px; cursor:pointer;">
+                        <i class="fas fa-sync"></i> Refresh Data
+                    </button>
+                </div>
+            </header>
+
+            <!-- Stats Row -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="card">
+                    <div class="stat-label">Total Transactions</div>
+                    <div class="stat-value" id="total-txns">-</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Healthy (Normal)</div>
+                    <div class="stat-value" id="total-normal" style="color: #10b981;">-</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Warning</div>
+                    <div class="stat-value" id="total-warning" style="color: #f59e0b;">-</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Critical</div>
+                    <div class="stat-value" id="total-critical" style="color: #ef4444;">-</div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="card">
+                    <h3>Health Distribution</h3>
+                    <div class="chart-box" style="height: 300px;">
+                        <canvas id="healthChart"></canvas>
+                    </div>
+                    <div
+                        style="font-size: 0.8rem; color: #64748b; margin-top: 1rem; text-align: center; line-height: 1.4;">
+                        <i class="fas fa-info-circle"></i> Berdasarkan kolom <strong>'Health'</strong> dari file
+                        Excel.<br>
+                        Menunjukkan kategori kesehatan transaksi (Normal, Warning, Critical).
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Top 10 Slowest Transactions (Response Time ms)</h3>
+                    <div class="chart-box" style="height: 300px;">
+                        <canvas id="slowestChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                <div class="card">
+                    <h3>Top 10 High Volume Transactions</h3>
+                    <div class="chart-box">
+                        <canvas id="volumeChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Transactions with Highest Error Rates (%)</h3>
+                    <div class="chart-box">
+                        <canvas id="errorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 3 -->
+            <div class="card">
+                <h3>Calls vs Response Time (Correlation)</h3>
+                <div class="chart-box">
+                    <canvas id="scatterChart"></canvas>
+                </div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; text-align: center;">
+                    Size of bubble represents number of calls (optional) or just simple scatter.
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card">
+                <h3>Detailed Transaction List</h3>
+                <div class="table-container">
+                    <table id="txnTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Health</th>
+                                <th>Response Time (ms)</th>
+                                <th>Calls</th>
+                                <th>% Errors</th>
+                                <th>Tier</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let healthChart, slowestChart, volumeChart, errorChart, scatterChart;
+
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/business-transactions');
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                updateStats(data);
+                renderHealthChart(data.health_counts);
+                renderSlowestChart(data.top_slowest);
+                renderVolumeChart(data.top_volume);
+                renderErrorChart(data.top_errors);
+                renderScatterChart(data.scatter);
+                renderTable(data.table);
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
+        function updateStats(data) {
+            const counts = data.health_counts;
+            const total = (counts['Normal'] || 0) + (counts['Warning'] || 0) + (counts['Critical'] || 0);
+
+            document.getElementById('total-txns').innerText = data.table.length; // Use table list len for accuracy
+            document.getElementById('total-normal').innerText = counts['Normal'] || 0;
+            document.getElementById('total-warning').innerText = counts['Warning'] || 0;
+            document.getElementById('total-critical').innerText = counts['Critical'] || 0;
+        }
+
+        function renderHealthChart(counts) {
+            const ctx = document.getElementById('healthChart');
+            if (healthChart) healthChart.destroy();
+
+            healthChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Normal', 'Warning', 'Critical'],
+                    datasets: [{
+                        data: [counts['Normal'] || 0, counts['Warning'] || 0, counts['Critical'] || 0],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function renderSlowestChart(data) {
+            const ctx = document.getElementById('slowestChart');
+            if (slowestChart) slowestChart.destroy();
+
+            slowestChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Response Time (ms)',
+                        data: data.values,
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Horizontal
+                    scales: { x: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderVolumeChart(data) {
+            const ctx = document.getElementById('volumeChart');
+            if (volumeChart) volumeChart.destroy();
+
+            volumeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Calls',
+                        data: data.values,
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderErrorChart(data) {
+            const ctx = document.getElementById('errorChart');
+            if (errorChart) errorChart.destroy();
+
+            errorChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Error Rate (%)',
+                        data: data.values,
+                        backgroundColor: '#ef4444',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function renderScatterChart(rawData) {
+            const ctx = document.getElementById('scatterChart');
+            if (scatterChart) scatterChart.destroy();
+
+            // Transform for chart.js scatter: {x: calls, y: response_time}
+            const points = rawData.map(item => ({
+                x: item['Calls'],
+                y: item['Response Time (ms)'],
+                item: item // for tooltip
+            }));
+
+            scatterChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Transactions',
+                        data: points,
+                        backgroundColor: rawData.map(d => {
+                            if (d.Health === 'Critical') return '#ef4444';
+                            if (d.Health === 'Warning') return '#f59e0b';
+                            return '#10b981';
+                        })
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Calls (Volume)' }, beginAtZero: true },
+                        y: { title: { display: true, text: 'Response Time (ms)' }, beginAtZero: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const p = context.raw;
+                                    return `${p.item.Name}: ${p.y}ms (${p.x} calls)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTable(data) {
+            const tbody = document.querySelector('#txnTable tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(txn => {
+                const tr = document.createElement('tr');
+
+                // Health Badge Class
+                let badgeClass = 'bg-green';
+                if (txn.Health === 'Warning') badgeClass = 'bg-yellow';
+                if (txn.Health === 'Critical') badgeClass = 'bg-red';
+
+                tr.innerHTML = `
+                    <td style="font-weight:500; color:#1e293b;">${txn.Name}</td>
+                    <td><span class="health-badge ${badgeClass}">${txn.Health}</span></td>
+                    <td>${txn['Response Time (ms)'].toLocaleString()}</td>
+                    <td>${txn.Calls.toLocaleString()}</td>
+                    <td>${txn['% Errors']}%</td>
+                    <td>${txn.Tier}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Init
+        fetchData();
+    </script>
+</body>
+
+</html>

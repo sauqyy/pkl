@@ -601,5 +601,105 @@ def get_slow_calls_analysis():
         print(f"Slow Calls Analysis Error: {e}")
         return jsonify({'error': str(e)})
 
+@app.route('/business-transactions')
+def business_transactions_page():
+    return render_template('business_transactions.html')
+
+@app.route('/api/business-transactions')
+def get_business_transactions():
+    file_path = 'List FWD.xlsx'
+    sheet_name = 'business_transactions'
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'Excel file not found.'})
+        
+    try:
+        # Read with header=None to find the correct header row dynamically
+        df_raw = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+        
+        # Find header row
+        header_idx = -1
+        for i, row in df_raw.iterrows():
+            # Check for key columns. 'Name' and 'Response Time (ms)' seem distinct enough.
+            row_values = [str(x).strip() for x in row.values]
+            if 'Name' in row_values and 'Response Time (ms)' in row_values:
+                header_idx = i
+                break
+        
+        if header_idx == -1:
+             return jsonify({'error': 'Could not locate header row with "Name" and "Response Time (ms)" columns.'})
+
+        # Reload or slice
+        # Slicing is faster
+        df = df_raw.iloc[header_idx + 1:].copy()
+        df.columns = [str(x).strip() for x in df_raw.iloc[header_idx]]
+        
+        # Reset index
+        df.reset_index(drop=True, inplace=True)
+        
+        # Clean Data
+        required_cols = ['Name', 'Health', 'Response Time (ms)', 'Calls', '% Errors']
+        missing_cols = [c for c in required_cols if c not in df.columns]
+        if missing_cols:
+             return jsonify({'error': f'Missing columns: {missing_cols}. Verified columns: {df.columns.tolist()}'})
+
+        # Helper to clean numeric columns
+        def clean_numeric(val):
+            if pd.isna(val): return 0
+            if isinstance(val, (int, float)): return val
+            s = str(val).replace(',', '').replace('%', '').replace('-', '0').strip()
+            try:
+                return float(s)
+            except:
+                return 0
+
+        df['Response Time (ms)'] = df['Response Time (ms)'].apply(clean_numeric)
+        df['Calls'] = df['Calls'].apply(clean_numeric)
+        df['% Errors'] = df['% Errors'].apply(clean_numeric)
+        
+        # Aggregations / Visualizations Data
+        
+        # 1. Health Distribution
+        health_counts = df['Health'].value_counts().to_dict()
+        
+        # 2. Top 10 Slowest (Response Time)
+        top_slowest = df.nlargest(10, 'Response Time (ms)')[['Name', 'Response Time (ms)']]
+        
+        # 3. Top 10 High Volume (Calls)
+        top_volume = df.nlargest(10, 'Calls')[['Name', 'Calls']]
+        
+        # 4. Top 10 Error Rates (% Errors > 0)
+        top_errors = df[df['% Errors'] > 0].nlargest(10, '% Errors')[['Name', '% Errors']]
+        
+        # 5. Scatter Data: Calls vs Response Time (with Health)
+        # Handle NaN in Health just in case
+        df['Health'] = df['Health'].fillna('Unknown')
+        scatter_data = df[['Name', 'Calls', 'Response Time (ms)', 'Health']].to_dict(orient='records')
+
+        # 6. Table Data
+        table_data = df.fillna('').to_dict(orient='records')
+        
+        return jsonify({
+            'health_counts': health_counts,
+            'top_slowest': {
+                'labels': top_slowest['Name'].tolist(),
+                'values': top_slowest['Response Time (ms)'].tolist() 
+            },
+            'top_volume': {
+                'labels': top_volume['Name'].tolist(),
+                'values': top_volume['Calls'].tolist()
+            },
+            'top_errors': {
+                'labels': top_errors['Name'].tolist(),
+                'values': top_errors['% Errors'].tolist()
+            },
+            'scatter': scatter_data,
+            'table': table_data
+        })
+        
+    except Exception as e:
+        print(f"Business Transactions Error: {e}")
+        return jsonify({'error': str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
