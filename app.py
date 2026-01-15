@@ -601,7 +601,127 @@ def get_slow_calls_analysis():
         print(f"Slow Calls Analysis Error: {e}")
         return jsonify({'error': str(e)})
 
-@app.route('/business-transactions')
+@app.route('/jvm-health')
+def jvm_health_page():
+    return render_template('jvm_health.html')
+
+@app.route('/api/jvm-data')
+def get_jvm_data():
+    duration = request.args.get('duration', default=60, type=int) # Default 1 hour for quick view
+    
+    # Define Metric Paths based on user request
+    METRICS = {
+        'availability': "Application Infrastructure Performance|dynamic-letter-deployment|Agent|App|Availability",
+        'heap_used': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Memory|Heap|Used %",
+        'heap_used_mb': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Memory|Heap|Current Usage (MB)",
+        'gc_time': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Garbage Collection|Major Collection Time Spent Per Min (ms)",
+        'threads_live': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Threads|Current No. of Threads",
+        'cpu_busy': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|Hardware Resources|CPU|%Busy"
+    }
+    
+    results = {}
+    
+    # Helper to fetch individual metric (reusing existing auth logic would be best, but let's inline or reuse load_data logic)
+    # Since load_data uses a global METRIC_PATH, we need a flexible version.
+    
+    def fetch_metric_flexible(metric_path, duration_mins):
+        encoded_metric = urllib.parse.quote(metric_path)
+        # Use 'Smart2' as seen in user provided links for JVM metrics
+        # If global APP_NAME is SmartNano, we should probably switch this specific call to Smart2
+        target_app = "Smart2" 
+        
+        url = (
+            f"{BASE_URL}/controller/rest/applications/{target_app}/metric-data?"
+            f"metric-path={encoded_metric}&"
+            f"time-range-type=BEFORE_NOW&"
+            f"duration-in-mins={duration_mins}&"
+            f"output=JSON&"
+            f"rollup=false"
+        )
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
+        try:
+            with urllib.request.urlopen(req) as response:
+                return json.loads(response.read().decode())
+        except Exception as e:
+            print(f"Error fetching {metric_path}: {e}")
+            return []
+
+    # Fetch all metrics
+    # Note: Sequential fetching might be slow. In prod, use ThreadPool. for now, sequential is fine.
+    for key, path in METRICS.items():
+        data = fetch_metric_flexible(path, duration)
+        
+        # Process data into simple Time/Value pairs
+        series = []
+        if data and isinstance(data, list):
+             for item in data:
+                 if 'metricValues' in item:
+                     for val in item['metricValues']:
+                         series.append({
+                             't': val.get('startTimeInMillis', 0),
+                             'v': val.get('value', 0)
+                         })
+        results[key] = series
+
+    # --- Generate Insights ---
+    insights = []
+    
+    # 1. Availability Insight
+    avail_series = results['availability']
+    if avail_series:
+        avg_avail = sum(d['v'] for d in avail_series) / len(avail_series)
+        uptime_percentage = round(avg_avail * 100, 2) if avg_avail <= 1 else round(avg_avail, 2) # Usually 1 or 0, or %? AppD availability usually 1/0
+        
+        # Check if AppD returns 1 (up) or 0 (down). It seems to be 1=Up.
+        # If it's returning %, adjust. Assuming 1=100% based on "Availability".
+        
+        if avg_avail < 0.99:
+            insights.append({'type': 'critical', 'msg': f'Availability is low ({avg_avail:.2%}). System has experienced downtime.'})
+        else:
+             insights.append({'type': 'success', 'msg': 'System Availability is excellent.'})
+    
+    # 2. Memory Leak Detection (Simple Trend)
+    heap_series = results['heap_used']
+    if len(heap_series) > 10:
+        # Check first 20% vs last 20% average
+        split = len(heap_series) // 5
+        start_avg = sum(d['v'] for d in heap_series[:split]) / split
+        end_avg = sum(d['v'] for d in heap_series[-split:]) / split
+        
+        if end_avg > start_avg * 1.2: # 20% growth
+            insights.append({'type': 'warning', 'msg': 'Potential Memory Leak detected. Heap usage has increased significantly over time without full recovery.'})
+        
+        # Critical Threshold
+        max_heap = max(d['v'] for d in heap_series)
+        if max_heap > 90:
+             insights.append({'type': 'critical', 'msg': f'Critical Heap Usage detected ({max_heap}%). Risk of OutOfMemoryError.'})
+
+    # 3. GC Storm Detection
+    gc_series = results['gc_time']
+    if gc_series:
+        high_gc_events = [d for d in gc_series if d['v'] > 5000] # > 5000ms (5s) spent in GC per min is bad
+        if len(high_gc_events) > 3:
+             insights.append({'type': 'warning', 'msg': f'Detected {len(high_gc_events)} Major GC spikes (>5s). This causes application pauses ("Stop-the-world").'})
+
+    # 4. CPU High Load
+    cpu_series = results.get('cpu_busy', [])
+    if cpu_series:
+        high_cpu = [d for d in cpu_series if d['v'] > 80]
+        if len(high_cpu) > 5:
+             insights.append({'type': 'warning', 'msg': f'High CPU Usage detected (>80%) for sustained period.'})
+             
+    # 5. Thread Exhaustion Risk
+    thread_series = results.get('threads_live', [])
+    if thread_series:
+        max_threads = max(d['v'] for d in thread_series)
+        if max_threads > 200: # Arbitrary threshold, adjust per app
+             insights.append({'type': 'warning', 'msg': f'High Thread Count ({max_threads}). Check for stuck threads or connection pool leaks.'})
+
+    return jsonify({
+        'data': results,
+        'insights': insights
+    })
 def business_transactions_page():
     return render_template('business_transactions.html')
 

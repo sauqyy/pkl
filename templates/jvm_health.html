@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JVM & Infrastructure Health</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            margin: 0;
+            color: #1e293b;
+        }
+
+        h3 {
+            margin-top: 0;
+            color: #334155;
+        }
+
+        .insight-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .insight-critical {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .insight-warning {
+            background: #fef9c3;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+
+        .insight-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .gauge-container {
+            text-align: center;
+            position: relative;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gauge-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .gauge-label {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Infrastructure Health</h1>
+                <div style="color: #64748b;">Live Monitoring of JVM, Memory & Availability</div>
+                <a href="/"
+                    style="text-decoration:none; color:#3b82f6; font-size:0.9rem; margin-top:0.5rem; display:block;">
+                    <i class="fas fa-home"></i> Back to Executive Dashboard
+                </a>
+            </div>
+            <div>
+                <select id="duration" onchange="fetchData()" style="padding: 0.5rem; border-radius: 6px;">
+                    <option value="60" selected>Last 1 Hour</option>
+                    <option value="360">Last 6 Hours</option>
+                    <option value="720">Last 12 Hours</option>
+                    <option value="1440">Last 1 Day</option>
+                    <option value="4320">Last 3 Days</option>
+                    <option value="10080">Last 1 Week</option>
+                </select>
+                <button onclick="fetchData()"
+                    style="padding: 0.5rem 1rem; background:#3b82f6; color:white; border:none; border-radius:6px; margin-left: 0.5rem; cursor:pointer;">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Insights & Availability Row -->
+        <div class="grid-2">
+            <div class="card">
+                <h3><i class="fas fa-robot"></i> Smart Insights</h3>
+                <div id="insights-container" style="max-height: 200px; overflow-y: auto;">
+                    <div style="color: #94a3b8; font-style: italic;">Analyzing metrics...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>System Availability</h3>
+                <div class="gauge-container">
+                    <div class="gauge-value" id="avail-value">--%</div>
+                    <div class="gauge-label">Uptime (Selected Period)</div>
+                    <div id="avail-status" style="margin-top:0.5rem; font-weight:600;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts (Heap & CPU) -->
+        <div class="grid-2">
+            <div class="card">
+                <h3>Heap Memory (%)</h3>
+                <div class="chart-container">
+                    <canvas id="heapChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>CPU Usage (%)</h3>
+                <div class="chart-container">
+                    <canvas id="cpuChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts (Threads & GC) -->
+        <div class="grid-2">
+            <div class="card">
+                <h3>Live Threads</h3>
+                <div class="chart-container">
+                    <canvas id="threadChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Major GC Time (ms/min)</h3>
+                <div class="chart-container">
+                    <canvas id="gcChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let heapChart, gcChart, cpuChart, threadChart;
+
+        async function fetchData() {
+            const duration = document.getElementById('duration').value;
+            document.getElementById('insights-container').innerHTML = '<div style="color: #64748b;">Loading analysis...</div>';
+
+            try {
+                const response = await fetch(`/api/jvm-data?duration=${duration}`);
+                const json = await response.json();
+
+                const data = json.data;
+                const insights = json.insights;
+
+                renderInsights(insights);
+                renderAvailability(data.availability);
+                renderHeapChart(data.heap_used);
+                renderGCChart(data.gc_time);
+                renderCPUChart(data.cpu_busy);
+                renderThreadChart(data.threads_live);
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('insights-container').innerHTML = '<div style="color: #ef4444;">Failed to load data.</div>';
+            }
+        }
+
+        function renderInsights(insights) {
+            const container = document.getElementById('insights-container');
+            container.innerHTML = '';
+
+            if (insights.length === 0) {
+                container.innerHTML = '<div style="color: #64748b;">No critical issues detected. System appears stable.</div>';
+                return;
+            }
+
+            insights.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `insight-box insight-${item.type}`;
+                let icon = 'fa-info-circle';
+                if (item.type === 'critical') icon = 'fa-exclamation-circle';
+                if (item.type === 'warning') icon = 'fa-exclamation-triangle';
+                if (item.type === 'success') icon = 'fa-check-circle';
+
+                div.innerHTML = `<i class="fas ${icon}" style="margin-top: 3px;"></i> <div>${item.msg}</div>`;
+                container.appendChild(div);
+            });
+        }
+
+        function renderAvailability(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('avail-value').innerText = "N/A";
+                return;
+            }
+
+            // Calculate Average Uptime
+            const upCount = data.filter(d => d.v >= 1).length; // Assuming 1 = UP
+            // Or average of value if it's 0-1
+            const avg = data.reduce((sum, d) => sum + d.v, 0) / data.length;
+
+            // If data is 0 or 1, avg * 100 is percentage.
+            // If data is already %, avg is %.
+            // AppD Availability metric is usually 1 (Available) or 0 (Unavailable).
+            const pct = (avg * 100).toFixed(2);
+
+            const el = document.getElementById('avail-value');
+            el.innerText = `${pct}%`;
+
+            const status = document.getElementById('avail-status');
+            if (avg >= 0.99) {
+                el.style.color = '#10b981'; // Green
+                status.innerText = "System Healthy";
+                status.style.color = '#10b981';
+            } else {
+                el.style.color = '#ef4444'; // Red
+                status.innerText = "Downtime Detected";
+                status.style.color = '#ef4444';
+            }
+        }
+
+        function renderHeapChart(data) {
+            const ctx = document.getElementById('heapChart');
+            if (heapChart) heapChart.destroy();
+
+            if (!data) return;
+
+            heapChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.t),
+                    datasets: [{
+                        label: 'Heap Used (%)',
+                        data: data.map(d => d.v),
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'time', time: { unit: 'minute' }, ticks: { display: false } }, // Hide ticks for clean look
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: '%' } }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: 90,
+                                    yMax: 90,
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    label: { content: 'Danger Zone (90%)', enabled: true }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderGCChart(data) {
+            const ctx = document.getElementById('gcChart');
+            if (gcChart) gcChart.destroy();
+
+            if (!data) return;
+
+            gcChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.t), // Sync time with heap
+                    datasets: [{
+                        label: 'Major GC Time (ms/min)',
+                        data: data.map(d => d.v),
+                        backgroundColor: '#f59e0b',
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'time', time: { unit: 'minute' }, ticks: { display: false } },
+                        y: { beginAtZero: true, title: { display: true, text: 'ms' } }
+                    }
+                }
+            });
+        }
+
+        function renderCPUChart(data) {
+            const ctx = document.getElementById('cpuChart');
+            if (cpuChart) cpuChart.destroy();
+            if (!data) return;
+
+            cpuChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.t),
+                    datasets: [{
+                        label: 'CPU Busy %',
+                        data: data.map(d => d.v),
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                        fill: true,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { type: 'time', time: { unit: 'minute' }, ticks: { display: false } },
+                        y: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+        }
+
+        function renderThreadChart(data) {
+            const ctx = document.getElementById('threadChart');
+            if (threadChart) threadChart.destroy();
+            if (!data) return;
+
+            threadChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => d.t),
+                    datasets: [{
+                        label: 'Active Threads',
+                        data: data.map(d => d.v),
+                        borderColor: '#8b5cf6',
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { type: 'time', time: { unit: 'minute' }, ticks: { display: false } } }
+                }
+            });
+        }
+
+        fetchData();
+    </script>
+</body>
+
+</html>
