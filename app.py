@@ -603,5 +603,226 @@ def get_slow_calls_analysis():
         print(f"Slow Calls Analysis Error: {e}")
         return jsonify({'error': str(e)})
 
+@app.route('/jvm-health')
+def jvm_health_page():
+    return render_template('jvm_health.html')
+
+@app.route('/api/jvm-data')
+def get_jvm_data():
+    duration = request.args.get('duration', default=60, type=int) # Default 1 hour for quick view
+    
+    # Define Metric Paths based on user request
+    METRICS = {
+        'availability': "Application Infrastructure Performance|dynamic-letter-deployment|Agent|App|Availability",
+        'heap_used': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Memory|Heap|Used %",
+        'heap_used_mb': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Memory|Heap|Current Usage (MB)",
+        'gc_time': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Garbage Collection|Major Collection Time Spent Per Min (ms)",
+        'threads_live': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|JVM|Threads|Current No. of Threads",
+        'cpu_busy': "Application Infrastructure Performance|dynamic-letter-deployment|Individual Nodes|dynamic-letter-deployment--18|Hardware Resources|CPU|%Busy"
+    }
+    
+    results = {}
+    
+    # Helper to fetch individual metric (reusing existing auth logic would be best, but let's inline or reuse load_data logic)
+    # Since load_data uses a global METRIC_PATH, we need a flexible version.
+    
+    def fetch_metric_flexible(metric_path, duration_mins):
+        encoded_metric = urllib.parse.quote(metric_path)
+        # Use 'Smart2' as seen in user provided links for JVM metrics
+        # If global APP_NAME is SmartNano, we should probably switch this specific call to Smart2
+        target_app = "Smart2" 
+        
+        url = (
+            f"{BASE_URL}/controller/rest/applications/{target_app}/metric-data?"
+            f"metric-path={encoded_metric}&"
+            f"time-range-type=BEFORE_NOW&"
+            f"duration-in-mins={duration_mins}&"
+            f"output=JSON&"
+            f"rollup=false"
+        )
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
+        try:
+            with urllib.request.urlopen(req) as response:
+                return json.loads(response.read().decode())
+        except Exception as e:
+            print(f"Error fetching {metric_path}: {e}")
+            return []
+
+    # Fetch all metrics
+    # Note: Sequential fetching might be slow. In prod, use ThreadPool. for now, sequential is fine.
+    for key, path in METRICS.items():
+        data = fetch_metric_flexible(path, duration)
+        
+        # Process data into simple Time/Value pairs
+        series = []
+        if data and isinstance(data, list):
+             for item in data:
+                 if 'metricValues' in item:
+                     for val in item['metricValues']:
+                         series.append({
+                             't': val.get('startTimeInMillis', 0),
+                             'v': val.get('value', 0)
+                         })
+        results[key] = series
+
+    # --- Generate Insights ---
+    insights = []
+    
+    # 1. Availability Insight
+    avail_series = results['availability']
+    if avail_series:
+        avg_avail = sum(d['v'] for d in avail_series) / len(avail_series)
+        uptime_percentage = round(avg_avail * 100, 2) if avg_avail <= 1 else round(avg_avail, 2) # Usually 1 or 0, or %? AppD availability usually 1/0
+        
+        # Check if AppD returns 1 (up) or 0 (down). It seems to be 1=Up.
+        # If it's returning %, adjust. Assuming 1=100% based on "Availability".
+        
+        if avg_avail < 0.99:
+            insights.append({'type': 'critical', 'msg': f'Availability is low ({avg_avail:.2%}). System has experienced downtime.'})
+        else:
+             insights.append({'type': 'success', 'msg': 'System Availability is excellent.'})
+    
+    # 2. Memory Leak Detection (Simple Trend)
+    heap_series = results['heap_used']
+    if len(heap_series) > 10:
+        # Check first 20% vs last 20% average
+        split = len(heap_series) // 5
+        start_avg = sum(d['v'] for d in heap_series[:split]) / split
+        end_avg = sum(d['v'] for d in heap_series[-split:]) / split
+        
+        if end_avg > start_avg * 1.2: # 20% growth
+            insights.append({'type': 'warning', 'msg': 'Potential Memory Leak detected. Heap usage has increased significantly over time without full recovery.'})
+        
+        # Critical Threshold
+        max_heap = max(d['v'] for d in heap_series)
+        if max_heap > 90:
+             insights.append({'type': 'critical', 'msg': f'Critical Heap Usage detected ({max_heap}%). Risk of OutOfMemoryError.'})
+
+    # 3. GC Storm Detection
+    gc_series = results['gc_time']
+    if gc_series:
+        high_gc_events = [d for d in gc_series if d['v'] > 5000] # > 5000ms (5s) spent in GC per min is bad
+        if len(high_gc_events) > 3:
+             insights.append({'type': 'warning', 'msg': f'Detected {len(high_gc_events)} Major GC spikes (>5s). This causes application pauses ("Stop-the-world").'})
+
+    # 4. CPU High Load
+    cpu_series = results.get('cpu_busy', [])
+    if cpu_series:
+        high_cpu = [d for d in cpu_series if d['v'] > 80]
+        if len(high_cpu) > 5:
+             insights.append({'type': 'warning', 'msg': f'High CPU Usage detected (>80%) for sustained period.'})
+             
+    # 5. Thread Exhaustion Risk
+    thread_series = results.get('threads_live', [])
+    if thread_series:
+        max_threads = max(d['v'] for d in thread_series)
+        if max_threads > 200: # Arbitrary threshold, adjust per app
+             insights.append({'type': 'warning', 'msg': f'High Thread Count ({max_threads}). Check for stuck threads or connection pool leaks.'})
+
+    return jsonify({
+        'data': results,
+        'insights': insights
+    })
+@app.route('/business-transactions')
+def business_transactions_page():
+    return render_template('business_transactions.html')
+
+@app.route('/api/business-transactions')
+def get_business_transactions():
+    file_path = 'List FWD.xlsx'
+    sheet_name = 'business_transactions'
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'Excel file not found.'})
+        
+    try:
+        # Read with header=None to find the correct header row dynamically
+        df_raw = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+        
+        # Find header row
+        header_idx = -1
+        for i, row in df_raw.iterrows():
+            # Check for key columns. 'Name' and 'Response Time (ms)' seem distinct enough.
+            row_values = [str(x).strip() for x in row.values]
+            if 'Name' in row_values and 'Response Time (ms)' in row_values:
+                header_idx = i
+                break
+        
+        if header_idx == -1:
+             return jsonify({'error': 'Could not locate header row with "Name" and "Response Time (ms)" columns.'})
+
+        # Reload or slice
+        # Slicing is faster
+        df = df_raw.iloc[header_idx + 1:].copy()
+        df.columns = [str(x).strip() for x in df_raw.iloc[header_idx]]
+        
+        # Reset index
+        df.reset_index(drop=True, inplace=True)
+        
+        # Clean Data
+        required_cols = ['Name', 'Health', 'Response Time (ms)', 'Calls', '% Errors']
+        missing_cols = [c for c in required_cols if c not in df.columns]
+        if missing_cols:
+             return jsonify({'error': f'Missing columns: {missing_cols}. Verified columns: {df.columns.tolist()}'})
+
+        # Helper to clean numeric columns
+        def clean_numeric(val):
+            if pd.isna(val): return 0
+            if isinstance(val, (int, float)): return val
+            s = str(val).replace(',', '').replace('%', '').replace('-', '0').strip()
+            try:
+                return float(s)
+            except:
+                return 0
+
+        df['Response Time (ms)'] = df['Response Time (ms)'].apply(clean_numeric)
+        df['Calls'] = df['Calls'].apply(clean_numeric)
+        df['% Errors'] = df['% Errors'].apply(clean_numeric)
+        
+        # Aggregations / Visualizations Data
+        
+        # 1. Health Distribution
+        health_counts = df['Health'].value_counts().to_dict()
+        
+        # 2. Top 10 Slowest (Response Time)
+        top_slowest = df.nlargest(10, 'Response Time (ms)')[['Name', 'Response Time (ms)']]
+        
+        # 3. Top 10 High Volume (Calls)
+        top_volume = df.nlargest(10, 'Calls')[['Name', 'Calls']]
+        
+        # 4. Top 10 Error Rates (% Errors > 0)
+        top_errors = df[df['% Errors'] > 0].nlargest(10, '% Errors')[['Name', '% Errors']]
+        
+        # 5. Scatter Data: Calls vs Response Time (with Health)
+        # Handle NaN in Health just in case
+        df['Health'] = df['Health'].fillna('Unknown')
+        scatter_data = df[['Name', 'Calls', 'Response Time (ms)', 'Health']].to_dict(orient='records')
+
+        # 6. Table Data
+        table_data = df.fillna('').to_dict(orient='records')
+        
+        return jsonify({
+            'health_counts': health_counts,
+            'top_slowest': {
+                'labels': top_slowest['Name'].tolist(),
+                'values': top_slowest['Response Time (ms)'].tolist() 
+            },
+            'top_volume': {
+                'labels': top_volume['Name'].tolist(),
+                'values': top_volume['Calls'].tolist()
+            },
+            'top_errors': {
+                'labels': top_errors['Name'].tolist(),
+                'values': top_errors['% Errors'].tolist()
+            },
+            'scatter': scatter_data,
+            'table': table_data
+        })
+        
+    except Exception as e:
+        print(f"Business Transactions Error: {e}")
+        return jsonify({'error': str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
