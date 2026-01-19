@@ -7,6 +7,7 @@ import ResponseTime from '@/pages/ResponseTime'
 import LoadAnalysis from '@/pages/LoadAnalysis'
 import ErrorAnalysis from '@/pages/ErrorAnalysis'
 import SlowCallsAnalysis from '@/pages/SlowCallsAnalysis'
+import DatabaseAnalysis from '@/pages/DatabaseAnalysis'
 import BusinessTransactions from '@/pages/BusinessTransactions'
 import JVMHealth from '@/pages/JVMHealth'
 import { ThemeProvider } from '@/components/ThemeProvider'
@@ -27,6 +28,7 @@ function App() {
               <Route path="/error-analysis" element={<ErrorAnalysis />} />
               <Route path="/slow-calls-analysis" element={<SlowCallsAnalysis />} />
               <Route path="/business-transactions" element={<BusinessTransactions />} />
+              <Route path="/database-analysis" element={<DatabaseAnalysis />} />
               <Route path="/jvm-health" element={<JVMHealth />} />
             </Routes>
           </DashboardLayout>

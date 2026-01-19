@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
-import { Clock, AlertTriangle, Server, Hourglass, PanelRight, ListChecks, Activity } from "lucide-react"
+import { Clock, AlertTriangle, Server, Hourglass, PanelRight, ListChecks, Activity, Database } from "lucide-react"
 import { useSidebar } from "@/components/SidebarContext"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 
@@ -126,6 +126,16 @@ export default function ExecutiveDashboard() {
           icon={<Activity className="h-4 w-4" />}
           iconColor="text-rose-500"
           onClick={() => navigate('/jvm-health')}
+        />
+
+        {/* Database Analysis Card */}
+        <MetricCard
+          title="Database Analysis"
+          value="Query"
+          subtext="Performance & Spikes"
+          icon={<Database className="h-4 w-4" />}
+          iconColor="text-indigo-500"
+          onClick={() => navigate('/database-analysis')}
         />
       </div>
     </div>
