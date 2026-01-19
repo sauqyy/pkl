@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Analysis - Realtime Overview</title>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-color: #0ea5e9;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        canvas {
+            max-height: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .home-link {
+            text-decoration: none;
+            color: var(--accent-color);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .metric-unit {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel h2 {
+            font-size: 1.25rem;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        /* Insights List Styling (Bottom) */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .insight-item {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            display: flex;
+            gap: 0.75rem;
+            align-items: start;
+        }
+
+        .insight-icon {
+            margin-top: 0.25rem;
+        }
+
+        .insight-content h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .insight-content p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .type-critical {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .type-warning {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .type-success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .type-info {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        /* Form Elements */
+        .controls-wrapper {
+            position: relative;
+            width: 200px;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+            font-family: inherit;
+            color: var(--text-primary);
+            cursor: pointer;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header style="margin-bottom: 2rem;">
+            <div>
+                <h1>Database Analysis</h1>
+                <div class="subtitle" id="last-updated">Updating...</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="/" class="home-link"><i class="fas fa-home"></i> Home</a>
+                <div class="controls-wrapper">
+                    <select id="timeRange" onchange="fetchData()">
+                        <option value="60" selected>Last 1 Hour</option>
+                        <option value="180">Last 3 Hours</option>
+                        <option value="360">Last 6 Hours</option>
+                        <option value="1440">Last 24 Hours</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- Top Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Avg Time Spent</div>
+                <div class="metric-value" style="color: var(--accent-color)">
+                    <span id="avg-time">--</span>
+                    <span class="metric-unit">s</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Avg Load</div>
+                <div class="metric-value">
+                    <span id="avg-load">--</span>
+                    <span class="metric-unit">cpm</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Max Latency</div>
+                <div class="metric-value" style="color: var(--danger-color)">
+                    <span id="max-time">--</span>
+                    <span class="metric-unit">s</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Inefficient Events</div>
+                <div class="metric-value" style="color: var(--warning-color)">
+                    <span id="inefficiency-count">--</span>
+                    <span class="metric-unit">times</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Avg CPU</div>
+                <div class="metric-value">
+                    <span id="avg-cpu">--</span>
+                    <span class="metric-unit">%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Section -->
+        <div class="dashboard-layout">
+            <!-- Main Chart -->
+            <div class="panel">
+                <h2>Time Spent vs Load Trend</h2>
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Side Chart -->
+            <div class="panel">
+                <h2>Efficiency Distribution</h2>
+                <div class="chart-container" style="display: flex; justify-content: center; align-items: center;">
+                    <canvas id="donutChart"></canvas>
+                </div>
+                <div style="text-align: center; margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    Time > Load vs Time ≤ Load
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: CPU Chart -->
+        <div class="panel" style="margin-top: 5.5rem;">
+            <h2>CPU Resource Usage</h2>
+            <div class="chart-container">
+                <canvas id="cpuChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Top 5 Queries -->
+        <div class="panel" style="margin-top: 2rem;">
+            <h2 style="margin-bottom: 1rem;">Top 5 Heavy Queries (by Weight)</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280; font-size: 0.9rem;">
+                            <th style="padding: 12px;">Rank</th>
+                            <th style="padding: 12px; width: 40%;">Query</th>
+                            <th style="padding: 12px;">Weight (%)</th>
+                            <th style="padding: 12px;">Executions</th>
+                            <th style="padding: 12px;">Avg Response</th>
+                            <th style="padding: 12px;">Total Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="queries-body">
+                        <tr>
+                            <td colspan="6" style="padding: 20px; text-align: center; color: #9ca3af;">Loading
+                                queries...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Query Distribution Chart -->
+        <div class="panel" style="margin-top: 2rem;">
+            <h2 style="margin-bottom: 1rem;">Top 10 Query Weight Distribution</h2>
+            <div style="height: 300px; position: relative;">
+                <canvas id="queryDistributionChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let mainChart = null;
+        let donutChart = null;
+        let cpuChart = null;
+        let queryChart = null;
+
+        async function fetchData() {
+            const duration = document.getElementById('timeRange').value;
+            const now = new Date();
+            document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+
+            try {
+                const response = await fetch(`/api/database-analysis?duration=${duration}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error("API Error", data.error);
+                    alert("Error fetching data: " + data.error);
+                    return;
+                }
+
+                updateCards(data);
+                renderMainChart(data.chart_data);
+                renderCpuChart(data.chart_data);
+                renderDonutChart(data);
+                renderDonutChart(data);
+
+                // Table shows Top 5
+                renderQueries(data.queries.slice(0, 5));
+                // Chart shows Top 10 (which is what data.queries contains now from backend)
+                renderQueryChart(data.queries);
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+            }
+        }
+
+        function generateColors(count) {
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                const hue = Math.floor((360 / count) * i);
+                colors.push(`hsl(${hue}, 70%, 50%)`);
+            }
+            return colors;
+        }
+
+        function renderQueryChart(queries) {
+            const ctx = document.getElementById('queryDistributionChart').getContext('2d');
+
+            if (!queries || queries.length === 0) {
+                if (queryChart) queryChart.destroy();
+                return;
+            }
+
+            const labels = queries.map((q, i) => {
+                const text = q.query || `Query #${i + 1}`;
+                return text.length > 60 ? text.substring(0, 60) + '...' : text;
+            });
+            const dataValues = queries.map(q => q.weight);
+            const bgColors = generateColors(queries.length);
+
+            if (queryChart) queryChart.destroy();
+
+            queryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: bgColors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                usePointStyle: true,
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return ` ${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        function renderQueries(queries) {
+            const tbody = document.getElementById('queries-body');
+            tbody.innerHTML = '';
+
+            if (!queries || queries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #6b7280;">No query data available</td></tr>';
+                return;
+            }
+
+            queries.forEach((q, index) => {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid #f3f4f6';
+                row.style.fontSize = '0.9rem';
+
+                row.innerHTML = `
+                    <td style="padding: 12px; font-weight: bold; color: #374151;">#${index + 1}</td>
+                    <td style="padding: 12px;">
+                        <div style="max-height: 80px; overflow-y: auto; font-family: monospace; font-size: 0.85em; color: #4b5563; background: #f9fafb; padding: 8px; border-radius: 4px; border: 1px solid #e5e7eb;">
+                            ${q.query}
+                        </div>
+                    </td>
+                    <td style="padding: 12px; font-weight: bold; color: #ef4444;">${q.weight}%</td>
+                    <td style="padding: 12px; color: #374151;">${Number(q.executions).toLocaleString()}</td>
+                    <td style="padding: 12px; color: #374151;">${q.avg_response}</td>
+                    <td style="padding: 12px; color: #374151;">${q.elapsed_time}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateCards(data) {
+            const timeVals = data.chart_data.time_spent;
+            const loadVals = data.chart_data.load;
+            const cpuVals = data.chart_data.cpu || [];
+
+            const avgTime = timeVals.length ? (timeVals.reduce((a, b) => a + b, 0) / timeVals.length).toFixed(1) : 0;
+            const avgLoad = loadVals.length ? (loadVals.reduce((a, b) => a + b, 0) / loadVals.length).toFixed(0) : 0;
+            const avgCpu = cpuVals.length ? (cpuVals.reduce((a, b) => a + b, 0) / cpuVals.length).toFixed(1) : 0;
+            const maxTime = timeVals.length ? Math.max(...timeVals).toFixed(1) : 0;
+
+            // Format numbers
+            document.getElementById('avg-time').innerText = avgTime;
+            document.getElementById('avg-load').innerText = Number(avgLoad).toLocaleString();
+            document.getElementById('avg-cpu').innerText = avgCpu;
+            document.getElementById('max-time').innerText = maxTime;
+            document.getElementById('inefficiency-count').innerText = data.inefficiency_count;
+        }
+
+        function renderMainChart(data) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            const labels = data.timestamps.map(ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
+            if (mainChart) mainChart.destroy();
+
+            mainChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Time Spent (s)',
+                            data: data.time_spent,
+                            borderColor: '#f59e0b', // Amber
+                            backgroundColor: 'rgba(245, 158, 11, 0.05)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            yAxisID: 'y1',
+                            fill: false
+                        },
+                        {
+                            label: 'Load (CPM)',
+                            type: 'bar',
+                            data: data.load,
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)', // Blue
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            borderRadius: 2,
+                            yAxisID: 'y',
+                            barPercentage: 0.6,
+                            categoryPercentage: 0.8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            padding: 12,
+                            titleFont: { weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { maxTicksLimit: 12, color: '#94a3b8' } },
+                        y: {
+                            type: 'linear', position: 'left',
+                            title: { display: true, text: 'Load (CPM)', color: '#3b82f6' },
+                            grid: { color: '#f1f5f9' }, beginAtZero: true
+                        },
+                        y1: {
+                            type: 'linear', position: 'right',
+                            title: { display: true, text: 'Time Spent (s)', color: '#f59e0b' },
+                            grid: { drawOnChartArea: false }, beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCpuChart(data) {
+            const ctx = document.getElementById('cpuChart').getContext('2d');
+            const labels = data.timestamps.map(ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
+            if (cpuChart) cpuChart.destroy();
+
+            cpuChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'CPU Busy (%)',
+                        data: data.cpu,
+                        borderColor: '#0ea5e9', // Sky Blue
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { maxTicksLimit: 12, color: '#94a3b8' } },
+                        y: { beginAtZero: true, max: 100, title: { display: true, text: 'Percent (%)' } }
+                    }
+                }
+            });
+        }
+
+        function renderDonutChart(data) {
+            const ctx = document.getElementById('donutChart').getContext('2d');
+
+            const inefficient = data.inefficiency_count;
+            const total = data.total_points || 1;
+            const efficient = Math.max(0, total - inefficient);
+
+            if (donutChart) donutChart.destroy();
+
+            donutChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Efficient (Load ≥ Time)', 'Inefficient (Time > Load)'],
+                    datasets: [{
+                        data: [efficient, inefficient],
+                        backgroundColor: ['#22c55e', '#ef4444'], // Green, Red
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Init
+        fetchData();
+        setInterval(fetchData, 60000);
+
+    </script>
+</body>
+
+</html>
