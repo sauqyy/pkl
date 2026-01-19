@@ -6,12 +6,14 @@ import { Search, Calendar as CalendarIcon, PanelRight } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { fetchDashboardData, DashboardData } from "@/lib/api"
 import { useSidebar } from "@/components/SidebarContext"
+import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState("60")
   const { toggleSidebar } = useSidebar()
+  const tooltipStyles = useChartTooltipStyles()
 
   useEffect(() => {
     const load = async () => {
@@ -156,8 +158,8 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                             <XAxis dataKey="time" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                             <Tooltip 
-                                contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
-                                itemStyle={{ color: '#fff' }}
+                                contentStyle={tooltipStyles.contentStyle}
+                                itemStyle={tooltipStyles.itemStyle}
                             />
                             <Area type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
                         </AreaChart>
@@ -186,7 +188,7 @@ export default function Dashboard() {
                                     <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                            <Tooltip contentStyle={tooltipStyles.contentStyle} />
                         </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -209,7 +211,7 @@ export default function Dashboard() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                             <XAxis dataKey="ms" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                             <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip cursor={{fill: '#333'}} contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                            <Tooltip cursor={tooltipStyles.cursor} contentStyle={tooltipStyles.contentStyle} />
                             <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>

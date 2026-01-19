@@ -5,6 +5,8 @@ import { PanelRight } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell, Pie, PieChart, Legend } from "recharts"
 import { Heatmap } from "@/components/Heatmap"
 import { useSidebar } from "@/components/SidebarContext"
+import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
+import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 
 interface SlowCallsData {
   total: number;
@@ -31,10 +33,12 @@ export default function SlowCallsAnalysis() {
   const [timeframe, setTimeframe] = useState("30d")
   const [metricType, setMetricType] = useState("slow")
   const { toggleSidebar } = useSidebar()
+  const tooltipStyles = useChartTooltipStyles()
+  const { selectedTier, selectedTransaction } = useBusinessTransaction()
 
   const fetchAnalysis = async () => {
     try {
-      const response = await fetch(`/api/slow-calls-analysis?timeframe=${timeframe}&type=${metricType}`)
+      const response = await fetch(`/api/slow-calls-analysis?timeframe=${timeframe}&type=${metricType}&tier=${encodeURIComponent(selectedTier)}&bt=${encodeURIComponent(selectedTransaction)}`)
       const result = await response.json()
       if (!result.error) {
         setData(result)
@@ -46,7 +50,7 @@ export default function SlowCallsAnalysis() {
 
   useEffect(() => {
     fetchAnalysis()
-  }, [timeframe, metricType])
+  }, [timeframe, metricType, selectedTier, selectedTransaction])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
   
@@ -80,7 +84,7 @@ export default function SlowCallsAnalysis() {
           </button>
           <div className="h-6 w-px bg-border"></div>
           <div>
-            <h1 className="text-lg font-semibold">Slow Calls Analysis</h1>
+            <h1 className="text-lg font-semibold">Business Transaction - Slow</h1>
             <p className="text-xs text-muted-foreground">{subtitle}</p>
           </div>
         </div>
@@ -90,8 +94,8 @@ export default function SlowCallsAnalysis() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="slow">Slow Calls (&gt;X ms)</SelectItem>
-              <SelectItem value="veryslow">Very Slow Calls (&gt;Y ms)</SelectItem>
+              <SelectItem value="slow">Slow Calls</SelectItem>
+              <SelectItem value="veryslow">Very Slow Calls</SelectItem>
             </SelectContent>
           </Select>
           <Select value={timeframe} onValueChange={setTimeframe}>
@@ -160,7 +164,7 @@ export default function SlowCallsAnalysis() {
                 />
                 <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
+                  contentStyle={tooltipStyles.contentStyle}
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
                 />
                 <Line 
@@ -210,7 +214,7 @@ export default function SlowCallsAnalysis() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                   <XAxis dataKey="hour" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                  <Tooltip contentStyle={tooltipStyles.contentStyle} />
                   <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -239,7 +243,7 @@ export default function SlowCallsAnalysis() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                  <Tooltip contentStyle={tooltipStyles.contentStyle} />
                   <Legend 
                     verticalAlign="bottom" 
                     height={36}

@@ -55,7 +55,10 @@ export function Heatmap({ data, colorScheme = 'blue' }: HeatmapProps) {
             {Array.from({ length: 24 }, (_, h) => {
               const val = values[i][h];
               const bgColor = getColor(val);
-              const shouldShowWhiteText = val > 0 && (val / maxVal) > 0.5;
+              const intensity = val / maxVal;
+              const shouldShowWhiteText = val > 0 && intensity > 0.5;
+              // Show values for outliers (> 50% of max) or non-zero on hover
+              const isOutlier = val > 0 && intensity > 0.5;
               
               return (
                 <div
@@ -64,7 +67,7 @@ export function Heatmap({ data, colorScheme = 'blue' }: HeatmapProps) {
                   style={{ backgroundColor: bgColor }}
                   title={`${day} ${h}:00 - ${val} ${colorScheme === 'blue' ? 'Calls' : 'Errors'}`}
                 >
-                  <span className={`opacity-0 group-hover:opacity-100 transition-opacity font-semibold ${shouldShowWhiteText ? 'text-white' : 'text-foreground'}`}>
+                  <span className={`font-semibold ${shouldShowWhiteText ? 'text-white' : 'text-foreground'} ${isOutlier ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
                     {formatValue(val)}
                   </span>
                 </div>

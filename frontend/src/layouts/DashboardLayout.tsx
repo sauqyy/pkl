@@ -1,8 +1,10 @@
 import { Sidebar } from "@/components/Sidebar";
 import { SidebarProvider, useSidebar } from "@/components/SidebarContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { collapsed, toggleSidebar } = useSidebar();
+  usePageTitle();
   
   return (
     <div className="flex min-h-screen bg-background text-foreground font-sans antialiased">

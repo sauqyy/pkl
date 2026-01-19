@@ -5,6 +5,8 @@ import { PanelRight } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { Heatmap } from "@/components/Heatmap"
 import { useSidebar } from "@/components/SidebarContext"
+import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
+import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 
 interface LoadAnalysisData {
   total: number;
@@ -22,10 +24,12 @@ export default function LoadAnalysis() {
   const [data, setData] = useState<LoadAnalysisData | null>(null)
   const [timeframe, setTimeframe] = useState("all")
   const { toggleSidebar } = useSidebar()
+  const tooltipStyles = useChartTooltipStyles()
+  const { selectedTier, selectedTransaction } = useBusinessTransaction()
 
   const fetchAnalysis = async () => {
     try {
-      const response = await fetch(`/api/load-analysis?timeframe=${timeframe}`)
+      const response = await fetch(`/api/load-analysis?timeframe=${timeframe}&tier=${encodeURIComponent(selectedTier)}&bt=${encodeURIComponent(selectedTransaction)}`)
       const result = await response.json()
       if (!result.error) {
         setData(result)
@@ -37,7 +41,7 @@ export default function LoadAnalysis() {
 
   useEffect(() => {
     fetchAnalysis()
-  }, [timeframe])
+  }, [timeframe, selectedTier, selectedTransaction])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
   const dailyData = data?.daily.map((count, i) => ({ day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], count })) || []
@@ -58,7 +62,7 @@ export default function LoadAnalysis() {
           </button>
           <div className="h-6 w-px bg-border"></div>
           <div>
-            <h1 className="text-lg font-semibold">Lifetime Load Analysis</h1>
+            <h1 className="text-lg font-semibold">Business Transaction - Load</h1>
             <p className="text-xs text-muted-foreground">Historical Analysis of "Calls per Minute" (Last 3 Years)</p>
           </div>
         </div>
@@ -131,7 +135,7 @@ export default function LoadAnalysis() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                   <XAxis dataKey="hour" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                  <Tooltip contentStyle={tooltipStyles.contentStyle} />
                   <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -150,7 +154,7 @@ export default function LoadAnalysis() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
                   <XAxis type="number" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis type="category" dataKey="day" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                  <Tooltip contentStyle={tooltipStyles.contentStyle} />
                   <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>

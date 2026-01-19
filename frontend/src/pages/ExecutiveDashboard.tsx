@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
-import { Clock, AlertTriangle, Server, Hourglass, PanelRight } from "lucide-react"
+import { Clock, AlertTriangle, Server, Hourglass, PanelRight, ListChecks, Activity } from "lucide-react"
 import { useSidebar } from "@/components/SidebarContext"
+import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 
 interface SummaryData {
   response_time: number;
@@ -15,10 +16,11 @@ export default function ExecutiveDashboard() {
   const [data, setData] = useState<SummaryData | null>(null)
   const navigate = useNavigate()
   const { toggleSidebar } = useSidebar()
+  const { selectedTier, selectedTransaction } = useBusinessTransaction()
 
   const fetchSummary = async () => {
     try {
-      const response = await fetch('/api/summary')
+      const response = await fetch(`/api/summary?tier=${encodeURIComponent(selectedTier)}&bt=${encodeURIComponent(selectedTransaction)}`)
       const result = await response.json()
       setData(result)
     } catch (e) {
@@ -31,7 +33,7 @@ export default function ExecutiveDashboard() {
     // Auto-refresh every 60s
     const interval = setInterval(fetchSummary, 60000)
     return () => clearInterval(interval)
-  }, [])
+  }, [selectedTier, selectedTransaction])
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
@@ -63,8 +65,8 @@ export default function ExecutiveDashboard() {
         </div>
       </div>
 
-      {/* 2x2 Grid Layout */}
-      <div className="grid gap-4 grid-cols-2">
+      {/* 3x2 Grid Layout */}
+      <div className="grid gap-4 grid-cols-3">
         {/* Response Time Card */}
         <MetricCard
           title="Response Time"
@@ -104,6 +106,26 @@ export default function ExecutiveDashboard() {
           icon={<Hourglass className="h-4 w-4" />}
           iconColor="text-orange-500"
           onClick={() => navigate('/slow-calls-analysis')}
+        />
+
+        {/* Business Transactions Card */}
+        <MetricCard
+          title="Business Transactions"
+          value="Analysis"
+          subtext="Health, Volume & Latency"
+          icon={<ListChecks className="h-4 w-4" />}
+          iconColor="text-purple-500"
+          onClick={() => navigate('/business-transactions')}
+        />
+
+        {/* JVM Health Card */}
+        <MetricCard
+          title="Infrastructure Health"
+          value="JVM"
+          subtext="Memory, GC & Availability"
+          icon={<Activity className="h-4 w-4" />}
+          iconColor="text-rose-500"
+          onClick={() => navigate('/jvm-health')}
         />
       </div>
     </div>
