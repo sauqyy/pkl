@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { PanelRight, RefreshCw } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useSidebar } from "@/components/SidebarContext"
+import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 
 interface ForecastData {
   history: Array<{ timestamp: number; value: number }>;
@@ -14,6 +15,7 @@ export default function Forecasting() {
   const [data, setData] = useState<ForecastData | null>(null)
   const [loading, setLoading] = useState(true)
   const { toggleSidebar } = useSidebar()
+  const tooltipStyles = useChartTooltipStyles()
 
   const fetchForecast = async () => {
     try {
@@ -85,7 +87,7 @@ export default function Forecasting() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis dataKey="time" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                 <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                <Tooltip contentStyle={tooltipStyles.contentStyle} />
                 <Area type="monotone" dataKey="value" stroke="#38bdf8" strokeWidth={2} fillOpacity={1} fill="url(#colorForecast)" />
               </AreaChart>
             </ResponsiveContainer>

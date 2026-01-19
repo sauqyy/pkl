@@ -32,6 +32,82 @@ SENDER_EMAIL = "your_email@gmail.com"
 SENDER_PASSWORD = "your_app_password"
 RECIPIENT_EMAIL = "your_email@gmail.com"
 
+# Business Transactions CSV
+BT_CSV_FILE = 'business_transactions.csv'
+
+def load_bt_csv():
+    """Load business transactions CSV into a lookup dictionary."""
+    if not os.path.exists(BT_CSV_FILE):
+        return pd.DataFrame()
+    try:
+        # Use only the first 4 columns to avoid errors with trailing commas
+        df = pd.read_csv(BT_CSV_FILE, header=0, usecols=range(4))
+        df.columns = ['Tier', 'BT', 'MetricType', 'URL']
+        # Clean whitespace
+        df['Tier'] = df['Tier'].str.strip()
+        df['BT'] = df['BT'].str.strip()
+        df['MetricType'] = df['MetricType'].str.strip()
+        return df
+    except Exception as e:
+        print(f"Error loading BT CSV: {e}")
+        return pd.DataFrame()
+
+def get_bt_url(tier: str, bt: str, metric_type: str) -> str:
+    """
+    Look up the AppDynamics URL for a specific tier, business transaction, and metric type.
+    metric_type should be one of: 'Load', 'Response', 'Error', 'Slow', 'Very Slow'
+    """
+    df = load_bt_csv()
+    if df.empty:
+        return None
+    
+    # Normalize inputs
+    tier = tier.strip()
+    bt = bt.strip()
+    metric_type = metric_type.strip()
+    
+    mask = (df['Tier'] == tier) & (df['BT'] == bt) & (df['MetricType'] == metric_type)
+    matches = df[mask]
+    
+    if matches.empty:
+        print(f"No URL found for tier='{tier}', bt='{bt}', metric_type='{metric_type}'")
+        return None
+    
+    return matches.iloc[0]['URL']
+
+def fetch_from_appdynamics(url: str, duration_override: int = None) -> list:
+    """
+    Fetch data from an AppDynamics URL.
+    Optionally override the duration-in-mins parameter.
+    """
+    if not url:
+        return []
+    
+    # Override duration if specified
+    if duration_override:
+        # Parse and update duration in URL
+        if 'duration-in-mins=' in url:
+            import re
+            url = re.sub(r'duration-in-mins=\d+', f'duration-in-mins={duration_override}', url)
+    
+    # Add output=JSON and rollup=false if not present
+    if 'output=JSON' not in url:
+        url += '&output=JSON'
+    if 'rollup=false' not in url:
+        url += '&rollup=false'
+    
+    print(f"Fetching from AppDynamics: {url[:100]}...")
+    req = urllib.request.Request(url)
+    req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
+    
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            data = json.loads(response.read().decode())
+            return data
+    except Exception as e:
+        print(f"Error fetching from AppDynamics: {e}")
+        return []
+
 def send_email_alert(error_message):
     """Sends an email alert when an error occurs."""
     try:
@@ -105,6 +181,10 @@ def response_time_dashboard():
 
 @app.route('/api/summary')
 def get_summary_data():
+    tier = request.args.get('tier', 'integration-service')
+    bt = request.args.get('bt', '/smart-integration/users')
+    duration = 43200  # 30 days in minutes
+    
     summary = {
         'response_time': 0,
         'load': 0,
@@ -112,69 +192,62 @@ def get_summary_data():
         'slow_calls': 0
     }
     
-    # 1. Response Time (Current/Avg)
+    # 1. Response Time (Average)
     try:
-        data = load_data(60) # Last 60 mins
-        if data and isinstance(data, list) and len(data) > 0:
-             values = data[0].get('metricValues', [])
-             if values:
-                 summary['response_time'] = round(sum(v['value'] for v in values) / len(values))
-    except: pass
+        url = get_bt_url(tier, bt, 'Response')
+        if url:
+            data = fetch_from_appdynamics(url, 60)  # Last 60 mins for current
+            if data and isinstance(data, list) and len(data) > 0:
+                values = data[0].get('metricValues', [])
+                if values:
+                    summary['response_time'] = round(sum(v['value'] for v in values) / len(values))
+    except Exception as e:
+        print(f"Summary Response Time Error: {e}")
 
     # 2. Errors (Total Last 30 Days)
     try:
-        if os.path.exists('error_data.json'):
-            with open('error_data.json', 'r') as f:
-                errors = json.load(f)
-                # Filter last 30 days based on DATA availability to match detailed dashboard
-                df = pd.DataFrame(errors)
-                if not df.empty:
-                    df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms')
-                    # Match get_error_analysis logic: Add 7 hours (WIB) and anchor to max date
-                    df['dt'] = df['dt'] + timedelta(hours=7) 
-                    now_date = df['dt'].max()
-                    start_date = now_date - timedelta(days=30)
-                    
-                    recent_errors = df[df['dt'] >= start_date]
-                    summary['errors'] = int(recent_errors['sum'].sum())
-    except: pass
+        url = get_bt_url(tier, bt, 'Error')
+        if url:
+            data = fetch_from_appdynamics(url, duration)
+            if data and isinstance(data, list):
+                total = 0
+                for item in data:
+                    if 'metricValues' in item:
+                        for v in item['metricValues']:
+                            total += v.get('sum', v.get('value', 0))
+                summary['errors'] = int(total)
+    except Exception as e:
+        print(f"Summary Errors Error: {e}")
 
-    # 3. Load (Calls per Minute)
-    # To get Total Calls from CPM: Summing the 'sum' field (which is sum of CPMs per minute) gives Total Calls.
+    # 3. Load (Total Calls Last 30 Days)
     try:
-        if os.path.exists('load_data.json'):
-            with open('load_data.json', 'r') as f:
-                load_df = pd.DataFrame(json.load(f))
-                if not load_df.empty:
-                    # Last 30 days sum
-                    load_df['dt'] = pd.to_datetime(load_df['startTimeInMillis'], unit='ms')
-                    # Consistency: Add 7h and anchor to max
-                    load_df['dt'] = load_df['dt'] + timedelta(hours=7)
-                    now_load = load_df['dt'].max()
-                    start_load = now_load - timedelta(days=30)
-                    
-                    mask = load_df['dt'] >= start_load
-                    # 'sum' field contains the sum of rates (Calls per Minute * Minutes) for Rate metrics
-                    summary['load'] = int(load_df[mask]['sum'].sum())
-    except: pass
+        url = get_bt_url(tier, bt, 'Load')
+        if url:
+            data = fetch_from_appdynamics(url, duration)
+            if data and isinstance(data, list):
+                total = 0
+                for item in data:
+                    if 'metricValues' in item:
+                        for v in item['metricValues']:
+                            total += v.get('sum', v.get('value', 0))
+                summary['load'] = int(total)
+    except Exception as e:
+        print(f"Summary Load Error: {e}")
     
-    # 4. Slow Calls (Number of Slow Calls)
-    # This is a Count metric, so 'sum' or 'value' works, but 'sum' is safer for aggregation.
+    # 4. Slow Calls (Total Last 30 Days)
     try:
-        if os.path.exists('slow_calls_data.json'):
-            with open('slow_calls_data.json', 'r') as f:
-                slow_data = json.load(f)
-                slow_df = pd.DataFrame(slow_data)
-                if not slow_df.empty:
-                    slow_df['dt'] = pd.to_datetime(slow_df['startTimeInMillis'], unit='ms')
-                    # Consistency: Add 7h and anchor to max
-                    slow_df['dt'] = slow_df['dt'] + timedelta(hours=7)
-                    now_slow = slow_df['dt'].max()
-                    start_slow = now_slow - timedelta(days=30)
-                    
-                    mask = slow_df['dt'] >= start_slow
-                    summary['slow_calls'] = int(slow_df[mask]['sum'].sum())
-    except: pass
+        url = get_bt_url(tier, bt, 'Slow')
+        if url:
+            data = fetch_from_appdynamics(url, duration)
+            if data and isinstance(data, list):
+                total = 0
+                for item in data:
+                    if 'metricValues' in item:
+                        for v in item['metricValues']:
+                            total += v.get('sum', v.get('value', 0))
+                summary['slow_calls'] = int(total)
+    except Exception as e:
+        print(f"Summary Slow Calls Error: {e}")
     
     return jsonify(summary)
 
@@ -185,11 +258,20 @@ def forecasting():
 @app.route('/api/data')
 def get_data():
     duration = request.args.get('duration', default=60, type=int)
-    raw_data = load_data(duration)
+    tier = request.args.get('tier', 'integration-service')
+    bt = request.args.get('bt', '/smart-integration/users')
+    
+    # Get URL and fetch data
+    url = get_bt_url(tier, bt, 'Response')
+    if not url:
+        # Fallback to old method if no URL found
+        raw_data = load_data(duration)
+    else:
+        raw_data = fetch_from_appdynamics(url, duration)
     
     # Data structures for visualization
     response_times = []
-    timeline = [] # For Line Chart: {time: ms, value: ms}
+    timeline = []  # For Line Chart: {timestamp: ms, value: ms}
     
     if raw_data and isinstance(raw_data, list):
         for item in raw_data:
@@ -200,7 +282,7 @@ def get_data():
                         t = val.get('startTimeInMillis', 0)
                         
                         response_times.append(v)
-                        timeline.append({'time': t, 'value': v})
+                        timeline.append({'timestamp': t, 'value': v})
     
     # 1. Frequency Distribution (Bar Chart)
     frequency = Counter(response_times)
@@ -217,8 +299,8 @@ def get_data():
         else:
             buckets['Slow (>100ms)'] += 1
 
-    # 3. Sort timeline by time
-    timeline.sort(key=lambda x: x['time'])
+    # 3. Sort timeline by timestamp
+    timeline.sort(key=lambda x: x['timestamp'])
 
     return jsonify({
         'frequency': sorted_freq,
@@ -362,77 +444,74 @@ def error_analysis_page():
 
 @app.route('/api/error-analysis')
 def get_error_analysis():
-    error_file = 'error_data.json'
-    if not os.path.exists(error_file):
-        return jsonify({'error': 'Error data not found. Please run fetch_errors.py first.'})
+    # Get tier and bt parameters
+    tier = request.args.get('tier', 'integration-service')
+    bt = request.args.get('bt', '/smart-integration/users')
+    timeframe = request.args.get('timeframe', 'all')
+    
+    # Calculate duration in minutes based on timeframe
+    duration_map = {
+        '7d': 7 * 24 * 60,
+        '30d': 30 * 24 * 60,
+        '6m': 180 * 24 * 60,
+        '1y': 365 * 24 * 60,
+        'all': 43200  # 30 days default for 'all'
+    }
+    duration = duration_map.get(timeframe, 43200)
+    
+    # Get URL and fetch data
+    url = get_bt_url(tier, bt, 'Error')
+    if not url:
+        return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Error', 'total': 0})
+    
+    raw_data = fetch_from_appdynamics(url, duration)
+    
+    if not raw_data:
+        return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
     
     try:
-        with open(error_file, 'r') as f:
-            raw_data = json.load(f)
+        # Extract metric values
+        all_values = []
+        for item in raw_data:
+            if 'metricValues' in item:
+                all_values.extend(item['metricValues'])
+        
+        if not all_values:
+            return jsonify({'error': 'No metric values in response', 'total': 0})
             
-        df = pd.DataFrame(raw_data)
+        df = pd.DataFrame(all_values)
+        if df.empty:
+            return jsonify({'error': 'Empty dataframe', 'total': 0})
         
-        # Convert timestamp
-        df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms')
-        # Adjust for Timezone? Usually UTC. Let's assume UTC for now or add +7 manually if needed.
-        # Ideally, we handle TZ in frontend, but for aggregation we need it here.
-        # Let's add 7 hours for WIB (Western Indonesia Time) since user is in Indonesia.
-        df['dt'] = df['dt'] + pd.Timedelta(hours=7)
+        # Preprocessing
+        df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms') + pd.Timedelta(hours=7)
         
-        # Timeframe Filtering
-        timeframe = request.args.get('timeframe', 'all')
-        now = df['dt'].max() # Use max date in data as 'now' or actual now? Using data max is safer for historical analysis.
-        
-        if timeframe == '7d':
-             start_date = now - pd.Timedelta(days=7)
-             df = df[df['dt'] >= start_date]
-        elif timeframe == '30d':
-             start_date = now - pd.Timedelta(days=30)
-             df = df[df['dt'] >= start_date]
-        elif timeframe == '6m':
-             start_date = now - pd.Timedelta(days=180)
-             df = df[df['dt'] >= start_date]
-        elif timeframe == '1y':
-             start_date = now - pd.Timedelta(days=365)
-             df = df[df['dt'] >= start_date]
-             
         df['hour'] = df['dt'].dt.hour
         df['day_name'] = df['dt'].dt.day_name()
-        df['day_of_week'] = df['dt'].dt.dayofweek # 0=Monday, 6=Sunday
         
-        # filter only non-zero errors?
-        # df = df[df['value'] > 0] 
-        # Actually we want frequency of errors, so sum of values
+        # Aggregation - use 'sum' column if available, else 'value'
+        value_col = 'sum' if 'sum' in df.columns else 'value'
         
-        # 1. Heatmap Data (Day vs Hour)
-        heatmap_data = df.groupby(['day_name', 'hour'])['sum'].sum().reset_index()
-        # Pivot for easier frontend consumption
-        heatmap_pivot = heatmap_data.pivot(index='day_name', columns='hour', values='sum').fillna(0)
-        
-        # Reorder days and ensure fillna happens AFTER reindex (if day is missing)
+        # Heatmap
+        heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
         
-        # 2. Hourly Distribution (Total errors by hour of day)
-        # MUST reindex to 0..23 to ensure all hours exist
-        hourly_dist = df.groupby('hour')['sum'].sum().reindex(range(24), fill_value=0).tolist()
+        # Hourly
+        hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
         
-        # 3. Daily Distribution
-        daily_dist = df.groupby('day_name')['sum'].sum().reindex(days_order, fill_value=0).tolist()
+        # Daily
+        daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
         
-        # 4. Total Errors
-        total_errors = int(df['sum'].sum())
-        
-        # 5. Peak Time
+        # Stats
+        total_errors = int(df[value_col].sum())
         peak_hour_idx = np.argmax(hourly_dist)
         peak_hour = f"{peak_hour_idx:02d}:00"
-        
-        # 6. Peak Day
         peak_day_idx = np.argmax(daily_dist)
-        peak_day = days_order[peak_day_idx]
+        peak_day = days_order[peak_day_idx] if daily_dist else 'N/A'
         
         return jsonify({
-            'heatmap': heatmap_pivot.to_dict(orient='split'), # {index: [days], columns: [0..23], data: [[...]]}
+            'heatmap': heatmap_pivot.to_dict(orient='split'),
             'hourly': hourly_dist,
             'daily': daily_dist,
             'total': total_errors,
@@ -441,7 +520,7 @@ def get_error_analysis():
         })
         
     except Exception as e:
-        print(e)
+        print(f"Error Analysis Error: {e}")
         return jsonify({'error': str(e)})
 
 @app.route('/loadanalysis')
@@ -450,50 +529,69 @@ def load_analysis_page():
 
 @app.route('/api/load-analysis')
 def get_load_analysis():
-    data_file = 'load_data.json'
-    if not os.path.exists(data_file):
-        # Fallback to empty if not ready
-        return jsonify({'error': 'Load data (load_data.json) not found. Script is likely still running.', 'total': 0})
+    # Get tier and bt parameters
+    tier = request.args.get('tier', 'integration-service')
+    bt = request.args.get('bt', '/smart-integration/users')
+    timeframe = request.args.get('timeframe', 'all')
+    
+    # Calculate duration in minutes based on timeframe
+    duration_map = {
+        '7d': 7 * 24 * 60,
+        '30d': 30 * 24 * 60,
+        '6m': 180 * 24 * 60,
+        '1y': 365 * 24 * 60,
+        'all': 43200  # 30 days default for 'all'
+    }
+    duration = duration_map.get(timeframe, 43200)
+    
+    # Get URL and fetch data
+    url = get_bt_url(tier, bt, 'Load')
+    if not url:
+        return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Load', 'total': 0})
+    
+    raw_data = fetch_from_appdynamics(url, duration)
+    
+    if not raw_data:
+        return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
     
     try:
-        with open(data_file, 'r') as f:
-            raw_data = json.load(f)
+        # Extract metric values
+        all_values = []
+        for item in raw_data:
+            if 'metricValues' in item:
+                all_values.extend(item['metricValues'])
+        
+        if not all_values:
+            return jsonify({'error': 'No metric values in response', 'total': 0})
             
-        df = pd.DataFrame(raw_data)
+        df = pd.DataFrame(all_values)
         if df.empty:
-             return jsonify({'error': 'No data in load_data.json'})
+            return jsonify({'error': 'Empty dataframe', 'total': 0})
 
         # Preprocessing
         df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms') + pd.Timedelta(hours=7)
         
-        # Timeframe
-        timeframe = request.args.get('timeframe', 'all')
-        now = df['dt'].max()
-        
-        if timeframe == '7d': df = df[df['dt'] >= now - pd.Timedelta(days=7)]
-        elif timeframe == '30d': df = df[df['dt'] >= now - pd.Timedelta(days=30)]
-        elif timeframe == '6m': df = df[df['dt'] >= now - pd.Timedelta(days=180)]
-        elif timeframe == '1y': df = df[df['dt'] >= now - pd.Timedelta(days=365)]
-        
         df['hour'] = df['dt'].dt.hour
         df['day_name'] = df['dt'].dt.day_name()
         
-        # Aggregation
+        # Aggregation - use 'sum' column if available, else 'value'
+        value_col = 'sum' if 'sum' in df.columns else 'value'
+        
         # Heatmap
-        heatmap_pivot = df.groupby(['day_name', 'hour'])['sum'].sum().reset_index().pivot(index='day_name', columns='hour', values='sum').fillna(0)
+        heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
         
         # Hourly
-        hourly_dist = df.groupby('hour')['sum'].sum().reindex(range(24), fill_value=0).tolist()
+        hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
         
         # Daily
-        daily_dist = df.groupby('day_name')['sum'].sum().reindex(days_order, fill_value=0).tolist()
+        daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
         
         # Stats
-        total_load = int(df['sum'].sum())
+        total_load = int(df[value_col].sum())
         peak_hour = f"{np.argmax(hourly_dist)}:00"
-        peak_day = days_order[np.argmax(daily_dist)]
+        peak_day = days_order[np.argmax(daily_dist)] if daily_dist else 'N/A'
         
         return jsonify({
             'heatmap': heatmap_pivot.to_dict(orient='split'),
@@ -514,78 +612,90 @@ def slow_calls_analysis_page():
 
 @app.route('/api/slow-calls-analysis')
 def get_slow_calls_analysis():
-    # Helper to load specific file
-    metric_type = request.args.get('type', 'slow') # 'slow' or 'veryslow'
+    # Get tier and bt parameters
+    tier = request.args.get('tier', 'integration-service')
+    bt = request.args.get('bt', '/smart-integration/users')
+    timeframe = request.args.get('timeframe', 'all')
+    metric_type = request.args.get('type', 'slow')  # 'slow' or 'veryslow'
     
-    if metric_type == 'veryslow':
-        data_file = 'very_slow_calls_data.json'
-    else:
-        data_file = 'slow_calls_data.json'
-
-    if not os.path.exists(data_file):
-        # Graceful fallback if one file assumes existence but other doesn't
-        return jsonify({'error': f'Data file ({data_file}) not found. Script likely running.', 'total': 0})
+    # Calculate duration in minutes based on timeframe
+    duration_map = {
+        '7d': 7 * 24 * 60,
+        '30d': 30 * 24 * 60,
+        '6m': 180 * 24 * 60,
+        '1y': 365 * 24 * 60,
+        'all': 43200  # 30 days default for 'all'
+    }
+    duration = duration_map.get(timeframe, 43200)
+    
+    # Map metric type to CSV metric name
+    metric_name = 'Very Slow' if metric_type == 'veryslow' else 'Slow'
+    
+    # Get URL and fetch data
+    url = get_bt_url(tier, bt, metric_name)
+    if not url:
+        return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type={metric_name}', 'total': 0})
+    
+    raw_data = fetch_from_appdynamics(url, duration)
+    
+    if not raw_data:
+        return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
     
     try:
-        with open(data_file, 'r') as f:
-            raw_data = json.load(f)
+        # Extract metric values
+        all_values = []
+        for item in raw_data:
+            if 'metricValues' in item:
+                all_values.extend(item['metricValues'])
+        
+        if not all_values:
+            return jsonify({'error': 'No metric values in response', 'total': 0})
             
-        df = pd.DataFrame(raw_data)
+        df = pd.DataFrame(all_values)
         if df.empty:
-             return jsonify({'error': f'No data in {data_file}', 'total': 0})
+            return jsonify({'error': 'Empty dataframe', 'total': 0})
 
         # Preprocessing
         df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms') + pd.Timedelta(hours=7)
         
-        # Timeframe
-        timeframe = request.args.get('timeframe', 'all')
-        now = df['dt'].max()
-        
-        if timeframe == '7d': df = df[df['dt'] >= now - pd.Timedelta(days=7)]
-        elif timeframe == '30d': df = df[df['dt'] >= now - pd.Timedelta(days=30)]
-        elif timeframe == '6m': df = df[df['dt'] >= now - pd.Timedelta(days=180)]
-        elif timeframe == '1y': df = df[df['dt'] >= now - pd.Timedelta(days=365)]
-        
         df['hour'] = df['dt'].dt.hour
         df['day_name'] = df['dt'].dt.day_name()
         
-        # Aggregation
+        # Aggregation - use 'sum' column if available, else 'value'
+        value_col = 'sum' if 'sum' in df.columns else 'value'
+        
         # Heatmap
-        heatmap_pivot = df.groupby(['day_name', 'hour'])['sum'].sum().reset_index().pivot(index='day_name', columns='hour', values='sum').fillna(0)
+        heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
         days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
         
         # Hourly
-        hourly_dist = df.groupby('hour')['sum'].sum().reindex(range(24), fill_value=0).tolist()
+        hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
         
         # Daily
-        daily_dist = df.groupby('day_name')['sum'].sum().reindex(days_order, fill_value=0).tolist()
+        daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
         
-        # Stats (Total is sum of ALL events in period, not count of entries)
-        total_calls = int(df['sum'].sum())
+        # Stats
+        total_calls = int(df[value_col].sum())
         peak_hour = f"{np.argmax(hourly_dist)}:00"
-        peak_day = days_order[np.argmax(daily_dist)]
+        peak_day = days_order[np.argmax(daily_dist)] if daily_dist else 'N/A'
         
-        # New Visuals Logic
-        # 1. Trend Analysis (Daily Sum)
-        # Group by Date (YYYY-MM-DD)
+        # Trend Analysis (Daily Sum)
         df['date_str'] = df['dt'].dt.strftime('%Y-%m-%d')
-        daily_trend = df.groupby('date_str')['sum'].sum().reset_index()
+        daily_trend = df.groupby('date_str')[value_col].sum().reset_index()
         trend_data = {
             'labels': daily_trend['date_str'].tolist(),
-            'values': daily_trend['sum'].tolist()
+            'values': daily_trend[value_col].tolist()
         }
         
-        # 2. Business Hours Impact
-        # Business Hours: 08:00 to 18:00 (inclusive of 08, exclusive of 18? Let's say 8-18)
-        # actually 08:00 to 17:59 usually. Let's say hour >= 8 and hour < 18
+        # Business Hours Impact
         business_hours_mask = (df['hour'] >= 8) & (df['hour'] < 18)
-        business_calls = df[business_hours_mask]['sum'].sum()
+        business_calls = int(df[business_hours_mask][value_col].sum())
         off_hours_calls = total_calls - business_calls
         
         impact_data = {
-            'Business Hours (8-18)': int(business_calls),
-            'Off-Hours': int(off_hours_calls)
+            'Business Hours (8-18)': business_calls,
+            'Off-Hours': off_hours_calls
         }
         
         return jsonify({
@@ -601,6 +711,230 @@ def get_slow_calls_analysis():
         
     except Exception as e:
         print(f"Slow Calls Analysis Error: {e}")
+        return jsonify({'error': str(e)})
+
+@app.route('/jvm-health')
+def jvm_health_page():
+    return render_template('jvm_health.html')
+
+@app.route('/api/jvm-data')
+def get_jvm_data():
+    duration = request.args.get('duration', default=60, type=int)
+    tier = request.args.get('tier', 'integration-service')
+    
+    # Map tier names to their node identifiers (from the user's tier URLs)
+    TIER_NODE_MAP = {
+        'integration-service': 'integration-service--1',
+        'remote-selling-service-deployment': 'remote-selling-service-deployment--14',
+        'dynamic-letter-deployment': 'dynamic-letter-deployment--18',
+        'payment-service': 'payment-service--1',
+        'validation-ph-service-deployment': 'validation-ph-service-deployment--17',
+        'otp-smart2-deployment': 'otp-smart2-deployment--22',
+    }
+    
+    node = TIER_NODE_MAP.get(tier, tier + '--1')
+    
+    # Define Metric Paths dynamically based on tier
+    METRICS = {
+        'availability': f"Application Infrastructure Performance|{tier}|Agent|App|Availability",
+        'heap_used': f"Application Infrastructure Performance|{tier}|Individual Nodes|{node}|JVM|Memory|Heap|Used %",
+        'heap_used_mb': f"Application Infrastructure Performance|{tier}|Individual Nodes|{node}|JVM|Memory|Heap|Current Usage (MB)",
+        'gc_time': f"Application Infrastructure Performance|{tier}|Individual Nodes|{node}|JVM|Garbage Collection|Major Collection Time Spent Per Min (ms)",
+        'gc_count': f"Application Infrastructure Performance|{tier}|Individual Nodes|{node}|JVM|Garbage Collection|Number of Major Collections Per Min",
+        'threads_live': f"Application Infrastructure Performance|{tier}|Individual Nodes|{node}|JVM|Threads|Current No. of Threads",
+        'cpu_busy': f"Application Infrastructure Performance|{tier}|Individual Nodes|{node}|Hardware Resources|CPU|%Busy"
+    }
+    
+    results = {}
+    
+    def fetch_metric_flexible(metric_path, duration_mins):
+        encoded_metric = urllib.parse.quote(metric_path)
+        target_app = "Smart2"
+        
+        url = (
+            f"{BASE_URL}/controller/rest/applications/{target_app}/metric-data?"
+            f"metric-path={encoded_metric}&"
+            f"time-range-type=BEFORE_NOW&"
+            f"duration-in-mins={duration_mins}&"
+            f"output=JSON&"
+            f"rollup=false"
+        )
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                return json.loads(response.read().decode())
+        except Exception as e:
+            print(f"Error fetching {metric_path}: {e}")
+            return []
+
+    # Fetch all metrics
+    for key, path in METRICS.items():
+        data = fetch_metric_flexible(path, duration)
+        
+        # Process data into simple Time/Value pairs
+        series = []
+        if data and isinstance(data, list):
+            for item in data:
+                if 'metricValues' in item:
+                    for val in item['metricValues']:
+                        series.append({
+                            't': val.get('startTimeInMillis', 0),
+                            'v': val.get('value', 0)
+                        })
+        results[key] = series
+
+    # --- Generate Insights ---
+    insights = []
+    
+    # 1. Availability Insight
+    avail_series = results.get('availability', [])
+    if avail_series:
+        avg_avail = sum(d['v'] for d in avail_series) / len(avail_series)
+        
+        if avg_avail < 0.99:
+            insights.append({'type': 'critical', 'msg': f'Availability is low ({avg_avail:.2%}). System has experienced downtime.'})
+        else:
+            insights.append({'type': 'success', 'msg': f'System Availability for {tier} is excellent.'})
+    
+    # 2. Memory Leak Detection (Simple Trend)
+    heap_series = results.get('heap_used', [])
+    if len(heap_series) > 10:
+        split = len(heap_series) // 5
+        start_avg = sum(d['v'] for d in heap_series[:split]) / split
+        end_avg = sum(d['v'] for d in heap_series[-split:]) / split
+        
+        if end_avg > start_avg * 1.2:
+            insights.append({'type': 'warning', 'msg': 'Potential Memory Leak detected. Heap usage has increased significantly over time without full recovery.'})
+        
+        max_heap = max(d['v'] for d in heap_series)
+        if max_heap > 90:
+            insights.append({'type': 'critical', 'msg': f'Critical Heap Usage detected ({max_heap}%). Risk of OutOfMemoryError.'})
+
+    # 3. GC Storm Detection
+    gc_series = results.get('gc_time', [])
+    if gc_series:
+        high_gc_events = [d for d in gc_series if d['v'] > 5000]
+        if len(high_gc_events) > 3:
+            insights.append({'type': 'warning', 'msg': f'Detected {len(high_gc_events)} Major GC spikes (>5s). This causes application pauses ("Stop-the-world").'})
+
+    # 4. CPU High Load
+    cpu_series = results.get('cpu_busy', [])
+    if cpu_series:
+        high_cpu = [d for d in cpu_series if d['v'] > 80]
+        if len(high_cpu) > 5:
+            insights.append({'type': 'warning', 'msg': 'High CPU Usage detected (>80%) for sustained period.'})
+             
+    # 5. Thread Exhaustion Risk
+    thread_series = results.get('threads_live', [])
+    if thread_series:
+        max_threads = max(d['v'] for d in thread_series)
+        if max_threads > 200:
+            insights.append({'type': 'warning', 'msg': f'High Thread Count ({max_threads}). Check for stuck threads or connection pool leaks.'})
+
+    return jsonify({
+        'data': results,
+        'insights': insights,
+        'tier': tier
+    })
+@app.route('/business-transactions')
+def business_transactions_page():
+    return render_template('business_transactions.html')
+
+@app.route('/api/business-transactions')
+def get_business_transactions():
+    file_path = 'List FWD.xlsx'
+    sheet_name = 'business_transactions'
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'Excel file not found.'})
+        
+    try:
+        # Read with header=None to find the correct header row dynamically
+        df_raw = pd.read_excel(file_path, sheet_name=sheet_name, header=None)
+        
+        # Find header row
+        header_idx = -1
+        for i, row in df_raw.iterrows():
+            # Check for key columns. 'Name' and 'Response Time (ms)' seem distinct enough.
+            row_values = [str(x).strip() for x in row.values]
+            if 'Name' in row_values and 'Response Time (ms)' in row_values:
+                header_idx = i
+                break
+        
+        if header_idx == -1:
+             return jsonify({'error': 'Could not locate header row with "Name" and "Response Time (ms)" columns.'})
+
+        # Reload or slice
+        # Slicing is faster
+        df = df_raw.iloc[header_idx + 1:].copy()
+        df.columns = [str(x).strip() for x in df_raw.iloc[header_idx]]
+        
+        # Reset index
+        df.reset_index(drop=True, inplace=True)
+        
+        # Clean Data
+        required_cols = ['Name', 'Health', 'Response Time (ms)', 'Calls', '% Errors']
+        missing_cols = [c for c in required_cols if c not in df.columns]
+        if missing_cols:
+             return jsonify({'error': f'Missing columns: {missing_cols}. Verified columns: {df.columns.tolist()}'})
+
+        # Helper to clean numeric columns
+        def clean_numeric(val):
+            if pd.isna(val): return 0
+            if isinstance(val, (int, float)): return val
+            s = str(val).replace(',', '').replace('%', '').replace('-', '0').strip()
+            try:
+                return float(s)
+            except:
+                return 0
+
+        df['Response Time (ms)'] = df['Response Time (ms)'].apply(clean_numeric)
+        df['Calls'] = df['Calls'].apply(clean_numeric)
+        df['% Errors'] = df['% Errors'].apply(clean_numeric)
+        
+        # Aggregations / Visualizations Data
+        
+        # 1. Health Distribution
+        health_counts = df['Health'].value_counts().to_dict()
+        
+        # 2. Top 10 Slowest (Response Time)
+        top_slowest = df.nlargest(10, 'Response Time (ms)')[['Name', 'Response Time (ms)']]
+        
+        # 3. Top 10 High Volume (Calls)
+        top_volume = df.nlargest(10, 'Calls')[['Name', 'Calls']]
+        
+        # 4. Top 10 Error Rates (% Errors > 0)
+        top_errors = df[df['% Errors'] > 0].nlargest(10, '% Errors')[['Name', '% Errors']]
+        
+        # 5. Scatter Data: Calls vs Response Time (with Health)
+        # Handle NaN in Health just in case
+        df['Health'] = df['Health'].fillna('Unknown')
+        scatter_data = df[['Name', 'Calls', 'Response Time (ms)', 'Health']].to_dict(orient='records')
+
+        # 6. Table Data
+        table_data = df.fillna('').to_dict(orient='records')
+        
+        return jsonify({
+            'health_counts': health_counts,
+            'top_slowest': {
+                'labels': top_slowest['Name'].tolist(),
+                'values': top_slowest['Response Time (ms)'].tolist() 
+            },
+            'top_volume': {
+                'labels': top_volume['Name'].tolist(),
+                'values': top_volume['Calls'].tolist()
+            },
+            'top_errors': {
+                'labels': top_errors['Name'].tolist(),
+                'values': top_errors['% Errors'].tolist()
+            },
+            'scatter': scatter_data,
+            'table': table_data
+        })
+        
+    except Exception as e:
+        print(f"Business Transactions Error: {e}")
         return jsonify({'error': str(e)})
 
 if __name__ == '__main__':

@@ -118,6 +118,11 @@
             background: #ccfbf1;
             color: #0d9488;
         }
+
+        .purple-theme .icon-box {
+            background: #f3e8ff;
+            color: #7e22ce;
+        }
     </style>
 </head>
 
@@ -169,6 +174,28 @@
                 <div class="value" id="slow-calls">--</div>
                 <div class="subtext">Total Slow (Last 30 Days)</div>
                 <div class="link-text">Investigate Latency <i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <!-- Business Transactions -->
+            <div class="card purple-theme" onclick="window.location.href='/business-transactions'">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-list-alt"></i></div>
+                    <div class="title">Business Transactions</div>
+                </div>
+                <div class="value" style="font-size: 2rem;">Analysis</div>
+                <div class="subtext">Health, Volume & Latency</div>
+                <div class="link-text">View Report <i class="fas fa-arrow-right"></i></div>
+            </div>
+
+            <!-- JVM Health -->
+            <div class="card red-theme" onclick="window.location.href='/jvm-health'">
+                <div class="card-header">
+                    <div class="icon-box"><i class="fas fa-memory"></i></div>
+                    <div class="title">Infrastructure Health</div>
+                </div>
+                <div class="value" style="font-size: 2rem;">JVM</div>
+                <div class="subtext">Memory, GC & Availability</div>
+                <div class="link-text">Monitor Nodes <i class="fas fa-arrow-right"></i></div>
             </div>
 
             <!-- Forecasting (Optional, maybe not "important" enough for summary, but we can add if needed. 

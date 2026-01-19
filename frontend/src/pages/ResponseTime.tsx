@@ -6,16 +6,20 @@ import { Search, Calendar as CalendarIcon, PanelRight } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { fetchDashboardData, DashboardData } from "@/lib/api"
 import { useSidebar } from "@/components/SidebarContext"
+import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
+import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 
 export default function ResponseTime() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [period, setPeriod] = useState("60")
   const { toggleSidebar } = useSidebar()
+  const tooltipStyles = useChartTooltipStyles()
+  const { selectedTier, selectedTransaction } = useBusinessTransaction()
 
   useEffect(() => {
     const load = async () => {
         try {
-            const d = await fetchDashboardData(Number(period))
+            const d = await fetchDashboardData(Number(period), selectedTier, selectedTransaction)
             setData(d)
         } catch (e) {
             console.error(e)
@@ -24,14 +28,14 @@ export default function ResponseTime() {
     load()
     const interval = setInterval(load, 30000)
     return () => clearInterval(interval)
-  }, [period])
+  }, [period, selectedTier, selectedTransaction])
 
   if (!data) return <div className="p-8 text-muted-foreground">Loading dashboard...</div>
 
   // Prepare Chart Data
   const lineData = data.timeline.map(t => {
-      // t.time is already the timestamp in milliseconds
-      const date = new Date(t.time);
+      // t.timestamp is already the timestamp in milliseconds
+      const date = new Date(t.timestamp);
       return {
           time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           value: t.value
@@ -82,7 +86,7 @@ export default function ResponseTime() {
           </button>
           <div className="h-6 w-px bg-border"></div>
           <div>
-            <h1 className="text-lg font-semibold">Response Time Analysis</h1>
+            <h1 className="text-lg font-semibold">Business Transaction - Response</h1>
             <p className="text-xs text-muted-foreground">Trend for the last {getPeriodLabel(period)}</p>
           </div>
         </div>
@@ -153,8 +157,8 @@ export default function ResponseTime() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                             <XAxis dataKey="time" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                             <Tooltip 
-                                contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
-                                itemStyle={{ color: '#fff' }}
+                                contentStyle={tooltipStyles.contentStyle}
+                                itemStyle={tooltipStyles.itemStyle}
                             />
                             <Area type="monotone" dataKey="value" stroke="#0ea5e9" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
                         </AreaChart>
@@ -183,7 +187,7 @@ export default function ResponseTime() {
                                     <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                            <Tooltip contentStyle={tooltipStyles.contentStyle} />
                         </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -206,7 +210,7 @@ export default function ResponseTime() {
                             <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                             <XAxis dataKey="ms" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                             <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                            <Tooltip cursor={{fill: '#333'}} contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} />
+                            <Tooltip cursor={tooltipStyles.cursor} contentStyle={tooltipStyles.contentStyle} />
                             <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
