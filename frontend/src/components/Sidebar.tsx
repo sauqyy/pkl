@@ -1,4 +1,4 @@
-import { LineChart, Sun, Moon, Home, Layers, Clock, AlertTriangle, Server, Hourglass, ChevronsUpDown, ListChecks } from "lucide-react";
+import { LineChart, Sun, Moon, Home, Layers, Clock, AlertTriangle, Server, Hourglass, ChevronsUpDown, ListChecks, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
 import HandalinLogo from "@/assets/handalin.svg";
 import { Link, useLocation } from "react-router-dom";
@@ -130,6 +130,7 @@ export function Sidebar({ className, collapsed = false }: SidebarProps) {
           <div className="space-y-1">
             <SidebarItem icon={<Home className="h-4 w-4" />} label="Executive Dashboard" to="/" collapsed={collapsed} />
             <SidebarItem icon={<ListChecks className="h-4 w-4" />} label="BT Report" to="/business-transactions" collapsed={collapsed} />
+            <SidebarItem icon={<Database className="h-4 w-4" />} label="Database" to="/database-analysis" collapsed={collapsed} />
             <SidebarItem icon={<LineChart className="h-4 w-4" />} label="Forecasting" to="/forecasting" collapsed={collapsed} />
             <SidebarItem icon={<Layers className="h-4 w-4" />} label="Tier" to="/jvm-health" collapsed={collapsed} />
           </div>

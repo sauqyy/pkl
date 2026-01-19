@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import json
 import os
+import csv
 from collections import Counter
 import smtplib
 from email.mime.text import MIMEText
@@ -913,29 +914,163 @@ def get_business_transactions():
         scatter_data = df[['Name', 'Calls', 'Response Time (ms)', 'Health']].to_dict(orient='records')
 
         # 6. Table Data
-        table_data = df.fillna('').to_dict(orient='records')
-        
+        table_data = df[['Name', 'Health', 'Response Time (ms)', 'Calls', '% Errors']].head(50).to_dict(orient='records')
+
         return jsonify({
-            'health_counts': health_counts,
-            'top_slowest': {
-                'labels': top_slowest['Name'].tolist(),
-                'values': top_slowest['Response Time (ms)'].tolist() 
-            },
-            'top_volume': {
-                'labels': top_volume['Name'].tolist(),
-                'values': top_volume['Calls'].tolist()
-            },
-            'top_errors': {
-                'labels': top_errors['Name'].tolist(),
-                'values': top_errors['% Errors'].tolist()
-            },
+            'health_dist': health_counts,
+            'top_slowest': top_slowest.to_dict(orient='records'),
+            'top_volume': top_volume.to_dict(orient='records'),
+            'top_errors': top_errors.to_dict(orient='records'),
             'scatter': scatter_data,
             'table': table_data
         })
-        
+
     except Exception as e:
-        print(f"Business Transactions Error: {e}")
+        print(f"Error processing stats: {e}")
         return jsonify({'error': str(e)})
+
+@app.route('/database-analysis')
+def database_analysis_page():
+    return render_template('database_analysis.html')
+
+@app.route('/api/database-analysis')
+def get_database_analysis():
+    # 1. Fetch Data
+    duration = request.args.get('duration', default=60, type=int)
+    
+    # Metric Paths
+    metric_time_spent = "Databases|C2L_DMS|KPI|Time Spent in Executions (s)"
+    metric_load = "Databases|C2L_DMS|KPI|Calls per Minute"
+    metric_cpu = "Databases|C2L_DMS|Hardware Resources|CPU|%Busy"
+    
+    # Helper to fetch data
+    def fetch_metric(m_path):
+        encoded_metric = urllib.parse.quote(m_path)
+        target_app = "Database Monitoring"
+        url = (
+            f"{BASE_URL}/controller/rest/applications/{urllib.parse.quote(target_app)}/metric-data?"
+            f"metric-path={encoded_metric}&"
+            f"time-range-type=BEFORE_NOW&"
+            f"duration-in-mins={duration}&"
+            f"output=JSON&"
+            f"rollup=false"
+        )
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
+        try:
+            with urllib.request.urlopen(req) as response:
+                raw = json.loads(response.read().decode())
+                if raw and len(raw) > 0 and 'metricValues' in raw[0]:
+                    return raw[0]['metricValues']
+        except Exception as e:
+            print(f"Fetch Error ({m_path}): {e}")
+        return []
+
+    # helper to parse queries.csv
+    def get_top_queries():
+        queries_path = os.path.join(os.path.dirname(__file__), 'queries.csv')
+        top_queries = []
+        try:
+            if os.path.exists(queries_path):
+                with open(queries_path, 'r', encoding='utf-8', errors='replace') as f:
+                    # Skip first 6 lines of metadata
+                    for _ in range(6):
+                        next(f)
+                    
+                    reader = csv.DictReader(f)
+                    all_queries = []
+                    
+                    for row in reader:
+                        # Clean up keys (sometimes they have whitespace)
+                        clean_row = {k.strip(): v.strip() for k, v in row.items() if k}
+                        
+                        # Extract Time and Weight
+                        weight_str = clean_row.get('Weight (%)', '0').replace('%', '')
+                        weight = float(weight_str) if weight_str else 0.0
+                        
+                        all_queries.append({
+                            'id': clean_row.get('Query Id', 'N/A'),
+                            'query': clean_row.get('Query', 'N/A'),
+                            'elapsed_time': clean_row.get('Elapsed Time', 'N/A'),
+                            'executions': clean_row.get('Number of Executions', '0'),
+                            'avg_response': clean_row.get('Average Response Time', 'N/A'),
+                            'weight': weight
+                        })
+                    
+                    # Sort by Weight descending
+                    all_queries.sort(key=lambda x: x['weight'], reverse=True)
+                    top_queries = all_queries[:10]
+        except Exception as e:
+            print(f"Error parsing queries.csv: {e}")
+            
+        return top_queries
+
+    data_time = fetch_metric(metric_time_spent)
+    data_load = fetch_metric(metric_load)
+    data_cpu = fetch_metric(metric_cpu)
+    queries_data = get_top_queries() # Function name kept for simplicity, but returns all now
+
+    # 2. Process & Align Data
+    # Use a dictionary to align by timestamp: {timestamp: {'time': v1, 'load': v2, 'cpu': v3}}
+    aligned_data = {}
+    
+    for item in data_time:
+        ts = item.get('startTimeInMillis', 0)
+        val = item.get('value', 0)
+        if ts not in aligned_data: aligned_data[ts] = {'time': 0, 'load': 0, 'cpu': 0}
+        aligned_data[ts]['time'] = val
+        
+    for item in data_load:
+        ts = item.get('startTimeInMillis', 0)
+        val = item.get('value', 0)
+        if ts not in aligned_data: aligned_data[ts] = {'time': 0, 'load': 0, 'cpu': 0}
+        aligned_data[ts]['load'] = val
+
+    for item in data_cpu:
+        ts = item.get('startTimeInMillis', 0)
+        val = item.get('value', 0)
+        if ts not in aligned_data: aligned_data[ts] = {'time': 0, 'load': 0, 'cpu': 0}
+        aligned_data[ts]['cpu'] = val
+        
+    # Sort by timestamp
+    sorted_ts = sorted(aligned_data.keys())
+    
+    timestamps = []
+    values_time = []
+    values_load = []
+    values_cpu = []
+    
+    inefficiency_count = 0
+    total_points = len(sorted_ts)
+    
+    for ts in sorted_ts:
+        t_val = aligned_data[ts]['time']
+        l_val = aligned_data[ts]['load']
+        c_val = aligned_data[ts]['cpu']
+        
+        timestamps.append(ts)
+        values_time.append(t_val)
+        values_load.append(l_val)
+        values_cpu.append(c_val)
+        
+        # Analysis: Time Spent > Load
+        if t_val > l_val:
+            inefficiency_count += 1
+
+    if total_points == 0:
+        return jsonify({'error': 'No data received from AppDynamics'})
+
+    return jsonify({
+        'chart_data': { 
+            'timestamps': timestamps, 
+            'time_spent': values_time,
+            'load': values_load,
+            'cpu': values_cpu
+        },
+        'inefficiency_count': inefficiency_count,
+        'total_points': total_points,
+        'queries': queries_data
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
