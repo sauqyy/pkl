@@ -1,0 +1,918 @@
+queries 
+01/19/26 10:36:05 AM 
+ last 1 week 
+ 10080 
+Database: : C2L_DMS 
+Number of queries: 100 
+,Query Id,Query,Elapsed Time,Number of Sessions,Number of Executions,Average Response Time,Weight (%)
+313821,0300FF7F2B9048D986C0840142B1000001000000000000000000000000000000000000000000000000000000,sp_cdc_scan,167h 28m 30s,1,313821,0h 0m 1.92s,58
+16,030006003039215CF0DAEB0015B1000001000000000000000000000000000000000000000000000000000000,USP_GENERATE_DMS_POLPREMTRANS,20h 53m 27s,7,16,1h 18m 20.44s,7
+64441,020000001FB35C36791169DD60088183DB0FC35A2576676B0000000000000000000000000000000000000000,"(@P0 bigint)select listagentt0_.AGENTSEQ as AGENTSEQ1_, listagentt0_.AGENTTRAININGCOMPILATIONSEQ as AGENTTRA1_1_, listagentt0_.AGENTTRAININGCOMPILATIONSEQ as AGENTTRA1_18_0_, listagentt0_.versionid as versionid18_0_, listagentt0_.guid as guid18_0_, listagentt0_.TRAININGSTARTDT as TRAINING4_18_0_, listagentt0_.TRAININGENDDT as TRAINING5_18_0_, listagentt0_.TRAININGCERTNUM as TRAINING6_18_0_, listagentt0_.TRAININGMODE as TRAINING7_18_0_, listagentt0_.ATILOCATION as ATILOCAT8_18_0_, listagentt0_.TRAININGINSTITUTE as TRAINING9_18_0_, listagentt0_.ACCREDITATIONNUMBER as ACCREDI10_18_0_, listagentt0_.EXAMBODY as EXAMBODY18_0_, listagentt0_.EXAMCENTER as EXAMCENTER18_0_, listagentt0_.EXAMLANGUAGE as EXAMLAN13_18_0_, listagentt0_.TRAININGTYPE as TRAININ14_18_0_, listagentt0_.TRAININGCODE as TRAININ15_18_0_, listagentt0_.TRAININGSTATUS as TRAININ16_18_0_, listagentt0_.TRAININGCANDIDATENUMBER as TRAININ17_18_0_, listagentt0_.TRAININGHOURSCOMPLETED as TRAININ18_18_0_, listagentt0_.ROOMNO as ROOMNO18_0_, listagentt0_.BATCHNO as BATCHNO18_0_, listagentt0_.INSURERREMARK as INSURER21_18_0_, listagentt0_.AGENTSEQ as AGENTSEQ18_0_ from AGENTTRAININGCOMPILATION_V listagentt0_ where listagentt0_.AGENTSEQ= @P0 ",17h 11m 16s,60,64441,0h 0m 0.96s,6
+162,02000000301B980502613A196B60BE99BED8AF92A173A0590000000000000000000000000000000000000000,"select ? RECORDTYPE, hm.BASEAGENTID, count(hm.HIERARCHYSEQ)
+from HIERARCHY_M hm
+where hm.EFFECTIVETODT is null
+group by hm.BASEAGENTID
+having count(hm.HIERARCHYSEQ) &gt;?
+union
+select ? RECORDTYPE, history.AGENTID, count(history.AGENTHISTORYSEQ)
+from AGENTHISTORY history
+where history.EFFECTIVETODT is null
+group by history.AGENTID
+having count(history.AGENTHISTORYSEQ) &gt;?
+union
+select ?, AGENTCD, count(*)
+FROM POLICYHIERARCHY
+where EFFECTIVETODT is null
+group by HIERARCHYTYPECD, HIERARCHYSUBTYPECD, HIERARCHYSUBSUBTYPECD, PREMIUMSUBTYPECD, AGENTCD, SUBTRANCHENO
+having count(POLICYPRODUCTHIERARCHYSEQ) &gt;?",11h 3m 5s,33,162,0h 4m 5.59s,4
+307,020000006B0CDB04D632AEAD61D8B7DA5D24E932DF4140F10000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT SERVICEQUESTRESPSEQ,QUESTIONSETCD,QUESTIONDATAELEMENTCD,DOCUMENTCD,QUESTIONNAIRETYPECD,ENTITYGUID,PARTYGUID,ROWGUID,RESPONSEVALUE,SCORE,WEIGHT,VERSIONID,GUID,SYSTEMCREATEDDT,SYSTEMUPDATEDDT
+FROM SERVICEQUESTIONRESPONSE WITH(NOLOCK)
+WHERE systemupdateddt BETWEEN @P1 AND @P2",7h 46m 40s,30,307,0h 1m 31.21s,3
+310,0200000048AD1A348FBFB16D093BBF3A11557E08AC68992D0000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT *fROM COMPENSATIONPAYABLE NOLOCK
+where systemupdateddt between @P1 and @P2",3h 50m 53s,31,310,0h 0m 44.69s,1
+0,02000000AAE893077B7E41CE0DBDD626B3E90725E1CCF6520000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?),@_msparam_1 nvarchar(?))SELECT
+clmns.column_id AS [ID],
+clmns.name AS [Name],
+ISNULL(dc.Name, N?) AS [DefaultConstraintName],
+clmns.is_nullable AS [Nullable],
+CAST(ISNULL(cik.index_column_id, ?) AS bit) AS [InPrimaryKey],
+clmns.is_identity AS [Identity],
+clmns.is_computed AS [Computed]
+FROM
+sys.tables AS tbl
+INNER JOIN sys.all_columns AS clmns ON clmns.object_id=tbl.object_id
+LEFT OUTER JOIN sys.default_constraints as dc ON clmns.default_object_id = dc.object_id
+LEFT OUTER JOIN sys.indexes AS ik ON ik.object_id = clmns.object_id and ?=ik.is_primary_key
+LEFT OUTER JOIN sys.index_columns AS cik ON cik.index_id = ik.index_id and cik.column_id = clmns.column_id and cik.object_id = clmns.object_id and ? = cik.is_included_column
+WHERE
+(tbl.name=@_msparam_0 and SCHEMA_NAME(tbl.schema_id)=@_msparam_1)
+ORDER BY
+[ID] ASC",3h 20m 41s,9,0,'-,1
+312,0200000075FAD323275768882E9FFDB681E03F2CF2C68BC70000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from KPIRESULT nolock
+where systemupdateddt between @P1 and @P2",3h 18m 0s,30,312,0h 0m 38.08s,1
+306,020000002D1348115D46343A9E9411CDE565F9EEDD9832D60000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT
+PREMIUMSEQ,
+POLICYSEQ,
+POLICYPRODUCTSEQ,
+POLICYNUM,
+SOURCE,
+SUBTRANCHENO,
+PRODUCTCD,
+PRODUCTVER,
+PRODUCTTYPECD,
+PRODUCTSEQ,
+ORIGINALPREMIUMGUID,
+PREMIUMDUEDT,
+POLICYYEARINFORCE,
+POLICYMONTHINFORCEFROM,
+POLICYMONTHINFORCETO,
+DUETYPECD,
+DUEAMT,
+EXTRAPREMIUMAMT,
+APPROPRIATIONTYPECD,
+APPROPRIATIONDT,
+APPROPRIATIONAMT,
+PREMIUMSOURCE,
+MOVEMENTSEQ,
+PRODUCTIONEFFECTIVEDT,
+REVERSALFL,
+TRANSACTIONCD,
+INTERFACEPROCESSFL,
+VERSIONID,
+GUID,
+POLICYGUID,
+REFERENCEGUID,
+POLICYPRODUCTGUID,
+PREMIUMSUBTYPECD,
+COR,
+FCPREMAMT,
+EXCHANGERATE,
+SYSTEMCREATEDDT,
+SYSTEMUPDATEDDT
+FROM PREMIUM WITH(NOLOCK)
+where systemupdateddt between @P1 and @P2",3h 5m 20s,31,306,0h 0m 36.34s,1
+0,02000000A7F9F505927EFB432387DDCFD4C5B198DB2D19CE0000000000000000000000000000000000000000,"SELECT
+tr.name AS [Name],
+tr.object_id AS [ID]
+FROM
+sys.triggers AS tr
+WHERE
+(tr.parent_class = ?)
+ORDER BY
+[Name] ASC",2h 30m 52s,6,0,'-,1
+312,020000009C15BB2AEF29F9FDE4969FCAD7C383E84766FB7E0000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from BENEFIT nolock
+where systemupdateddt between @P1 and @P2",2h 30m 33s,35,312,0h 0m 28.95s,1
+182,0200000081EBF107AD207782D4FD555D8E7AB2A2937EF5AE0000000000000000000000000000000000000000,"(@P0 int,@P1 int)select top ? compensati0_.COMPENSATIONPAYABLESEQ as COMPENSA1_136_, compensati0_.versionid as versionid136_, compensati0_.guid as guid136_, compensati0_.REFGUID as REFGUID136_, compensati0_.SOURCEAGENTID as SOURCEAG5_136_, compensati0_.PAYTOAGENTID as PAYTOAGE6_136_, compensati0_.PAYABLEDT as PAYABLEDT136_, compensati0_.DEFINITIONTYPECD as DEFINITI8_136_, compensati0_.DEFINITIONSUBTYPECD as DEFINITI9_136_, compensati0_.DEFINITIONSUBSUBTYPECD as DEFINIT10_136_, compensati0_.PAYHEADCD as PAYHEADCD136_, compensati0_.DEFINITIONCD as DEFINIT12_136_, compensati0_.GROSSPAYABLEVALUE as GROSSPA13_136_, compensati0_.ACTIONFIELDTYPECD as ACTIONF14_136_, compensati0_.RANKSORTORDER as RANKSOR15_136_, compensati0_.PAIDVALUE as PAIDVALUE136_, compensati0_.PAYMENTFL as PAYMENTFL136_, compensati0_.TRANSACTIONHOLDAMT as TRANSAC18_136_, compensati0_.LUMPSUMHOLDAMT as LUMPSUM19_136_, compensati0_.PENDINGINVOICEAMT as PENDING20_136_, compensati0_.APPROVEDINVOICEAMT as APPROVE21_136_, compensati0_.PAYMENTMODE as PAYMENT22_136_, compensati0_.PAYEENAME as PAYEENAME136_, compensati0_.BANKCD as BANKCD136_, compensati0_.BANKBRANCH as BANKBRANCH136_, compensati0_.BANKACCOUNTNUMBER as BANKACC26_136_, compensati0_.IFSCCD as IFSCCD136_, compensati0_.CARDTYPE as CARDTYPE136_, compensati0_.CARDHOLDERNAME as CARDHOL29_136_, compensati0_.CARDNUMBER as CARDNUMBER136_, compensati0_.EXPIRYMONTH as EXPIRYM31_136_, compensati0_.EXPIRYYEAR as EXPIRYYEAR136_, compensati0_.CASHBANKCD as CASHBANKCD136_, compensati0_.TAXCALCULATIONFL as TAXCALC34_136_, compensati0_.INVOICEREQUIREDFL as INVOICE35_136_, compensati0_.TAXPERIOD as TAXPERIOD136_, compensati0_.IMMEDIATEPAYMENTFL as IMMEDIA37_136_, compensati0_.GLPOSTINGFL as GLPOSTI38_136_, compensati0_.PREMIUMTYPECD as PREMIUM39_136_, compensati0_.PREMIUMSUBTYPECD as PREMIUM40_136_, compensati0_.POLICYYEAR as POLICYYEAR136_, compensati0_.PRODUCTCLASS1 as PRODUCT42_136_, compensati0_.PRODUCTCLASS2 as PRODUCT43_136_, compensati0_.PRODUCTCLASS3 as PRODUCT44_136_, compensati0_.CHARGECD as CHARGECD136_, compensati0_.MINPAYMENTAMT as MINPAYM46_136_, compensati0_.POLICYNUM as POLICYNUM136_, compensati0_.PRODUCTCD as PRODUCTCD136_, compensati0_.PRODUCTVER as PRODUCTVER136_, compensati0_.ENHANCETYPE as ENHANCE50_136_, compensati0_.SOURCE as SOURCE136_, compensati0_.TDSAPPLICABLEFL as TDSAPPL52_136_, compensati0_.SERVICETAXAPPLICABLEFL as SERVICE53_136_, compensati0_.ORIGINALPAYABLEGUID as ORIGINA54_136_, compensati0_.CHARGEGLCD as CHARGEGLCD136_, compensati0_.LOTNO as LOTNO136_, compensati0_.CREATEDDT as CREATEDDT136_, compensati0_.CREATEDBY as CREATEDBY136_, compensati0_.UPDATEDDT as UPDATEDDT136_, compensati0_.UPDATEDBY as UPDATEDBY136_, compensati0_.SYSTEMCREATEDDT as SYSTEMC61_136_, compensati0_.SYSTEMUPDATEDDT as SYSTEMU62_136_, compensati0_.VAT as VAT136_, compensati0_.WHT as WHT136_, compensati0_.NETPREMIUMFL as NETPREM65_136_, compensati0_.VATAPPLICABLEFL as VATAPPL66_136_ from COMPENSATIONPAYABLE compensati0_, BUSINESSDATE businessda1_, AGENT agentdo2_, AGENTDETAIL agentdetai3_ where (compensati0_.TAXCALCULATIONFL=? )and((compensati0_.TDSAPPLICABLEFL=? )or(compensati0_.SERVICETAXAPPLICABLEFL=? )or(compensati0_.VATAPPLICABLEFL=? ))and(compensati0_.PAYABLEDT&lt;=businessda1_.BATCHDATE )and(agentdo2_.AGENTID=compensati0_.PAYTOAGENTID )and(agentdo2_.AGENTSEQ=agentdetai3_.AGENTSEQ )and((agentdo2_.INTERMEDCATCD!=? )or(agentdetai3_.CHANNELCD=? ))and(agentdo2_.AGENTSEQ % @P0 = @P1 ) order by compensati0_.ORIGINALPAYABLEGUID",2h 26m 24s,43,182,0h 0m 48.26s,1
+41,0200000054E9D40B594C465E79A386B71E6EB9AD99FACDB40000000000000000000000000000000000000000,"SELECT
+SCHEMA_NAME(tbl.schema_id) AS [Schema],
+tbl.name AS [Name],
+tbl.object_id AS [ID]
+FROM
+sys.tables AS tbl
+ORDER BY
+[Schema] ASC,[Name] ASC",2h 7m 45s,13,41,0h 3m 6.95s,1
+17,02000000FD26D322769CEE691C933F258772430BD1146CFF0000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?))SELECT
+SCHEMA_NAME(v.schema_id) AS [Schema],
+v.name AS [Name],
+v.object_id AS [ID]
+FROM
+sys.all_views AS v
+WHERE
+(v.type = @_msparam_0)
+ORDER BY
+[Schema] ASC,[Name] ASC",1h 56m 3s,7,17,0h 6m 49.59s,1
+0,01000100E9E5F417903FEFBEF501000000000000000000000000000000000000000000000000000000000000,"(@database_name nvarchar(?),@vdi_device_name nvarchar(?))BACKUP DATABASE @database_name TO VIRTUAL_DEVICE = @vdi_device_name WITH STATS = ?;",1h 48m 42s,1,0,'-,1
+309,020000007B08D330F2B85A206464522A7B60EEA4B641EF2C0000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?),@_msparam_1 nvarchar(?))SELECT
+clmns.column_id AS [ID],
+clmns.name AS [Name],
+ISNULL(dc.Name, N?) AS [DefaultConstraintName],
+clmns.is_nullable AS [Nullable],
+CAST(ISNULL(cik.index_column_id, ?) AS bit) AS [InPrimaryKey],
+clmns.is_identity AS [Identity],
+usrt.name AS [DataType],
+ISNULL(baset.name, N?) AS [SystemType],
+CAST(CASE WHEN baset.name IN (N?, N?) AND clmns.max_length &lt;&gt; -? THEN clmns.max_length/? ELSE clmns.max_length END AS int) AS [Length],
+CAST(clmns.precision AS int) AS [NumericPrecision],
+CAST(clmns.scale AS int) AS [NumericScale],
+ISNULL(xscclmns.name, N?) AS [XmlSchemaNamespace],
+ISNULL(s2clmns.name, N?) AS [XmlSchemaNamespaceSchema],
+ISNULL( (case clmns.is_xml_document when ? then ? else ? end), ?) AS [XmlDocumentConstraint],
+s1clmns.name AS [DataTypeSchema],
+clmns.is_computed AS [Computed]
+FROM
+sys.tables AS tbl
+INNER JOIN sys.all_columns AS clmns ON clmns.object_id=tbl.object_id
+LEFT OUTER JOIN sys.default_constraints as dc ON clmns.default_object_id = dc.object_id
+LEFT OUTER JOIN sys.indexes AS ik ON ik.object_id = clmns.object_id and ?=ik.is_primary_key
+LEFT OUTER JOIN sys.index_columns AS cik ON cik.index_id = ik.index_id and cik.column_id = clmns.column_id and cik.object_id = clmns.object_id and ? = cik.is_included_column
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = clmns.user_type_id
+LEFT OUTER JOIN sys.types AS baset ON (baset.user_type_id = clmns.system_type_id and baset.user_type_id = baset.system_type_id) or ((baset.system_type_id = clmns.system_type_id) and (baset.user_type_id = clmns.user_type_id) and (baset.is_user_defined = ?) and (baset.is_assembly_type = ?))
+LEFT OUTER JOIN sys.xml_schema_collections AS xscclmns ON xscclmns.xml_collection_id = clmns.xml_collection_id
+LEFT OUTER JOIN sys.schemas AS s2clmns ON s2clmns.schema_id = xscclmns.schema_id
+LEFT OUTER JOIN sys.schemas AS s1clmns ON s1clmns.schema_id = usrt.schema_id
+WHERE
+(tbl.name=@_msparam_0 and SCHEMA_NAME(tbl.schema_id)=@_msparam_1)
+ORDER BY
+[ID] ASC",1h 34m 10s,30,309,0h 0m 18.28s,1
+42,020000006E6476027AFDF957261E8B44F9657C88EECA91100000000000000000000000000000000000000000,"SELECT
+tr.name AS [Name],
+tr.object_id AS [ID],
+CAST(
+tr.is_ms_shipped
+AS bit) AS [IsSystemObject],
+CASE WHEN tr.type = N? THEN ? WHEN tr.type = N? THEN ? ELSE ? END AS [ImplementationType],
+CAST(CASE WHEN ISNULL(smtr.definition, ssmtr.definition) IS NULL THEN ? ELSE ? END AS bit) AS [IsEncrypted]
+FROM
+sys.triggers AS tr
+LEFT OUTER JOIN sys.sql_modules AS smtr ON smtr.object_id = tr.object_id
+LEFT OUTER JOIN sys.system_sql_modules AS ssmtr ON ssmtr.object_id = tr.object_id
+WHERE
+(tr.parent_class = ?)
+ORDER BY
+[Name] ASC",1h 28m 29s,9,42,0h 2m 6.40s,1
+91,030006000ED90E333B8220012BB3000001000000000000000000000000000000000000000000000000000000,loadDataFromGroupKPIDTDOView,1h 26m 47s,21,91,0h 0m 57.22s,1
+2,0200000000B5C72579401B8AAC72F364767672151201319D0000000000000000000000000000000000000000,select * from [dbo].[POLICYHIERARCHY],1h 26m 24s,2,2,0h 43m 12.00s,1
+0,020000006713560660FF3D1C060D3E20FD12F328D990DCE90000000000000000000000000000000000000000,"SELECT
+SCHEMA_NAME(obj.schema_id) AS [Schema],
+obj.name AS [Name],
+obj.object_id AS [ID]
+FROM
+sys.objects AS obj
+WHERE
+(obj.type=N?)
+ORDER BY
+[Schema] ASC,[Name] ASC",1h 20m 1s,3,0,'-,0
+78,02000000AC7FBD033130EA096EA1E99B5791A03777AA26800000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT *fROM COMPENSATIONPAYABLE NOLOCK
+WHERE [SYSTEMUPDATEDDT] between @P1 and @P2",1h 18m 5s,14,78,0h 1m 0.06s,0
+10943,0200000020A7A60C80B2B5DEC5F7FCC91C5CC2ABA84E07A70000000000000000000000000000000000000000,"(@P0 nvarchar(?))select this_.SERVICEQUESTRESPSEQ as SERVICEQ1_408_0_, this_.versionid as versionid408_0_, this_.guid as guid408_0_, this_.QUESTIONSETCD as QUESTION4_408_0_, this_.QUESTIONDATAELEMENTCD as QUESTION5_408_0_, this_.DOCUMENTCD as DOCUMENTCD408_0_, this_.QUESTIONNAIRETYPECD as QUESTION7_408_0_, this_.ENTITYGUID as ENTITYGUID408_0_, this_.PARTYGUID as PARTYGUID408_0_, this_.ROWGUID as ROWGUID408_0_, this_.RESPONSEVALUE as RESPONS11_408_0_, this_.SCORE as SCORE408_0_, this_.WEIGHT as WEIGHT408_0_, this_.SYSTEMCREATEDDT as SYSTEMC14_408_0_, this_.SYSTEMUPDATEDDT as SYSTEMU15_408_0_ from SERVICEQUESTIONRESPONSE this_ where (this_.ENTITYGUID= @P0 )",1h 14m 4s,18,10943,0h 0m 0.41s,0
+409,02000000A6D9B403451DDA0BFAE79A5820BF5E2C26DF55040000000000000000000000000000000000000000,"with [CTE](Name, Designation, AgentID, parentid,GroupCode, GroupCodeBanca, sortcode, ind, AGENTSTATUSCD, LevelNum, PARENTAGENCYID) as (
+select Name, Designate, agentID, parentid
+, CAST( case when LevelNum = ? then agentid else ? end AS VARCHAR (?)) as GroupCode
+, CAST( case when LevelNum = ? then agentid else ? end AS VARCHAR (?)) as GroupCodeBanca
+, CAST( isnull(parentid,?) + ? + agentid AS VARCHAR (?)) as sortcode
+, CAST(? AS VARCHAR (?)) as ind
+, AGENTSTATUSCD, LevelNum, PARENTAGENCYID
+from (
+SELECT d.DESIGNATIONLEVEL AS LevelNum, dbo.AGENT.AGENTNAME AS Name, dbo.AGENT.AGENTID, dbo.AGENTDETAIL.DESIGNATIONCD AS Designate,
+dbo.AGENTDETAIL.PARENTAGENTID AS ParentID, dbo.AGENTDETAIL.AGENTSTATUSCD, dbo.AGENTDETAIL.PARENTAGENCYID
+FROM dbo.AGENT WITH(NOLOCK) INNER JOIN
+dbo.AGENTDETAIL WITH(NOLOCK) ON dbo.AGENT.AGENTSEQ = dbo.AGENTDETAIL.AGENTSEQ INNER JOIN
+dbo.DESIGNATION_M AS d WITH(NOLOCK) ON d.DESIGNATIONCD = dbo.AGENTDETAIL.DESIGNATIONCD
+WHERE agentid is not null
+) c
+--where (c.AgentID = @searchID OR @searchID IS NULL)
+ where (c.AgentID IS NULL OR
+(c.PARENTID is null))
+union all
+select c.Name, c.Designate, c.AgentID, c.parentid
+, CAST(case when c.LevelNum=? then (case when p.GroupCode is null or p.GroupCode= ? then c.agentid else p.GroupCode end) else p.GroupCode end AS VARCHAR (?)) as GroupCode
+, CAST(case when c.LevelNum=? then (case when p.GroupCodeBanca is null or p.GroupCodeBanca= ? then c.agentid else p.GroupCodeBanca end) else p.GroupCodeBanca end AS VARCHAR (?)) as GroupCodeBanca
+, CAST( p.sortcode + ? + c.agentid AS VARCHAR (?)) as sortcode
+, CAST(?+ p.ind AS VARCHAR (?)) as ind
+, c.AGENTSTATUSCD, c.LevelNum, c.PARENTAGENCYID
+from (
+SELECT d.DESIGNATIONLEVEL AS LevelNum, dbo.AGENT.AGENTNAME AS Name, dbo.AGENT.AGENTID, dbo.AGENTDETAIL.DESIGNATIONCD AS Designate,
+dbo.AGENTDETAIL.PARENTAGENTID AS ParentID, dbo.AGENTDETAIL.AGENTSTATUSCD, dbo.AGENTDETAIL.PARENTAGENCYID
+FROM dbo.AGENT WITH(NOLOCK) INNER JOIN
+dbo.AGENTDETAIL WITH(NOLOCK) ON dbo.AGENT.AGENTSEQ = dbo.AGENTDETAIL.AGENTSEQ INNER JOIN
+dbo.DESIGNATION_M AS d WITH(NOLOCK) ON d.DESIGNATIONCD = dbo.AGENTDETAIL.DESIGNATIONCD
+WHERE agentid is not null
+) c
+inner JOIN [CTE] p ON c.parentid = p.AgentID
+)
+select cp.AgentID, cp.parentid, cp.sortcode,cp.GroupCode, Designation, cp.ind, AGENTSTATUSCD,
+DisplayName, PARENTAGENCYID, cp.GroupCodeBanca from (
+select sort = ROW_NUMBER() over(partition by cp.AgentID order by cp.AgentID,AGENTSTATUSCD) ,cp.AgentID, cp.parentid, cp.sortcode,cp.GroupCode, Designation, cp.ind, AGENTSTATUSCD,
+CAST( cp.Name AS VARCHAR (?)) as DisplayName, PARENTAGENCYID, cp.GroupCodeBanca from [CTE] cp
+)cp
+where ?=?
+and sort = ?
+--and cp.AgentID=&#x27;20000513&#x27;",1h 4m 20s,30,409,0h 0m 9.44s,0
+309,02000000202A0E1A061F0B5D3F5CD2E66357307608834B6D0000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from POLICYPRODUCT_D nolock
+where systemupdateddt between @P1 and @P2",0h 53m 1s,28,309,0h 0m 10.29s,0
+0,020000000DC7210FB9CA3CE6CBC387F661CA15738107239D0000000000000000000000000000000000000000,"SELECT &quot;Tbl1004&quot;.&quot;CHANNELCD&quot; &quot;Col1007&quot;,&quot;Tbl1004&quot;.&quot;POLICYNUM&quot; &quot;Col1008&quot;,&quot;Tbl1004&quot;.&quot;LOGINDT&quot; &quot;Col1009&quot;,&quot;Tbl1004&quot;.&quot;POLICYISSUEDT&quot; &quot;Col1010&quot;,&quot;Tbl1004&quot;.&quot;APPROPRIATIONDT&quot; &quot;Col1011&quot;,&quot;Tbl1004&quot;.&quot;SERVICINGAGENTCD&quot; &quot;Col1012&quot;,&quot;Tbl1004&quot;.&quot;AGENTNAME&quot; &quot;Col1013&quot;,&quot;Tbl1004&quot;.&quot;RECRUITEDBYAGENTID&quot; &quot;Col1014&quot;,&quot;Tbl1004&quot;.&quot;PARENTAGENTID&quot; &quot;Col1015&quot;,&quot;Tbl1004&quot;.&quot;DESIGNATIONCD&quot; &quot;Col1016&quot;,&quot;Tbl1004&quot;.&quot;FWO&quot; &quot;Col1017&quot;,&quot;Tbl1004&quot;.&quot;FWM&quot; &quot;Col1018&quot;,&quot;Tbl1004&quot;.&quot;FWD&quot; &quot;Col1019&quot;,&quot;Tbl1004&quot;.&quot;RM&quot; &quot;Col1020&quot;,&quot;Tbl1004&quot;.&quot;SD&quot; &quot;Col1021&quot;,&quot;Tbl1004&quot;.&quot;G1&quot; &quot;Col1022&quot;,&quot;Tbl1004&quot;.&quot;G2&quot; &quot;Col1023&quot;,&quot;Tbl1004&quot;.&quot;G3&quot; &quot;Col1024&quot;,&quot;Tbl1004&quot;.&quot;BRANCHID&quot; &quot;Col1025&quot;,&quot;Tbl1004&quot;.&quot;LIFEASSURED&quot; &quot;Col1026&quot;,&quot;Tbl1004&quot;.&quot;POLICYHOLDER&quot; &quot;Col1027&quot;,&quot;Tbl1004&quot;.&quot;PRODUCTCD&quot; &quot;Col1028&quot;,&quot;Tbl1004&quot;.&quot;PREMIUMTYPECD&quot; &quot;Col1029&quot;,&quot;Tbl1004&quot;.&quot;PREMIUMSUBTYPECD&quot; &quot;Col1030&quot;,&quot;Tbl1004&quot;.&quot;APPROPRIATIONAMT&quot; &quot;Col1031&quot;,&quot;Tbl1004&quot;.&quot;ANP&quot; &quot;Col1032&quot;,&quot;Tbl1004&quot;.&quot;NOP&quot; &quot;Col1033&quot;,&quot;Tbl1004&quot;.&quot;POLICYSTATUSCD&quot; &quot;Col1034&quot;,&quot;Tbl1004&quot;.&quot;PREMIUMSTATUSCODE&quot; &quot;Col1035&quot;,&quot;Tbl1004&quot;.&quot;SELFCONTRACTINDICATORFL&quot; &quot;Col1036&quot;,&quot;Tbl1004&quot;.&quot;PAYMENTFREQUENCYCD&quot; &quot;Col1005&quot; FROM &quot;C2L_DMS&quot;.&quot;DBO&quot;.&quot;TN_POLICYPREMTRANS_V&quot; &quot;Tbl1004&quot; WITH (NOLOCK)",0h 46m 38s,6,0,'-,0
+0,02000000C62E32062F6CF16215FD32CDE93114C93DE4CB900000000000000000000000000000000000000000,"SELECT
+SCHEMA_NAME(udf.schema_id) AS [Schema],
+udf.name AS [Name],
+udf.object_id AS [ID]
+FROM
+sys.all_objects AS udf
+WHERE
+(udf.type in (?, ?, ?, ?, ?))
+ORDER BY
+[Schema] ASC,[Name] ASC",0h 43m 20s,2,0,'-,0
+2,02000000128243339C5A476E4E6B577AC79226F0F13638720000000000000000000000000000000000000000,select * from [dbo].[KPIResult],0h 39m 45s,2,2,0h 19m 52.50s,0
+76,020000001A7D0C2EF0BE1FA9E4BA0CBF9DFD735B7133D9190000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT PREMIUMSEQ,POLICYSEQ,POLICYPRODUCTSEQ,
+POLICYNUM,SOURCE,SUBTRANCHENO,PRODUCTCD,
+PRODUCTVER,PRODUCTTYPECD,PRODUCTSEQ,ORIGINALPREMIUMGUID,PREMIUMDUEDT,POLICYYEARINFORCE,
+POLICYMONTHINFORCEFROM,POLICYMONTHINFORCETO,
+DUETYPECD,DUEAMT,EXTRAPREMIUMAMT,APPROPRIATIONTYPECD,APPROPRIATIONDT,APPROPRIATIONAMT,PREMIUMSOURCE,
+MOVEMENTSEQ,PRODUCTIONEFFECTIVEDT,REVERSALFL,TRANSACTIONCD,INTERFACEPROCESSFL,VERSIONID,GUID,
+POLICYGUID,REFERENCEGUID,POLICYPRODUCTGUID,
+PREMIUMSUBTYPECD,COR,FCPREMAMT,EXCHANGERATE,
+SYSTEMCREATEDDT,SYSTEMUPDATEDDT,additionalField1,
+additionalField2,additionalField3,additionalField4,additionalField5,
+additionalField6,additionalField7,TOTALCOMMISSION,COMMISSIONRATE1,REFRATE1,REFRATE2,TOTALCOMMISSIONRECEIVEDDT,
+VAT,WHT,BILLTYPE,EDUCATIONBENEFITTERM fROM PREMIUM NOLOCK
+WHERE [SYSTEMUPDATEDDT] between @P1 and @P2",0h 38m 15s,14,76,0h 0m 30.20s,0
+596888,0200000093C8BF2E95867DBA6D8AB6B72CA91DE9E16FB0D60000000000000000000000000000000000000000,"select *, HASHBYTES(?, CONCAT(sql_text, sql_handle)) as sql_id, HASHBYTES(?, CONCAT(sql_text, sql_handle, plan_handle)) as handle_id, HASHBYTES(?, CONCAT(plan_handle, query_plan_hash)) as plan_id from (select s.session_id, db_name(s.database_id) as db, s.program_name, s.login_name, s.host_name, r.sql_handle, r.query_hash, substring(t.text, (r.statement_start_offset/?)+?, ((CASE r.statement_end_offset WHEN -? THEN DATALENGTH(t.TEXT) ELSE r.statement_end_offset END - r.statement_start_offset)/?)+?) sql_text, r.wait_type, r.plan_handle, r.query_plan_hash from sys.dm_exec_sessions s, sys.dm_exec_requests r outer apply sys.dm_exec_sql_text(r.sql_handle) t where s.session_id = r.session_id and s.session_id != @@SPID) f",0h 37m 17s,1,596888,0h 0m 0.00s,0
+20,020000002B3AF82446A9DD2D9A091D2494B9466E3FF12FD60000000000000000000000000000000000000000,"(@P1 bigint)SELECT *fROM KPIRESULT NOLOCK
+WHERE CONVERT(BIGINT, convert(varchar, [SYSTEMUPDATEDDT],?) ) &gt;= @P1",0h 36m 58s,6,20,0h 1m 50.90s,0
+17,03000600A6451172BEBCC90014B3000001000000000000000000000000000000000000000000000000000000,CommissionRuleMapping,0h 35m 24s,5,17,0h 2m 4.94s,0
+312,02000000B9262117AE84E2FA12F4A72B2106EB899D0DD1DA0000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from PAYOUT nolock
+where systemupdateddt between @P1 and @P2",0h 34m 52s,29,312,0h 0m 6.71s,0
+330,020000002799E21CBF6E02897434BACCD8F9CB636E0503B90000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from POLICYCOMMISSION nolock
+where systemupdateddt between @P1 and @P2",0h 33m 36s,30,330,0h 0m 6.11s,0
+13,020000004DA69916D4ED161A54CA3466E4B64C8B36A12F3E0000000000000000000000000000000000000000,"SELECT
+SCHEMA_NAME(obj.schema_id) AS [Schema],
+obj.name AS [Name],
+obj.object_id AS [ID],
+usrt.name AS [DataType],
+ISNULL(baset.name, N?) AS [SystemType],
+CAST(CASE WHEN baset.name IN (N?, N?) AND ret_param.max_length &lt;&gt; -? THEN ret_param.max_length/? ELSE ret_param.max_length END AS int) AS [Length],
+CAST(ret_param.precision AS int) AS [NumericPrecision],
+CAST(ret_param.scale AS int) AS [NumericScale],
+ISNULL(xscret_param.name, N?) AS [XmlSchemaNamespace],
+ISNULL(s2ret_param.name, N?) AS [XmlSchemaNamespaceSchema],
+ISNULL( (case ret_param.is_xml_document when ? then ? else ? end), ?) AS [XmlDocumentConstraint],
+s1ret_param.name AS [DataTypeSchema]
+FROM
+sys.objects AS obj
+LEFT OUTER JOIN sys.all_parameters AS ret_param ON ret_param.object_id = obj.object_id and ret_param.is_output = ?
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = ret_param.user_type_id
+LEFT OUTER JOIN sys.types AS baset ON (baset.user_type_id = ret_param.system_type_id and baset.user_type_id = baset.system_type_id) or ((baset.system_type_id = ret_param.system_type_id) and (baset.user_type_id = ret_param.user_type_id) and (baset.is_user_defined = ?) and (baset.is_assembly_type = ?))
+LEFT OUTER JOIN sys.xml_schema_collections AS xscret_param ON xscret_param.xml_collection_id = ret_param.xml_collection_id
+LEFT OUTER JOIN sys.schemas AS s2ret_param ON s2ret_param.schema_id = xscret_param.schema_id
+LEFT OUTER JOIN sys.schemas AS s1ret_param ON s1ret_param.schema_id = usrt.schema_id
+WHERE
+(obj.type=N?)
+ORDER BY
+[Schema] ASC,[Name] ASC",0h 33m 25s,5,13,0h 2m 34.23s,0
+223,02000000857BA41AC55341F71815D44DBEBA97C64B3F213C0000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 bigint,@P2 bigint,@P3 bigint,@P4 bigint,@P5 bigint,@P6 bigint,@P7 bigint,@P8 bigint,@P9 bigint,@P10 bigint,@P11 bigint,@P12 bigint,@P13 bigint,@P14 bigint,@P15 bigint,@P16 bigint,@P17 bigint,@P18 bigint,@P19 bigint,@P20 bigint,@P21 bigint,@P22 bigint,@P23 bigint,@P24 bigint,@P25 bigint,@P26 bigint,@P27 bigint,@P28 bigint,@P29 bigint,@P30 bigint,@P31 bigint,@P32 bigint,@P33 bigint,@P34 bigint,@P35 bigint,@P36 bigint,@P37 bigint,@P38 bigint,@P39 bigint,@P40 bigint,@P41 bigint,@P42 bigint,@P43 bigint,@P44 bigint,@P45 bigint,@P46 bigint,@P47 bigint,@P48 bigint,@P49 bigint,@P50 bigint,@P51 bigint,@P52 bigint,@P53 bigint,@P54 bigint,@P55 bigint,@P56 bigint,@P57 bigint,@P58 bigint,@P59 bigint,@P60 bigint,@P61 bigint,@P62 bigint,@P63 bigint,@P64 bigint,@P65 bigint,@P66 bigint,@P67 bigint,@P68 bigint,@P69 bigint,@P70 bigint,@P71 bigint,@P72 bigint,@P73 bigint,@P74 bigint,@P75 bigint,@P76 bigint,@P77 bigint,@P78 bigint,@P79 bigint,@P80 bigint,@P81 bigint,@P82 bigint,@P83 bigint,@P84 bigint,@P85 bigint,@P86 bigint,@P87 bigint,@P88 bigint,@P89 bigint,@P90 bigint,@P91 bigint,@P92 bigint,@P93 bigint,@P94 bigint,@P95 bigint,@P96 bigint,@P97 bigint,@P98 bigint,@P99 bigint,@P100 bigint)select DEFINITIONCD, DESIGNATIONCD, AGENTSTATUSCD, CLASSIFICATIONCD, RECRUITMENTCATEGORYCD, TIER, REPORTINGLINKCD, SOURCEDESIGNATIONCD, SOURCECHANNELCD, SOURCEAGENCYID,
+BUSINESSSEQ, BUSINESSTYPECD, RESULTAGENTID, DORMANTSTATUSFL, AGENTHISTORYSEQ, VERSIONNUM, MANAGERDESIGNATIONCD, MANAGERAGENTSTATUSCD,
+MANAGERCLASSIFICATIONCD, MANAGERDORMANTSTATUSFL, REPORTINGDERVICEPERIOD, TOTALSERVPRD, SERVPRDCURRDESIGNATION, HIERARCHYPERIOD, HIERARCHYSEQ, DIRECTLEADER, TOTALFYP, DIRECTAGENT, PERSISTENCY, PRODUCTGROUP,
+MANAGERTOTALSERVPRD, PERSISTENCYS24, PaymentFL, LASTDESIGNATIONCD
+from tempGROUPKPI where businessTypeCd = @P0 and businessSeq in ( @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 , @P21 , @P22 , @P23 , @P24 , @P25 , @P26 , @P27 , @P28 , @P29 , @P30 , @P31 , @P32 , @P33 , @P34 , @P35 , @P36 , @P37 , @P38 , @P39 , @P40 , @P41 , @P42 , @P43 , @P44 , @P45 , @P46 , @P47 , @P48 , @P49 , @P50 , @P51 , @P52 , @P53 , @P54 , @P55 , @P56 , @P57 , @P58 , @P59 , @P60 , @P61 , @P62 , @P63 , @P64 , @P65 , @P66 , @P67 , @P68 , @P69 , @P70 , @P71 , @P72 , @P73 , @P74 , @P75 , @P76 , @P77 , @P78 , @P79 , @P80 , @P81 , @P82 , @P83 , @P84 , @P85 , @P86 , @P87 , @P88 , @P89 , @P90 , @P91 , @P92 , @P93 , @P94 , @P95 , @P96 , @P97 , @P98 , @P99 , @P100 )",0h 31m 52s,31,223,0h 0m 8.57s,0
+312,02000000393BC82E96349D5D14F67B8D000D5EFBFFCDEBD30000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from PAYOUTPAYABLELINK nolock
+where systemupdateddt between @P1 and @P2",0h 30m 55s,29,312,0h 0m 5.95s,0
+37,020000008FAAEB130EAA5730FF98C1A8D226004EE46164E60000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?))SELECT
+SCHEMA_NAME(udf.schema_id) AS [Schema],
+udf.name AS [Name],
+udf.object_id AS [ID],
+(case when ? = udf.type then ? when ? = udf.type then ? when ? = udf.type then ? when ? = udf.type then ? when ? = udf.type then ? else ? end) AS [FunctionType],
+CASE WHEN udf.type IN (?,?,?) THEN ? WHEN udf.type IN (?,?) THEN ? ELSE ? END AS [ImplementationType],
+CAST(
+case
+when udf.is_ms_shipped = ? then ?
+when (
+select
+major_id
+from
+sys.extended_properties
+where
+major_id = udf.object_id and
+minor_id = ? and
+class = ? and
+name = N?)
+is not null then ?
+else ?
+end
+AS bit) AS [IsSystemObject],
+CAST(CASE WHEN ISNULL(smudf.definition, ssmudf.definition) IS NULL THEN ? ELSE ? END AS bit) AS [IsEncrypted],
+CAST(ISNULL(OBJECTPROPERTYEX(udf.object_id, N?),?) AS bit) AS [IsSchemaBound],
+usrt.name AS [DataType],
+ISNULL(baset.name, N?) AS [SystemType],
+CAST(CASE WHEN baset.name IN (N?, N?) AND ret_param.max_length &lt;&gt; -? THEN ret_param.max_length/? ELSE ret_param.max_length END AS int) AS [Length],
+CAST(ret_param.precision AS int) AS [NumericPrecision],
+CAST(ret_param.scale AS int) AS [NumericScale],
+ISNULL(xscret_param.name, N?) AS [XmlSchemaNamespace],
+ISNULL(s2ret_param.name, N?) AS [XmlSchemaNamespaceSchema],
+ISNULL( (case ret_param.is_xml_document when ? then ? else ? end), ?) AS [XmlDocumentConstraint],
+s1ret_param.name AS [DataTypeSchema]
+FROM
+sys.all_objects AS udf
+LEFT OUTER JOIN sys.sql_modules AS smudf ON smudf.object_id = udf.object_id
+LEFT OUTER JOIN sys.system_sql_modules AS ssmudf ON ssmudf.object_id = udf.object_id
+LEFT OUTER JOIN sys.all_parameters AS ret_param ON ret_param.object_id = udf.object_id and ret_param.is_output = @_msparam_0
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = ret_param.user_type_id
+LEFT OUTER JOIN sys.types AS baset ON (baset.user_type_id = ret_param.system_type_id and baset.user_type_id = baset.system_type_id) or ((baset.system_type_id = ret_param.system_type_id) and (baset.user_type_id = ret_param.user_type_id) and (baset.is_user_defined = ?) and (baset.is_assembly_type = ?))
+LEFT OUTER JOIN sys.xml_schema_collections AS xscret_param ON xscret_param.xml_collection_id = ret_param.xml_collection_id
+LEFT OUTER JOIN sys.schemas AS s2ret_param ON s2ret_param.schema_id = xscret_param.schema_id
+LEFT OUTER JOIN sys.schemas AS s1ret_param ON s1ret_param.schema_id = usrt.schema_id
+WHERE
+(udf.type in (?, ?, ?, ?, ?))
+ORDER BY
+[Schema] ASC,[Name] ASC",0h 29m 43s,17,37,0h 0m 48.19s,0
+0,02000000BDF0D616207E99142C3BC7CC012548301F128E8E0000000000000000000000000000000000000000,select * from [dbo].[PREMIUM],0h 29m 9s,1,0,'-,0
+0,0100010031BFA31E905F8822EF01000000000000000000000000000000000000000000000000000000000000,"(@database_name nvarchar(?),@vdi_device_name nvarchar(?))BACKUP DATABASE @database_name TO VIRTUAL_DEVICE = @vdi_device_name WITH STATS = ?, DIFFERENTIAL;",0h 28m 47s,4,0,'-,0
+2,02000000F9602B09C78CF1B4FA9B6573F2D94B2657C09F280000000000000000000000000000000000000000,select * from [dbo].[POLICYPRODUCTALTER_D],0h 28m 37s,2,2,0h 14m 18.50s,0
+313,02000000812B550AA7801BDB7F46CCF4986FC72C6899531C0000000000000000000000000000000000000000,select * from [dbo].[PAYOUTBANKFILE],0h 28m 22s,31,313,0h 0m 5.44s,0
+0,02000000FD9158076FE9CE3B72D6516F4521C086B74A79BE0000000000000000000000000000000000000000,IF @@TRANCOUNT &gt; ? COMMIT TRAN,0h 26m 55s,61,0,'-,0
+0,02000000EFAC5A20DB6CE317BB65C189B40121C3488C89110000000000000000000000000000000000000000,"SELECT ROW_NUMBER() OVER (ORDER BY
+P.AGENTID, P.POLICYNUM, P.TRANSACTIONDATE ASC) NOMOR ,
+CCOMMISIONGENERATEDATE
+CTRANSACTIONDATE,
+AGENTID,
+AGENTNAME,
+CYCLE,
+NOPAYMENTFL,
+DEFINITIONTYPECD,
+PAYMENTTYPE,
+DEFINITIONCD,
+POLICYNUM,
+POLICYCURRENCY,
+RIDERCOUNT,
+PREMIUMSUBTYPECD,
+POLICYYEAR,
+PRODUCTCD,
+BANKNAME,
+BANKBRANCH,
+BANKACCOUNTNUMBER,
+GROSSPAYABLE,
+TRANSACTIONHOLDAMOUNT,
+PAYOUTAMOUNT,
+COMMISIONGENERATEDATE,
+TRANSACTIONDATE,
+COMMISSIONRATE,
+TOTALPREMI,
+EXCHANGERATE,
+TOTALANNUALIZEDPREMIUM,
+PAYMENTSCHEDULECD,
+DESIGNATIONCD,
+TYPE
+FROM
+(
+SELECT
+CONVERT(VARCHAR(?),COMMISIONGENERATEDATE,?) AS CCOMMISIONGENERATEDATE,
+CONVERT(VARCHAR(?),TRANSACTIONDATE,?) AS CTRANSACTIONDATE,
+* FROM FN_PVFAGENCY_PREVCYCLE_TN(?,?)
+) P
+where [PAYMENTTYPE] NOT IN (?,?,?,?) ",0h 25m 45s,4,0,'-,0
+232594,0200000019DF901CA20C8CADE449C0CAB77D962EBE84EC5F0000000000000000000000000000000000000000,"(@P0 bigint,@P1 nvarchar(?),@P2 nvarchar(?),@P3 nvarchar(?),@P4 nvarchar(?),@P5 nvarchar(?),@P6 nvarchar(?),@P7 nvarchar(?),@P8 nvarchar(?),@P9 nvarchar(?),@P10 int,@P11 bigint,@P12 nvarchar(?),@P13 nvarchar(?),@P14 nvarchar(?),@P15 nvarchar(?),@P16 bigint,@P17 bigint,@P18 nvarchar(?),@P19 nvarchar(?),@P20 float,@P21 float,@P22 nvarchar(?),@P23 datetime,@P24 datetime,@P25 datetime,@P26 datetime,@P27 datetime,@P28 datetime,@P29 int,@P30 nvarchar(?),@P31 int,@P32 int,@P33 nvarchar(?),@P34 datetime,@P35 nvarchar(?),@P36 nvarchar(?),@P37 float,@P38 float,@P39 float,@P40 float,@P41 nvarchar(?),@P42 nvarchar(?),@P43 float,@P44 int,@P45 int,@P46 nvarchar(?),@P47 datetime,@P48 datetime,@P49 datetime,@P50 datetime,@P51 float,@P52 float,@P53 float,@P54 float,@P55 float,@P56 nvarchar(?),@P57 nvarchar(?),@P58 float,@P59 nvarchar(?),@P60 nvarchar(?),@P61 nvarchar(?),@P62 nvarchar(?),@P63 nvarchar(?),@P64 float,@P65 int,@P66 int,@P67 nvarchar(?),@P68 datetime,@P69 int,@P70 int,@P71 int,@P72 int,@P73 nvarchar(?),@P74 float,@P75 nvarchar(?),@P76 datetime,@P77 float,@P78 nvarchar(?),@P79 nvarchar(?),@P80 datetime,@P81 nvarchar(?),@P82 nvarchar(?),@P83 nvarchar(?),@P84 float,@P85 float,@P86 float,@P87 float,@P88 bigint,@P89 nvarchar(?),@P90 nvarchar(?),@P91 datetime,@P92 nvarchar(?),@P93 datetime,@P94 float,@P95 nvarchar(?),@P96 int,@P97 nvarchar(?),@P98 nvarchar(?),@P99 int,@P100 float,@P101 nvarchar(?),@P102 nvarchar(?),@P103 nvarchar(?),@P104 float,@P105 nvarchar(?),@P106 nvarchar(?),@P107 nvarchar(?),@P108 nvarchar(?),@P109 nvarchar(?),@P110 nvarchar(?),@P111 nvarchar(?),@P112 nvarchar(?),@P113 nvarchar(?),@P114 nvarchar(?),@P115 nvarchar(?),@P116 nvarchar(?),@P117 nvarchar(?),@P118 nvarchar(?),@P119 nvarchar(?),@P120 nvarchar(?),@P121 nvarchar(?),@P122 nvarchar(?),@P123 nvarchar(?),@P124 nvarchar(?),@P125 nvarchar(?),@P126 nvarchar(?),@P127 nvarchar(?),@P128 nvarchar(?),@P129 nvarchar(?),@P130 nvarchar(?),@P131 nvarchar(?),@P132 nvarchar(?),@P133 nvarchar(?),@P134 nvarchar(?),@P135 nvarchar(?),@P136 nvarchar(?),@P137 int,@P138 bigint,@P139 float,@P140 float,@P141 float,@P142 nvarchar(?),@P143 float,@P144 nvarchar(?),@P145 nvarchar(?),@P146 nvarchar(?),@P147 int,@P148 int,@P149 datetime,@P150 int,@P151 nvarchar(?),@P152 nvarchar(?),@P153 nvarchar(?),@P154 nvarchar(?),@P155 int,@P156 int,@P157 datetime,@P158 nvarchar(?),@P159 nvarchar(?),@P160 nvarchar(?),@P161 int,@P162 int,@P163 nvarchar(?),@P164 nvarchar(?),@P165 nvarchar(?),@P166 int)insert into CMSPOLICYINTERFACE (versionid, guid, TRANSACTIONTYPE, POLICYNUM, SOURCE, INSURANCETYPEFL, POLICYGUID, POLICYPRODUCTGUID, SUBTRANCHENO, PRODUCTCD, PRODUCTVER, PRODUCTSEQ, PRODUCTTYPECD, AGENTCD, HIERARCHYTYPECD, HIERARCHYGUID, AGENTHISTORYSEQ, SOURCEAGENTHISTORYSEQ, HIERARCHYSUBTYPECD, BASEAGENTFL, COMMISSIONSHARINGPERCENTAGE, PRODUCTIONSHARINGPERCENTAGE, ALTERATIONTYPECD, ALTERATIONEFFECTIVEDT, APPLICATIONDT, POLICYCOMMENCEMENTDT, POLICYISSUEDT, FREELOOKCANCELLATIONDT, LOGINDT, POLICYTERM, POLICYTERMUNITCD, NUMOFLIVES, RIDERCOUNT, POLICYSTATUSCD, POLICYSTATUSDT, SELFCONTRACTINDICATORFL, KEYMANPOLICYFL, TOTALPREMIUMAMOUNT, TOTALSUMASSURED, TOTALANNUALIZEDPREMIUM, TOTALEXTRAPREMIUMAMT, EMPLOYEEFL, PREMIUMTYPECD, DERIVEDENTRYAGE, MAXINITIALPERIODMONTHS, PREMIUMPAYINGTERM, PREMIUMPAYINGTERMUNITCD, PRODUCTCOMMENCEMENTDT, PRODUCTISSUEDT, CONTRIBUTIONSTARTDT, PRODUCTIONEFFECTIVEDT, ORIGINALANNUALIZEDPREMIUMAMT, ANNUALIZEDPREMIUMAMT, PREMIUMAMT, EXTRAPREMIUMAMT, SUMASSURED, PAYMENTFREQUENCYCD, PREMIUMRECEIVEDFL, MATURITYAGE, INTIMATIONSOURCE, MEDICALCASEFL, STRAIGHTTHRUFL, GROUPCD, SCHEMECD, FIRSTPREMIUMAMOUNT, CLAWBACKPERIOD, REFUNDPERIOD, PREMIUMGUID, PREMIUMDUEDT, POLICYYEARINFORCE, EDUCATIONBENEFITTERM, POLICYMONTHINFORCEFROM, POLICYMONTHINFORCETO, DUETYPECD, DUEAMT, APPROPRIATIONTYPECD, APPROPRIATIONDT, APPROPRIATIONAMT, REVERSALFL, REFERENCEGUID, CALCULATIONDT, COMMISSIONBASETYPECD, COMMISSIONSUBTYPECD, COMMISSIONENHANCETYPECD, COMMISSIONAMT, UNEARNEDCOMMAMT, EARNEDCOMMAMT, COMMISSIONRATE, PARTYSEQ, PARTYTYPECD, PRODUCTIONPROCESSEDFL, PRODUCTIONPROCESSEDDT, PAYMENTSPROCESSEDFL, PAYMENTSPROCESSEDDT, TOTALFIRSTPREMIUMAMT, POLICYPRODUCTSTATUSCD, BENEFITTERM, BENEFITTERMUNITCD, PRODUCTCATEGORY, PREMIUMCOUNT, TRANSFERSHARINGPERCENTAGE, TRANSACTIONREVERSALFLAG, POLICYBRANCHCD, PREMIUMSUBTYPECD, OLDANNUALIZEDPREMIUMAMT, PRODUCTCLASS1, PRODUCTCLASS2, PRODUCTCLASS3, COMMISSIONCALCULATIONFL, COMMISSIONRULECD, HIERARCHYSUBSUBTYPECD, AGENTBRANCHCD, AGENCYID, AGENTSTATUSCD, BLACKLISTFL, CHANNELCD, DESIGNATIONCD, INTERMEDCATCD , INTMDSUBCATCD, PARTFULLTMECD, RURALURBANFL, RECRUITCATECD, SOURCEAGENCYID, SOURCEAGENTSTATUSCD, SOURCEBLACKLISTFL, SOURCECHANNELCD, SOURCEDESIGNATIONCD, SOURCEINTERMEDCATCD, SOURCEINTMDSUBCATCD, SOURCEPARTFULLTMECD, SOURCERURALURBANFL, SOURCERECRUITCATECD, POLICYBRANCHCLASS, AGENTBRANCHCLASS, IRDAPRODUCTCLASS, SOURCETRANSACTIONCD, BASEPRODUCTCD, BASEPRODUCTVER, BASEPRODUCTSEQ, LOSSRATIO, SACRIFICEPERC, REFERENCEPERC, ENHANCEMENTTYPECD, COR, CLAWBACKCOMMISSIONPROCESSEDFL, PREMIUMSTATUS, LOTNO, SOURCEAGENTSERVICEPERIOD, ZMSOURCEAGENTSERVICEPERIOD, COMMISSIONCONTRACTEFFECTIVEDT, ORIGINALRIDERCOUNT, SUBTRANCHETYPE, MULTIPLIER1, MULTIPLIER2, MULTIPLIER3, AGENTSERVICEPERIOD, ZMAGENTSERVICEPERIOD, DESIGNATIONCHANGEDT, CAMPAIGNCODE, CURRENCYCD, PREMIUMCHANGETYPE, ORIGINALHSRIDERCOUNT, HSRIDERCOUNT, BASEKPICALCULATIONFL, DAILYPRODUCTIONPROCESSEDFL, HOLDPRODUCTIONPROCESSEDFL, PREMIUMPAYMENTPERIOD) values ( @P0 , @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 , @P21 , @P22 , @P23 , @P24 , @P25 , @P26 , @P27 , @P28 , @P29 , @P30 , @P31 , @P32 , @P33 , @P34 , @P35 , @P36 , @P37 , @P38 , @P39 , @P40 , @P41 , @P42 , @P43 , @P44 , @P45 , @P46 , @P47 , @P48 , @P49 , @P50 , @P51 , @P52 , @P53 , @P54 , @P55 , @P56 , @P57 , @P58 , @P59 , @P60 , @P61 , @P62 , @P63 , @P64 , @P65 , @P66 , @P67 , @P68 , @P69 , @P70 , @P71 , @P72 , @P73 , @P74 , @P75 , @P76 , @P77 , @P78 , @P79 , @P80 , @P81 , @P82 , @P83 , @P84 , @P85 , @P86 , @P87 , @P88 , @P89 , @P90 , @P91 , @P92 , @P93 , @P94 , @P95 , @P96 , @P97 , @P98 , @P99 , @P100 , @P101 , @P102 , @P103 , @P104 , @P105 , @P106 , @P107 , @P108 , @P109 , @P110 , @P111 , @P112 , @P113 , @P114 , @P115 , @P116 , @P117 , @P118 , @P119 , @P120 , @P121 , @P122 , @P123 , @P124 , @P125 , @P126 , @P127 , @P128 , @P129 , @P130 , @P131 , @P132 , @P133 , @P134 , @P135 , @P136 , @P137 , @P138 , @P139 , @P140 , @P141 , @P142 , @P143 , @P144 , @P145 , @P146 , @P147 , @P148 , @P149 , @P150 , @P151 , @P152 , @P153 , @P154 , @P155 , @P156 , @P157 , @P158 , @P159 , @P160 , @P161 , @P162 , @P163 , @P164 , @P165 , @P166 ) SELECT SCOPE_IDENTITY() AS ID",0h 24m 38s,51,232594,0h 0m 0.01s,0
+2437,020000006DE9092FD1CDAAEAA016798CB7FC9E82A4D4400D0000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?),@_msparam_1 nvarchar(?),@_msparam_2 nvarchar(?))SELECT
+clmns.name AS [Name],
+clmns.column_id AS [ID],
+clmns.is_nullable AS [Nullable],
+clmns.is_computed AS [Computed],
+CAST(ISNULL(cik.index_column_id, ?) AS bit) AS [InPrimaryKey],
+clmns.is_ansi_padded AS [AnsiPaddingStatus],
+CAST(clmns.is_rowguidcol AS bit) AS [RowGuidCol],
+CAST(ISNULL(cc.is_persisted, ?) AS bit) AS [IsPersisted],
+ISNULL(clmns.collation_name, N?) AS [Collation],
+CAST(ISNULL((select TOP ? ? from sys.foreign_key_columns AS colfk where colfk.parent_column_id = clmns.column_id and colfk.parent_object_id = clmns.object_id), ?) AS bit) AS [IsForeignKey],
+clmns.is_identity AS [Identity],
+CAST(ISNULL(ic.seed_value,?) AS numeric(?)) AS [IdentitySeedAsDecimal],
+CAST(ISNULL(ic.increment_value,?) AS numeric(?)) AS [IdentityIncrementAsDecimal],
+(case when clmns.default_object_id = ? then N? when d.parent_object_id &gt; ? then N? else d.name end) AS [Default],
+(case when clmns.default_object_id = ? then N? when d.parent_object_id &gt; ? then N? else schema_name(d.schema_id) end) AS [DefaultSchema],
+ISNULL(dc.Name, N?) AS [DefaultConstraintName],
+(case when clmns.rule_object_id = ? then N? else r.name end) AS [Rule],
+(case when clmns.rule_object_id = ? then N? else schema_name(r.schema_id) end) AS [RuleSchema],
+CAST(ISNULL(COLUMNPROPERTY(clmns.object_id, clmns.name, N?),?) AS bit) AS [IsDeterministic],
+CAST(ISNULL(COLUMNPROPERTY(clmns.object_id, clmns.name, N?),?) AS bit) AS [IsPrecise],
+ISNULL(ic.is_not_for_replication, ?) AS [NotForReplication],
+CAST(COLUMNPROPERTY(clmns.object_id, clmns.name, N?) AS bit) AS [IsFullTextIndexed],
+CAST(COLUMNPROPERTY(clmns.object_id, clmns.name, N?) AS int) AS [StatisticalSemantics],
+CAST(clmns.encryption_type AS int) AS [EncryptionType],
+clmns.encryption_algorithm_name AS [EncryptionAlgorithm],
+clmns.column_encryption_key_id AS [ColumnEncryptionKeyID],
+ceks.name AS [ColumnEncryptionKeyName],
+CAST(clmns.is_filestream AS bit) AS [IsFileStream],
+CAST(clmns.is_sparse AS bit) AS [IsSparse],
+CAST(clmns.is_column_set AS bit) AS [IsColumnSet],
+usrt.name AS [DataType],
+s1clmns.name AS [DataTypeSchema],
+ISNULL(baset.name, N?) AS [SystemType],
+CAST(CASE WHEN baset.name IN (N?, N?) AND clmns.max_length &lt;&gt; -? THEN clmns.max_length/? ELSE clmns.max_length END AS int) AS [Length],
+CAST(clmns.precision AS int) AS [NumericPrecision],
+CAST(clmns.scale AS int) AS [NumericScale],
+ISNULL(xscclmns.name, N?) AS [XmlSchemaNamespace],
+ISNULL(s2clmns.name, N?) AS [XmlSchemaNamespaceSchema],
+ISNULL( (case clmns.is_xml_document when ? then ? else ? end), ?) AS [XmlDocumentConstraint],
+CASE WHEN usrt.is_table_type = ? THEN N? ELSE N? END AS [UserType],
+clmns.generated_always_type AS [GeneratedAlwaysType],
+CAST(clmns.is_hidden AS bit) AS [IsHidden],
+CAST(? AS bit) AS [IsDroppedLedgerColumn],
+CAST(clmns.is_masked AS bit) AS [IsMasked],
+CAST(
+CASE
+WHEN [sc].[label] IS NOT NULL or [sc].[label_id] IS NOT NULL or [sc].[information_type] IS NOT NULL or [sc].[information_type_id] IS NOT NULL or [sc].[rank] IS NOT NULL THEN ?
+ELSE ?
+END
+AS bit) AS [IsClassified],
+ISNULL(clmns.graph_type, ?) AS [GraphType]
+FROM
+sys.tables AS tbl
+INNER JOIN sys.all_columns AS clmns ON clmns.object_id=tbl.object_id
+LEFT OUTER JOIN sys.indexes AS ik ON ik.object_id = clmns.object_id and ?=ik.is_primary_key
+LEFT OUTER JOIN sys.index_columns AS cik ON cik.index_id = ik.index_id and cik.column_id = clmns.column_id and cik.object_id = clmns.object_id and ? = cik.is_included_column
+LEFT OUTER JOIN sys.computed_columns AS cc ON cc.object_id = clmns.object_id and cc.column_id = clmns.column_id
+LEFT OUTER JOIN sys.identity_columns AS ic ON ic.object_id = clmns.object_id and ic.column_id = clmns.column_id
+LEFT OUTER JOIN sys.objects AS d ON d.object_id = clmns.default_object_id
+LEFT OUTER JOIN sys.default_constraints as dc ON clmns.default_object_id = dc.object_id
+LEFT OUTER JOIN sys.objects AS r ON r.object_id = clmns.rule_object_id
+LEFT OUTER JOIN sys.column_encryption_keys AS ceks ON (ceks.column_encryption_key_id = clmns.column_encryption_key_id)
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = clmns.user_type_id
+LEFT OUTER JOIN sys.schemas AS s1clmns ON s1clmns.schema_id = usrt.schema_id
+LEFT OUTER JOIN sys.types AS baset ON (baset.user_type_id = clmns.system_type_id and baset.user_type_id = baset.system_type_id) or ((baset.system_type_id = clmns.system_type_id) and (baset.user_type_id = clmns.user_type_id) and (baset.is_user_defined = ?) and (baset.is_assembly_type = ?))
+LEFT OUTER JOIN sys.xml_schema_collections AS xscclmns ON xscclmns.xml_collection_id = clmns.xml_collection_id
+LEFT OUTER JOIN sys.schemas AS s2clmns ON s2clmns.schema_id = xscclmns.schema_id
+LEFT OUTER JOIN sys.sensitivity_classifications AS sc ON sc.major_id = clmns.object_id and sc.minor_id = clmns.column_id
+WHERE
+(clmns.name=@_msparam_0)and((tbl.name=@_msparam_1 and SCHEMA_NAME(tbl.schema_id)=@_msparam_2))",0h 23m 52s,23,2437,0h 0m 0.59s,0
+309,0200000076CD9801DD71907B7C26B4F956D6147DEEAF40EE0000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from POLICY_M nolock
+where systemupdateddt between @P1 and @P2",0h 23m 18s,30,309,0h 0m 4.52s,0
+9,03000600235B57334558720145B2000001000000000000000000000000000000000000000000000000000000,AGENTCOMMISSIONWISEKPIDATAPROC,0h 23m 14s,8,9,0h 2m 34.89s,0
+55,020000001C70C614D261C85875D4EF3C90BD18D02D6245380000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?),@_msparam_1 nvarchar(?),@_msparam_2 nvarchar(?))SELECT
+SCHEMA_NAME(sp.schema_id) AS [Schema],
+sp.name AS [Name],
+sp.object_id AS [ID],
+CAST(
+case
+when sp.is_ms_shipped = ? then ?
+when (
+select
+major_id
+from
+sys.extended_properties
+where
+major_id = sp.object_id and
+minor_id = ? and
+class = ? and
+name = N?)
+is not null then ?
+else ?
+end
+AS bit) AS [IsSystemObject],
+CASE WHEN sp.type = N? THEN ? WHEN sp.type = N? THEN ? ELSE ? END AS [ImplementationType],
+CAST(CASE WHEN ISNULL(smsp.definition, ssmsp.definition) IS NULL THEN ? ELSE ? END AS bit) AS [IsEncrypted]
+FROM
+sys.all_objects AS sp
+LEFT OUTER JOIN sys.sql_modules AS smsp ON smsp.object_id = sp.object_id
+LEFT OUTER JOIN sys.system_sql_modules AS ssmsp ON ssmsp.object_id = sp.object_id
+WHERE
+(sp.type = @_msparam_0 OR sp.type = @_msparam_1 OR sp.type=@_msparam_2)
+ORDER BY
+[Schema] ASC,[Name] ASC",0h 22m 42s,25,55,0h 0m 24.76s,0
+313,02000000DF8C9B3758269B689A277576E7CFC64994AAA18F0000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)select * from BENEFITDTL nolock
+where systemupdateddt between @P1 and @P2",0h 22m 19s,31,313,0h 0m 4.28s,0
+68,02000000AA831007CEBD7617B2B8244CAD94D184B40ECE230000000000000000000000000000000000000000,"SELECT distinct AD.*
+,PC.CONTACTNUM [MOBILENO]
+,CONVERT(VARCHAR(?),AGD.FIRSTLICENSEDT,?) [FIRSTLICENSEDT]--,NPWP16.IDENTITYNUM NPWP16,KTP.IDENTITYNUM KTP_NUMBER              
+--CASE WHEN AGD.DESIGNATIONCD IN (&#x27;FWP&#x27;,&#x27;FWM&#x27;,&#x27;FWO&#x27;,&#x27;BA&#x27;) THEN J.JUMBO ELSE AGD.JUMBOFLAG END AS JUMBOFLAG_BASEDFROM_FWD,            
+--MAD.[MAD NAME] AS PARTNER_NAME,            
+--JUMBO.SUB_PARTNER_NAME, AG2.REGION, AG2.SALESOFFICE_NAME BRANCH            
+--INTO #TEMP_AGENTDATA          
+FROM MG_AGENTDATA_V AD (NOLOCK)
+JOIN AGENT AG (NOLOCK) ON AG.AGENTID = AD.AGENTID
+LEFT JOIN PARTY PT (NOLOCK) ON PT.PARTYID=AG.PARTYID
+LEFT JOIN PARTYCONTACT PC (NOLOCK) ON PC.PARTYSEQ=PT.PARTYSEQ and PC.CONTACTTYPECD=?
+LEFT JOIN AGENTDETAIL AGD (NOLOCK) ON AGD.AGENTSEQ = AG.AGENTSEQ
+LEFT JOIN PARTYIDENTITY KTP (NOLOCK) ON KTP.PARTYSEQ=PT.PARTYSEQ and KTP.IDENTITYTYPECD = ?",0h 22m 10s,11,68,0h 0m 19.56s,0
+116773,02000000A1A8D4068E6EC4E9C3AA1EA2A254F55214F5A54A0000000000000000000000000000000000000000,"(@P0 bigint,@P1 nvarchar(?),@P2 nvarchar(?),@P3 nvarchar(?),@P4 nvarchar(?),@P5 datetime,@P6 nvarchar(?),@P7 nvarchar(?),@P8 nvarchar(?),@P9 float,@P10 nvarchar(?),@P11 nvarchar(?),@P12 nvarchar(?),@P13 nvarchar(?),@P14 nvarchar(?),@P15 nvarchar(?),@P16 nvarchar(?),@P17 nvarchar(?),@P18 nvarchar(?),@P19 datetime,@P20 nvarchar(?))insert into GLPOSTING (versionid, guid, JOURNALTYPE, TRANSACTIONREF, ACCOUNTINGPERIOD, TRANSACTIONDT, ACCOUNTCODE, DESCRIPTION, TRANSACTIONCURRENCY, AMOUNT, TRANSACTIONTYPE, LOB, LOCATION, CHANNEL, COSTCENTER, TAX, CASHFLOW, L4FL, IFRS, GLPOSTINGDT, GLTYPECD) values ( @P0 , @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 ) SELECT SCOPE_IDENTITY() AS ID",0h 22m 8s,12,116773,0h 0m 0.01s,0
+2,02000000246D6708494A1536D03ACA3DF423E10005609E5D0000000000000000000000000000000000000000,select * from [dbo].[POLICYPRODUCT_D],0h 21m 26s,2,2,0h 10m 43.00s,0
+311,02000000580418322ECECA355C1C0234D38D489C35189E790000000000000000000000000000000000000000,select * from [dbo].[PAYOUTBANKFILELINK],0h 21m 7s,31,311,0h 0m 4.07s,0
+82,02000000DA50F82658FB07B63526AA5715B00089A469365C0000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?),@_msparam_1 nvarchar(?))SELECT
+clmns.column_id AS [ID],
+clmns.name AS [Name],
+ISNULL(dc.Name, N?) AS [DefaultConstraintName],
+clmns.is_nullable AS [Nullable],
+CAST(ISNULL(cik.index_column_id, ?) AS bit) AS [InPrimaryKey],
+clmns.is_identity AS [Identity],
+usrt.name AS [DataType],
+clmns.is_computed AS [Computed]
+FROM
+sys.tables AS tbl
+INNER JOIN sys.all_columns AS clmns ON clmns.object_id=tbl.object_id
+LEFT OUTER JOIN sys.default_constraints as dc ON clmns.default_object_id = dc.object_id
+LEFT OUTER JOIN sys.indexes AS ik ON ik.object_id = clmns.object_id and ?=ik.is_primary_key
+LEFT OUTER JOIN sys.index_columns AS cik ON cik.index_id = ik.index_id and cik.column_id = clmns.column_id and cik.object_id = clmns.object_id and ? = cik.is_included_column
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = clmns.user_type_id
+WHERE
+(tbl.name=@_msparam_0 and SCHEMA_NAME(tbl.schema_id)=@_msparam_1)
+ORDER BY
+[ID] ASC",0h 20m 41s,10,82,0h 0m 15.13s,0
+0,02000000600C111D29121CC086EDC6BD6AD8E3AD4C7EDB850000000000000000000000000000000000000000,select * from [dbo].[AGENTHISTORY],0h 20m 28s,1,0,'-,0
+5822,02000000B9D627057A34356E4253C5054F17220FD62985440000000000000000000000000000000000000000,"(@P0 bigint)SELECT STEP_EXECUTION_ID, STEP_NAME, START_TIME, END_TIME, STATUS, COMMIT_COUNT, READ_COUNT, FILTER_COUNT, WRITE_COUNT, EXIT_CODE, EXIT_MESSAGE, READ_SKIP_COUNT, WRITE_SKIP_COUNT, PROCESS_SKIP_COUNT, ROLLBACK_COUNT, LAST_UPDATED, VERSION from BATCH_STEP_EXECUTION where JOB_EXECUTION_ID = @P0 order by STEP_EXECUTION_ID",0h 20m 17s,60,5822,0h 0m 0.21s,0
+0,020000006FDCD22EA1A576FA64922D8B0B79156C401E1BA40000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?),@_msparam_1 nvarchar(?),@_msparam_2 nvarchar(?))SELECT
+SCHEMA_NAME(sp.schema_id) AS [Schema],
+sp.name AS [Name],
+sp.object_id AS [ID]
+FROM
+sys.all_objects AS sp
+WHERE
+(sp.type = @_msparam_0 OR sp.type = @_msparam_1 OR sp.type=@_msparam_2)
+ORDER BY
+[Schema] ASC,[Name] ASC",0h 20m 11s,2,0,'-,0
+632,030006002A82A838482CAA006EB3000001000000000000000000000000000000000000000000000000000000,CS_RPA_AGENTINFO,0h 18m 25s,4,632,0h 0m 1.75s,0
+8031,02000000B2D1D71763BA54A89079C2CFC94407365CB40F870000000000000000000000000000000000000000,"(@P0 bigint)select listjobrun0_.BATCHRUNDIARYSEQ as BATCHRU10_1_, listjobrun0_.JOBRUNDIARYSEQ as JOBRUNDI1_1_, listjobrun0_.JOBRUNDIARYSEQ as JOBRUNDI1_327_0_, listjobrun0_.versionid as versionid327_0_, listjobrun0_.guid as guid327_0_, listjobrun0_.STARTTIME as STARTTIME327_0_, listjobrun0_.ENDTIME as ENDTIME327_0_, listjobrun0_.JOBID as JOBID327_0_, listjobrun0_.JOBNAME as JOBNAME327_0_, listjobrun0_.JOBRUNSTATUSCD as JOBRUNST8_327_0_, listjobrun0_.SPRINGEXECUTIONID as SPRINGEX9_327_0_, listjobrun0_.BATCHRUNDIARYSEQ as BATCHRU10_327_0_ from JOBRUNDIARY listjobrun0_ where listjobrun0_.BATCHRUNDIARYSEQ= @P0 ",0h 18m 17s,66,8031,0h 0m 0.14s,0
+37,03000600BBAD766DB90C5A01B6B0000001000000000000000000000000000000000000000000000000000000,HANDLEFLCHOLDRELEASE,0h 17m 55s,6,37,0h 0m 29.05s,0
+27,020000009C34A136900D2709A5C0E8D25984AB02A16C1D490000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?),@P2 nvarchar(?),@P3 nvarchar(?),@P4 nvarchar(?),@P5 nvarchar(?),@P6 nvarchar(?),@P7 nvarchar(?),@P8 nvarchar(?),@P9 nvarchar(?),@P10 nvarchar(?),@P11 nvarchar(?),@P12 nvarchar(?),@P13 nvarchar(?),@P14 nvarchar(?),@P15 nvarchar(?),@P16 nvarchar(?),@P17 nvarchar(?),@P18 nvarchar(?),@P19 nvarchar(?),@P20 nvarchar(?),@P21 nvarchar(?),@P22 nvarchar(?),@P23 nvarchar(?),@P24 nvarchar(?),@P25 nvarchar(?),@P26 nvarchar(?),@P27 nvarchar(?),@P28 nvarchar(?),@P29 nvarchar(?),@P30 nvarchar(?),@P31 nvarchar(?),@P32 nvarchar(?),@P33 nvarchar(?),@P34 nvarchar(?),@P35 nvarchar(?),@P36 nvarchar(?),@P37 nvarchar(?),@P38 nvarchar(?),@P39 nvarchar(?),@P40 nvarchar(?),@P41 nvarchar(?),@P42 nvarchar(?),@P43 nvarchar(?),@P44 nvarchar(?),@P45 nvarchar(?),@P46 nvarchar(?),@P47 nvarchar(?),@P48 nvarchar(?),@P49 nvarchar(?),@P50 nvarchar(?),@P51 nvarchar(?),@P52 nvarchar(?),@P53 nvarchar(?),@P54 nvarchar(?),@P55 nvarchar(?),@P56 nvarchar(?),@P57 nvarchar(?),@P58 nvarchar(?),@P59 nvarchar(?),@P60 nvarchar(?),@P61 nvarchar(?),@P62 nvarchar(?),@P63 nvarchar(?),@P64 nvarchar(?),@P65 nvarchar(?),@P66 nvarchar(?),@P67 nvarchar(?),@P68 nvarchar(?),@P69 nvarchar(?),@P70 nvarchar(?),@P71 nvarchar(?),@P72 nvarchar(?),@P73 nvarchar(?),@P74 nvarchar(?),@P75 nvarchar(?),@P76 nvarchar(?),@P77 nvarchar(?),@P78 nvarchar(?),@P79 nvarchar(?),@P80 nvarchar(?),@P81 nvarchar(?),@P82 nvarchar(?),@P83 nvarchar(?),@P84 nvarchar(?),@P85 nvarchar(?),@P86 nvarchar(?),@P87 nvarchar(?),@P88 nvarchar(?),@P89 nvarchar(?),@P90 nvarchar(?),@P91 nvarchar(?),@P92 nvarchar(?),@P93 nvarchar(?),@P94 nvarchar(?),@P95 nvarchar(?),@P96 nvarchar(?),@P97 nvarchar(?),@P98 nvarchar(?),@P99 nvarchar(?),@P100 nvarchar(?),@P101 nvarchar(?),@P102 nvarchar(?),@P103 nvarchar(?),@P104 nvarchar(?),@P105 nvarchar(?),@P106 nvarchar(?),@P107 nvarchar(?),@P108 nvarchar(?),@P109 nvarchar(?),@P110 nvarchar(?),@P111 nvarchar(?),@P112 nvarchar(?),@P113 nvarchar(?),@P114 nvarchar(?),@P115 nvarchar(?),@P116 nvarchar(?),@P117 nvarchar(?),@P118 nvarchar(?),@P119 nvarchar(?),@P120 nvarchar(?),@P121 nvarchar(?),@P122 nvarchar(?),@P123 nvarchar(?),@P124 nvarchar(?),@P125 nvarchar(?),@P126 nvarchar(?),@P127 nvarchar(?),@P128 nvarchar(?),@P129 nvarchar(?),@P130 nvarchar(?),@P131 nvarchar(?),@P132 nvarchar(?),@P133 nvarchar(?),@P134 nvarchar(?),@P135 nvarchar(?),@P136 nvarchar(?),@P137 nvarchar(?),@P138 nvarchar(?),@P139 nvarchar(?),@P140 nvarchar(?),@P141 nvarchar(?),@P142 nvarchar(?),@P143 nvarchar(?),@P144 nvarchar(?),@P145 nvarchar(?),@P146 nvarchar(?),@P147 nvarchar(?),@P148 nvarchar(?),@P149 nvarchar(?),@P150 nvarchar(?),@P151 nvarchar(?),@P152 nvarchar(?),@P153 nvarchar(?),@P154 nvarchar(?),@P155 nvarchar(?),@P156 nvarchar(?),@P157 nvarchar(?),@P158 nvarchar(?),@P159 nvarchar(?),@P160 nvarchar(?),@P161 nvarchar(?),@P162 nvarchar(?),@P163 nvarchar(?),@P164 nvarchar(?),@P165 nvarchar(?),@P166 nvarchar(?),@P167 nvarchar(?),@P168 nvarchar(?),@P169 nvarchar(?),@P170 nvarchar(?),@P171 nvarchar(?),@P172 nvarchar(?),@P173 nvarchar(?),@P174 nvarchar(?),@P175 nvarchar(?),@P176 nvarchar(?),@P177 nvarchar(?),@P178 nvarchar(?),@P179 nvarchar(?),@P180 nvarchar(?),@P181 nvarchar(?),@P182 nvarchar(?),@P183 nvarchar(?),@P184 nvarchar(?),@P185 nvarchar(?),@P186 nvarchar(?),@P187 nvarchar(?),@P188 nvarchar(?),@P189 nvarchar(?),@P190 nvarchar(?),@P191 nvarchar(?),@P192 nvarchar(?),@P193 nvarchar(?),@P194 nvarchar(?),@P195 nvarchar(?),@P196 nvarchar(?),@P197 nvarchar(?),@P198 nvarchar(?),@P199 nvarchar(?),@P200 nvarchar(?),@P201 nvarchar(?),@P202 nvarchar(?),@P203 nvarchar(?),@P204 nvarchar(?),@P205 nvarchar(?),@P206 nvarchar(?),@P207 nvarchar(?),@P208 nvarchar(?),@P209 nvarchar(?),@P210 nvarchar(?),@P211 nvarchar(?),@P212 nvarchar(?),@P213 nvarchar(?),@P214 nvarchar(?),@P215 nvarchar(?),@P216 nvarchar(?),@P217 nvarchar(?),@P218 nvarchar(?),@P219 nvarchar(?),@P220 nvarchar(?),@P221 nvarchar(?),@P222 nvarchar(?),@P223 nvarchar(?),@P224 nvarchar(?),@P225 nvarchar(?),@P226 nvarchar(?),@P227 nvarchar(?),@P228 nvarchar(?),@P229 nvarchar(?),@P230 nvarchar(?),@P231 nvarchar(?),@P232 nvarchar(?),@P233 nvarchar(?),@P234 nvarchar(?),@P235 nvarchar(?),@P236 nvarchar(?),@P237 nvarchar(?),@P238 nvarchar(?),@P239 nvarchar(?),@P240 nvarchar(?),@P241 nvarchar(?),@P242 nvarchar(?),@P243 nvarchar(?),@P244 nvarchar(?),@P245 nvarchar(?),@P246 nvarchar(?),@P247 nvarchar(?),@P248 nvarchar(?),@P249 nvarchar(?),@P250 nvarchar(?),@P251 nvarchar(?),@P252 nvarchar(?),@P253 nvarchar(?),@P254 nvarchar(?),@P255 nvarchar(?),@P256 nvarchar(?),@P257 nvarchar(?),@P258 nvarchar(?),@P259 nvarchar(?),@P260 nvarchar(?),@P261 nvarchar(?),@P262 nvarchar(?),@P263 nvarchar(?),@P264 nvarchar(?),@P265 nvarchar(?),@P266 nvarchar(?),@P267 nvarchar(?),@P268 nvarchar(?),@P269 nvarchar(?),@P270 nvarchar(?),@P271 nvarchar(?),@P272 nvarchar(?),@P273 nvarchar(?),@P274 nvarchar(?),@P275 nvarchar(?),@P276 nvarchar(?),@P277 nvarchar(?),@P278 nvarchar(?),@P279 nvarchar(?),@P280 nvarchar(?),@P281 nvarchar(?),@P282 nvarchar(?),@P283 nvarchar(?),@P284 nvarchar(?),@P285 nvarchar(?),@P286 nvarchar(?),@P287 nvarchar(?),@P288 nvarchar(?),@P289 nvarchar(?),@P290 nvarchar(?),@P291 nvarchar(?),@P292 nvarchar(?),@P293 nvarchar(?),@P294 nvarchar(?),@P295 nvarchar(?),@P296 nvarchar(?),@P297 nvarchar(?),@P298 nvarchar(?),@P299 nvarchar(?),@P300 nvarchar(?),@P301 nvarchar(?),@P302 nvarchar(?),@P303 bigint,@P304 bigint)select k1.kpiresultseq, k1.guid, k1.postingDt, k1.productionEffectiveDt, k1.definitionCd, k1.versionNum, k1.definitionTypeCd,k1.definitionSubTypeCd, k1.individualFl, k1.resultValue, k1.dtRefGuid, k1.timeDimensionSeq, k1.zeroMthFinJoinTimeSeq, k1.zeroMthProdJoinTimeSeq, k1.zeroMthCalJoinTimeSeq, k1.zeroMthFinDesigTimeSeq, k1.zeroMthProdDesigTimeSeq, k1.zeroMthCalDesigTimeSeq, k1.productionSharingPerc, k1.transferSharingPerc, k1.agentHistorySeq, k1.kpiIndicatorFl, k1.subKPIsTypeCd, k1.baseKPICd, k1.baseKPISubTypeCd, k1.baseKPISeq, k1.countOfActionCd, k1.hierarchyTypeCd, k1.designationCd, k1.agentStatusCd, k1.recruitmentCategoryCd, k1.tier, k1.reportingLinkCd, k1.sourceDesignationCd, k1.sourceChannelCd, k1.sourceAgencyId, k1.kpiFrequencyCd, k1.dormantStatusFl, k1.classificationCd, k1.subordinateDesignationCd, k1.subordinateClassifyCd,k1.subordinateAgentStatusCd, k1.subRecruitmentCatgCd, k1.subordinateType, k1.cmsPolicyInterfaceSeq, k1.groupProcessedFl, k1.agentId, k1.processTypeCd, k1.numeratorValue, k1.denominatorValue, k1.reinstatementPerc, k1.actionFieldTypeCd , k1.zeroQtrFinJoinTimeSeq , k1.zeroQtrProdJoinTimeSeq , k1.zeroQtrCalJoinTimeSeq , k1.zeroQtrFinDesigTimeSeq , k1.zeroQtrProdDesigTimeSeq ,k1.zeroQtrCalDesigTimeSeq , k1.zeroHyrFinJoinTimeSeq , k1.zeroHyrProdJoinTimeSeq , k1.zeroHyrCalJoinTimeSeq , k1.zeroHyrFinDesigTimeSeq , k1.zeroHyrProdDesigTimeSeq , k1.zeroHyrCalDesigTimeSeq , k1.zeroYrFinJoinTimeSeq , k1.zeroYrProdJoinTimeSeq , k1.zeroYrCalJoinTimeSeq , k1.zeroYrFinDesigTimeSeq , k1.zeroYrProdDesigTimeSeq , k1.zeroYrCalDesigTimeSeq ,k1.POLICYISSUEDT , k1.logindt,k1.premiumDueDt from KPIResult k1 where ? = ? and k1.definitionCd = @P0 and k1.resultValue not in (?,?) and k1.agentId in ( @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 , @P21 , @P22 , @P23 , @P24 , @P25 , @P26 , @P27 , @P28 , @P29 , @P30 , @P31 , @P32 , @P33 , @P34 , @P35 , @P36 , @P37 , @P38 , @P39 , @P40 , @P41 , @P42 , @P43 , @P44 , @P45 , @P46 , @P47 , @P48 , @P49 , @P50 , @P51 , @P52 , @P53 , @P54 , @P55 , @P56 , @P57 , @P58 , @P59 , @P60 , @P61 , @P62 , @P63 , @P64 , @P65 , @P66 , @P67 , @P68 , @P69 , @P70 , @P71 , @P72 , @P73 , @P74 , @P75 , @P76 , @P77 , @P78 , @P79 , @P80 , @P81 , @P82 , @P83 , @P84 , @P85 , @P86 , @P87 , @P88 , @P89 , @P90 , @P91 , @P92 , @P93 , @P94 , @P95 , @P96 , @P97 , @P98 , @P99 , @P100 , @P101 , @P102 , @P103 , @P104 , @P105 , @P106 , @P107 , @P108 , @P109 , @P110 , @P111 , @P112 , @P113 , @P114 , @P115 , @P116 , @P117 , @P118 , @P119 , @P120 , @P121 , @P122 , @P123 , @P124 , @P125 , @P126 , @P127 , @P128 , @P129 , @P130 , @P131 , @P132 , @P133 , @P134 , @P135 , @P136 , @P137 , @P138 , @P139 , @P140 , @P141 , @P142 , @P143 , @P144 , @P145 , @P146 , @P147 , @P148 , @P149 , @P150 , @P151 , @P152 , @P153 , @P154 , @P155 , @P156 , @P157 , @P158 , @P159 , @P160 , @P161 , @P162 , @P163 , @P164 , @P165 , @P166 , @P167 , @P168 , @P169 , @P170 , @P171 , @P172 , @P173 , @P174 , @P175 , @P176 , @P177 , @P178 , @P179 , @P180 , @P181 , @P182 , @P183 , @P184 , @P185 , @P186 , @P187 , @P188 , @P189 , @P190 , @P191 , @P192 , @P193 , @P194 , @P195 , @P196 , @P197 , @P198 , @P199 , @P200 , @P201 , @P202 , @P203 , @P204 , @P205 , @P206 , @P207 , @P208 , @P209 , @P210 , @P211 , @P212 , @P213 , @P214 , @P215 , @P216 , @P217 , @P218 , @P219 , @P220 , @P221 , @P222 , @P223 , @P224 , @P225 , @P226 , @P227 , @P228 , @P229 , @P230 , @P231 , @P232 , @P233 , @P234 , @P235 , @P236 , @P237 , @P238 , @P239 , @P240 , @P241 , @P242 , @P243 , @P244 , @P245 , @P246 , @P247 , @P248 , @P249 , @P250 , @P251 , @P252 , @P253 , @P254 , @P255 , @P256 , @P257 , @P258 , @P259 , @P260 , @P261 , @P262 , @P263 , @P264 , @P265 , @P266 , @P267 , @P268 , @P269 , @P270 , @P271 , @P272 , @P273 , @P274 , @P275 , @P276 , @P277 , @P278 , @P279 , @P280 , @P281 , @P282 , @P283 , @P284 , @P285 , @P286 , @P287 , @P288 , @P289 , @P290 , @P291 , @P292 , @P293 , @P294 , @P295 , @P296 , @P297 , @P298 , @P299 , @P300 , @P301 , @P302 ) and k1.timeDimensionSeq between @P303 and @P304 order by k1.kpiResultSeq asc ",0h 17m 52s,6,27,0h 0m 39.70s,0
+13768,03000600EABA5E753C44BA0041B2000000000000000000000000000000000000000000000000000000000000,AgentCoursePassed,0h 17m 35s,58,13768,0h 0m 0.08s,0
+2,0200000031977432E2D4B94EF90C899CC1BBB5E4EB34F7C90000000000000000000000000000000000000000,select * from [dbo].[POLICY_M],0h 17m 31s,2,2,0h 8m 45.50s,0
+0,0400FF7FA6A6A9D6010000000000000000000000000000000000000000000000000000000000000000000000,sp_replcmds,0h 16m 55s,1,0,'-,0
+3,020000001A4C3D2D4CEEFC8EA8DF7FBBB2BF97079F069F340000000000000000000000000000000000000000,"SELECT ROW_NUMBER() OVER(ORDER BY INTERMEDSUBCATCD,AGENTID) AS NOMOR,
+INTERMEDSUBCATCD,
+dbo.RemoveNonAlphaNumericCharacters(AGENTID) AGENTID,
+dbo.RemoveNonAlphaNumericCharacters(AGENTNAME) [AGENTNAME],
+CONVERT(VARCHAR(?),AD.REGISTRATIONDT ,?) [REGISTRATIONDT],
+CONVERT(VARCHAR(?),AD.JOINDATE,?) AS JOINDATE,
+NEWRECRUITDATE,
+AGENTSTATUSCD,
+RECRUITEDBYAGENTID,
+PARENTAGENTID,
+FWO,
+FWM,
+FWD,
+SD,
+RM,
+BRANCHID,
+BANKCD,
+DESIGNATIONCD [AGENTLEVEL],
+dbo.RemoveNonAlphaNumericCharacters(REFNAME) REFNAME,
+dbo.RemoveNonAlphaNumericCharacters(IDENTITYNUM) NPWP,
+dbo.RemoveNonAlphaNumericCharacters(BANKNAME) BANKNAME,
+dbo.RemoveNonAlphaNumericCharacters(BRANCHCD) BRANCHCD,
+dbo.RemoveNonAlphaNumericCharacters(BRANCHNAME) BRANCHNAME,
+ACCOUNTNUM,
+CONVERT(VARCHAR(?),AD.TERMDATE ,?) TERMDATE,
+EXAMMODE,
+CONVERT(VARCHAR(?),AD.EXAMDT ,?) EXAMDT,
+EXAMCENTERNAME,
+EMAILADDRESS EMAILADDRESS,
+LICENSETYPE_PRODUCT,
+dbo.RemoveNonAlphaNumericCharacters(RECRUITERNAME) RECRUITERNAME,
+dbo.RemoveNonAlphaNumericCharacters(SUPERVISORNAME) SUPERVISORNAME,
+dbo.RemoveNonAlphaNumericCharacters(FWONAME) FWONAME,
+dbo.RemoveNonAlphaNumericCharacters(FWMNAME) FWMNAME,
+dbo.RemoveNonAlphaNumericCharacters(FWDNAME) FWDNAME,
+dbo.RemoveNonAlphaNumericCharacters(RMNAME) RMNAME,
+dbo.RemoveNonAlphaNumericCharacters(SDNAME) SDNAME,
+SYSTEMUPDATEDDT,
+CHANNELCD,
+dbo.RemoveNonAlphaNumericCharacters(LICENSETYPE) LICENSETYPE,
+dbo.RemoveNonAlphaNumericCharacters(LICENSENUM) LICENSENUM,
+CLICENSE_EFFECTIVEFROMDT [LICENSE_EFFECTIVEFROMDT],
+dbo.RemoveNonAlphaNumericCharacters(MONITORINGSTAFFID) MONITORINGSTAFFID,
+dbo.RemoveNonAlphaNumericCharacters(AGENTMONITORNAME) AGENTMONITORNAME,
+CLICENSE_EFFECTIVETODT [LICENSE_EFFECTIVETODT],
+CLEANSTATUS,
+CLEANDATE,
+JUMBOFLAG,
+CHECK_QC, CONTACTPERSON,TUNJANGANFLAG,APPLICATIONNUM,
+TRANSFERDATE
+,MOBILENO
+,FIRSTLICENSEDT
+,NPWP16 -- add by Tarum (20250109)
+,KTP_NUMBER -- add by Tarum (20250109)
+FROM MG_AGENTDATA2_V AD where [INTERMEDSUBCATCD] = ? ",0h 16m 25s,16,3,0h 5m 28.33s,0
+57,020000006533F9284024A5C4C6019E6F34334F0EF5A0D25D0000000000000000000000000000000000000000,select * from [dbo].[V_DIM_AGENT_HIERARCHY_OCBC],0h 16m 12s,14,57,0h 0m 17.05s,0
+308,020000005CDA1A1B71A2C88CD55C83E4F8EE7730661EDD390000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT
+POLICYSERVICINGAGENTSEQ,POLICYSEQ,POLICYNUM,SOURCE,AGENTCD,EFFECTIVEFROMDT,EFFECTIVETODT,ISACTIVEFL,VERSIONID,GUID,REFMOVEMENTGUID,SYSTEMCREATEDDT,SYSTEMUPDATEDDT FROM POLICYSERVICING_D WITH(NOLOCK)
+where systemupdateddt BETWEEN @P1 AND @P2",0h 15m 25s,29,308,0h 0m 3.00s,0
+12,02000000B041482CE13375FAF137B5C086462D828D94F6D00000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT *fROM COMPENSATIONPAYABLE NOLOCK
+WHERE [SYSTEMUPDATEDDT] BETWEEN @P1 AND @P2",0h 14m 50s,5,12,0h 1m 14.17s,0
+127,02000000F8B0AF04189657FD7ED962C22C29E8F2323B1DAB0000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?),@P2 bigint,@P3 bigint)select k1.kpiresultseq, k1.guid, k1.postingDt, k1.productionEffectiveDt, k1.definitionCd, k1.versionNum, k1.definitionTypeCd,k1.definitionSubTypeCd, k1.individualFl, k1.resultValue, k1.dtRefGuid, k1.timeDimensionSeq, k1.zeroMthFinJoinTimeSeq, k1.zeroMthProdJoinTimeSeq, k1.zeroMthCalJoinTimeSeq, k1.zeroMthFinDesigTimeSeq, k1.zeroMthProdDesigTimeSeq, k1.zeroMthCalDesigTimeSeq, k1.productionSharingPerc, k1.transferSharingPerc, k1.agentHistorySeq, k1.kpiIndicatorFl, k1.subKPIsTypeCd, k1.baseKPICd, k1.baseKPISubTypeCd, k1.baseKPISeq, k1.countOfActionCd, k1.hierarchyTypeCd, k1.designationCd, k1.agentStatusCd, k1.recruitmentCategoryCd, k1.tier, k1.reportingLinkCd, k1.sourceDesignationCd, k1.sourceChannelCd, k1.sourceAgencyId, k1.kpiFrequencyCd, k1.dormantStatusFl, k1.classificationCd, k1.subordinateDesignationCd, k1.subordinateClassifyCd,k1.subordinateAgentStatusCd, k1.subRecruitmentCatgCd, k1.subordinateType, k1.cmsPolicyInterfaceSeq, k1.groupProcessedFl, k1.agentId, k1.processTypeCd, k1.numeratorValue, k1.denominatorValue, k1.reinstatementPerc, k1.actionFieldTypeCd , k1.zeroQtrFinJoinTimeSeq , k1.zeroQtrProdJoinTimeSeq , k1.zeroQtrCalJoinTimeSeq , k1.zeroQtrFinDesigTimeSeq , k1.zeroQtrProdDesigTimeSeq ,k1.zeroQtrCalDesigTimeSeq , k1.zeroHyrFinJoinTimeSeq , k1.zeroHyrProdJoinTimeSeq , k1.zeroHyrCalJoinTimeSeq , k1.zeroHyrFinDesigTimeSeq , k1.zeroHyrProdDesigTimeSeq , k1.zeroHyrCalDesigTimeSeq , k1.zeroYrFinJoinTimeSeq , k1.zeroYrProdJoinTimeSeq , k1.zeroYrCalJoinTimeSeq , k1.zeroYrFinDesigTimeSeq , k1.zeroYrProdDesigTimeSeq , k1.zeroYrCalDesigTimeSeq ,k1.POLICYISSUEDT , k1.logindt,k1.premiumDueDt from KPIResult k1 where ? = ? and k1.definitionCd = @P0 and k1.resultValue not in (?,?) and k1.agentId in ( @P1 ) and k1.timeDimensionSeq between @P2 and @P3 order by k1.kpiResultSeq asc ",0h 14m 39s,14,127,0h 0m 6.92s,0
+22714,0200000015582C229997344E41B052446D5118493223AA1B0000000000000000000000000000000000000000,"(@P0 nvarchar(?))SELECT AGENTSEQ, AGENTID, AGENTNAME, CHANNELCD, INTERMEDSUBCATCD, DESIGNATIONCD, LEVEL, AGENTSTATUSCD, EMAILADDRESS, CONTACTNUM, COURSECODE, BRANCHID, BRANCHNAME, IDENTITYNUM from AGENTINFORMATIONLOGIN WHERE AGENTID = @P0 ",0h 14m 6s,42,22714,0h 0m 0.04s,0
+161,02000000795DD31C024CC9A88F118B3D403383FFF6BD22730000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?),@P2 nvarchar(?),@P3 nvarchar(?),@P4 nvarchar(?),@P5 nvarchar(?),@P6 nvarchar(?),@P7 nvarchar(?),@P8 nvarchar(?),@P9 nvarchar(?),@P10 nvarchar(?),@P11 nvarchar(?),@P12 nvarchar(?),@P13 nvarchar(?),@P14 nvarchar(?),@P15 nvarchar(?),@P16 nvarchar(?),@P17 nvarchar(?),@P18 nvarchar(?),@P19 nvarchar(?),@P20 nvarchar(?),@P21 nvarchar(?),@P22 nvarchar(?))select count(*) as col_0_0_, foldertask0_.FOLDERCD as col_1_0_ from FOLDERTASK foldertask0_ where (folderCd in( @P0 , @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 , @P21 , @P22 ))and(foldertask0_.FOLDERTASKSTATUSCD=? )and(foldertask0_.ENTITYSEQ is not null ) group by foldertask0_.FOLDERCD",0h 13m 52s,28,161,0h 0m 5.17s,0
+178,02000000A645180F22F6701B87A5A91A9A12E94F7FCFC91A0000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?),@P2 nvarchar(?),@P3 nvarchar(?),@P4 nvarchar(?),@P5 nvarchar(?),@P6 nvarchar(?),@P7 nvarchar(?),@P8 nvarchar(?),@P9 nvarchar(?),@P10 nvarchar(?),@P11 nvarchar(?),@P12 nvarchar(?),@P13 nvarchar(?),@P14 nvarchar(?),@P15 nvarchar(?),@P16 nvarchar(?),@P17 nvarchar(?),@P18 nvarchar(?),@P19 nvarchar(?),@P20 nvarchar(?),@P21 nvarchar(?),@P22 nvarchar(?),@P23 nvarchar(?),@P24 nvarchar(?),@P25 nvarchar(?),@P26 nvarchar(?),@P27 nvarchar(?),@P28 nvarchar(?),@P29 nvarchar(?),@P30 nvarchar(?),@P31 nvarchar(?),@P32 nvarchar(?),@P33 nvarchar(?),@P34 nvarchar(?),@P35 nvarchar(?),@P36 nvarchar(?),@P37 nvarchar(?),@P38 nvarchar(?),@P39 nvarchar(?),@P40 nvarchar(?),@P41 nvarchar(?),@P42 nvarchar(?),@P43 nvarchar(?),@P44 nvarchar(?),@P45 nvarchar(?),@P46 nvarchar(?),@P47 nvarchar(?),@P48 nvarchar(?),@P49 nvarchar(?),@P50 nvarchar(?),@P51 nvarchar(?),@P52 nvarchar(?),@P53 nvarchar(?),@P54 nvarchar(?),@P55 nvarchar(?),@P56 nvarchar(?),@P57 nvarchar(?),@P58 nvarchar(?),@P59 nvarchar(?),@P60 nvarchar(?),@P61 nvarchar(?),@P62 nvarchar(?),@P63 nvarchar(?),@P64 nvarchar(?),@P65 nvarchar(?),@P66 nvarchar(?),@P67 nvarchar(?),@P68 nvarchar(?),@P69 nvarchar(?),@P70 nvarchar(?),@P71 nvarchar(?),@P72 nvarchar(?),@P73 nvarchar(?),@P74 nvarchar(?),@P75 nvarchar(?),@P76 nvarchar(?),@P77 nvarchar(?),@P78 nvarchar(?),@P79 nvarchar(?),@P80 nvarchar(?),@P81 nvarchar(?),@P82 nvarchar(?),@P83 nvarchar(?),@P84 nvarchar(?),@P85 nvarchar(?),@P86 nvarchar(?),@P87 nvarchar(?),@P88 nvarchar(?),@P89 nvarchar(?),@P90 nvarchar(?),@P91 nvarchar(?),@P92 nvarchar(?),@P93 nvarchar(?),@P94 nvarchar(?),@P95 nvarchar(?),@P96 nvarchar(?),@P97 nvarchar(?),@P98 nvarchar(?),@P99 nvarchar(?))select interfaceq0_.INTERFACEQUEUESEQ as INTERFAC1_285_0_, intpolicyd1_.INTPOLICYSEQ as INTPOLIC1_295_1_, intpolicyc2_.INTPOLICYCOMPONENTSEQ as INTPOLIC1_259_2_, intpolicyp3_.INTPOLICYPRODUCTAGENTSEQ as INTPOLIC1_286_3_, intpolicyc4_.INTPOLICYCLIENTINSUREDSEQ as INTPOLIC1_305_4_, interfaceq0_.versionid as versionid285_0_, interfaceq0_.guid as guid285_0_, interfaceq0_.INTERFACEHEADERSEQ as INTERFAC4_285_0_, interfaceq0_.PROCESSDATE as PROCESSD5_285_0_, interfaceq0_.TABLESOURCE as TABLESOU6_285_0_, interfaceq0_.TRANSACTIONNUMBER as TRANSACT7_285_0_, interfaceq0_.POLICYNUM as POLICYNUM285_0_, interfaceq0_.SOURCESYSTEM as SOURCESY9_285_0_, interfaceq0_.STATUS as STATUS285_0_, interfaceq0_.REFTRANNO as REFTRANNO285_0_, interfaceq0_.ALTERATIONTYPE as ALTERAT12_285_0_, interfaceq0_.LOTNO as LOTNO285_0_, interfaceq0_.ERRORMESSAGE as ERRORME14_285_0_, intpolicyd1_.versionid as versionid295_1_, intpolicyd1_.guid as guid295_1_, intpolicyd1_.POLICYNUM as POLICYNUM295_1_, intpolicyd1_.SOURCESYSTEM as SOURCESY5_295_1_, intpolicyd1_.POLICYTYPE as POLICYTYPE295_1_, intpolicyd1_.ISSUEDT as ISSUEDT295_1_, intpolicyd1_.COMMENCEMENTDT as COMMENCE8_295_1_, intpolicyd1_.POLICYTERM as POLICYTERM295_1_, intpolicyd1_.POLICYBRANCHCD as POLICYB10_295_1_, intpolicyd1_.AGENTID as AGENTID295_1_, intpolicyd1_.MONAGENTID as MONAGENTID295_1_, intpolicyd1_.POLICYSTATUSCD as POLICYS13_295_1_, intpolicyd1_.OWNERPARTYSEQ as OWNERPA14_295_1_, intpolicyd1_.LIFEASSUREDPARTYSEQ as LIFEASS15_295_1_, intpolicyd1_.INTERFACEHEADERSEQ as INTERFA16_295_1_, intpolicyd1_.UPLOADSTATUS as UPLOADS17_295_1_, intpolicyd1_.ERRORDESCRIPTION as ERRORDE18_295_1_, intpolicyd1_.ALTERATIONTYPE as ALTERAT19_295_1_, intpolicyd1_.PTRNEFF as PTRNEFF295_1_, intpolicyd1_.TRANSATION_DATE as TRANSATION21_295_1_, intpolicyd1_.LOGINDT as LOGINDT295_1_, intpolicyd1_.CURRENCYCD as CURRENCYCD295_1_, intpolicyd1_.PREMIUMSTATUS as PREMIUM24_295_1_, intpolicyd1_.SELFCONTRACTINDICATORFL as SELFCON25_295_1_, intpolicyd1_.KEYMANPOLICYFL as KEYMANP26_295_1_, intpolicyd1_.EMPLOYEEFL as EMPLOYEEFL295_1_, intpolicyd1_.NOL as NOL295_1_, intpolicyd1_.RIDERCOUNT as RIDERCOUNT295_1_, intpolicyd1_.EXCHANGERATE as EXCHANG30_295_1_, intpolicyd1_.REFTRANNO as REFTRANNO295_1_, intpolicyd1_.PASBUSINESSDATE as PASBUSI32_295_1_, intpolicyd1_.CAMPAIGNCODE as CAMPAIG33_295_1_, intpolicyd1_.FREELOOKCANCELLATIONDT as FREELOO34_295_1_, intpolicyc2_.versionid as versionid259_2_, intpolicyc2_.guid as guid259_2_, intpolicyc2_.POLICYNUM as POLICYNUM259_2_, intpolicyc2_.SOURCESYSTEM as SOURCESY5_259_2_, intpolicyc2_.PRODUCTCD as PRODUCTCD259_2_, intpolicyc2_.PREMIUMPAYINGTERM as PREMIUMP7_259_2_, intpolicyc2_.COMMENCEMENTDT as COMMENCE8_259_2_, intpolicyc2_.ISSUEDT as ISSUEDT259_2_, intpolicyc2_.ANNUALIZEDPREMIUMAMT as ANNUALI10_259_2_, intpolicyc2_.MODALPREMIUMAMT as MODALPR11_259_2_, intpolicyc2_.EXTRAPREMIUMAMT as EXTRAPR12_259_2_, intpolicyc2_.SUMINSURRED as SUMINSU13_259_2_, intpolicyc2_.BILLFREQ as BILLFREQ259_2_, intpolicyc2_.PRODUCTSTATUSCD as PRODUCT15_259_2_, intpolicyc2_.INTERFACEHEADERSEQ as INTERFA16_259_2_, intpolicyc2_.PRODUCTTYPECD as PRODUCT17_259_2_, intpolicyc2_.PRODUCTVER as PRODUCTVER259_2_, intpolicyc2_.PREMIUMTYPECD as PREMIUM19_259_2_, intpolicyc2_.SUBTRANCHENO as SUBTRAN20_259_2_, intpolicyc2_.PREMIUMPAYINGTERMUNITCD as PREMIUM21_259_2_, intpolicyc2_.FIRSTPREMIUMAMOUNT as FIRSTPR22_259_2_, intpolicyc2_.DERIVEDENTRYAGE as DERIVED23_259_2_, intpolicyc2_.REFTRANNO as REFTRANNO259_2_, intpolicyc2_.PASBUSINESSDATE as PASBUSI25_259_2_, intpolicyp3_.versionid as versionid286_3_, intpolicyp3_.guid as guid286_3_, intpolicyp3_.SUBTRANCHENO as SUBTRANC4_286_3_, intpolicyp3_.AGENTID as AGENTID286_3_, intpolicyp3_.COMMISSIONSPLIT as COMMISSI6_286_3_, intpolicyp3_.PRODUCTIONSPLIT as PRODUCTI7_286_3_, intpolicyp3_.REFTRANNO as REFTRANNO286_3_, intpolicyp3_.PASBUSINESSDATE as PASBUSIN9_286_3_, intpolicyp3_.INTERFACEHEADERSEQ as INTERFA10_286_3_, intpolicyc4_.versionid as versionid305_4_, intpolicyc4_.guid as guid305_4_, intpolicyc4_.POLICYNUM as POLICYNUM305_4_, intpolicyc4_.CLIENTNO as CLIENTNO305_4_, intpolicyc4_.CLIENTTYPE as CLIENTTYPE305_4_, intpolicyc4_.CLIENTNAME as CLIENTNAME305_4_, intpolicyc4_.REFTRANNO as REFTRANNO305_4_, intpolicyc4_.PASBUSINESSDATE as PASBUSIN9_305_4_, intpolicyc4_.INTERFACEHEADERSEQ as INTERFA10_305_4_ from INTERFACEQUEUE interfaceq0_, INTPOLICY intpolicyd1_, INTPOLICYCOMPONENT intpolicyc2_, INTPOLICYPRODUCTAGENTLINK intpolicyp3_, INTPOLICYCLIENTINSURED intpolicyc4_ where (interfaceq0_.POLICYNUM in( @P0 , @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 , @P21 , @P22 , @P23 , @P24 , @P25 , @P26 , @P27 , @P28 , @P29 , @P30 , @P31 , @P32 , @P33 , @P34 , @P35 , @P36 , @P37 , @P38 , @P39 , @P40 , @P41 , @P42 , @P43 , @P44 , @P45 , @P46 , @P47 , @P48 , @P49 , @P50 , @P51 , @P52 , @P53 , @P54 , @P55 , @P56 , @P57 , @P58 , @P59 , @P60 , @P61 , @P62 , @P63 , @P64 , @P65 , @P66 , @P67 , @P68 , @P69 , @P70 , @P71 , @P72 , @P73 , @P74 , @P75 , @P76 , @P77 , @P78 , @P79 , @P80 , @P81 , @P82 , @P83 , @P84 , @P85 , @P86 , @P87 , @P88 , @P89 , @P90 , @P91 , @P92 , @P93 , @P94 , @P95 , @P96 , @P97 , @P98 , @P99 ))and(interfaceq0_.STATUS in(? , ?))and(interfaceq0_.TABLESOURCE=? )and(intpolicyd1_.INTPOLICYSEQ=interfaceq0_.TRANSACTIONNUMBER )and(intpolicyd1_.INTERFACEHEADERSEQ=interfaceq0_.INTERFACEHEADERSEQ )and(intpolicyd1_.POLICYNUM=interfaceq0_.POLICYNUM )and(intpolicyc2_.POLICYNUM=intpolicyd1_.POLICYNUM )and(intpolicyc2_.REFTRANNO=intpolicyd1_.REFTRANNO )and(intpolicyc2_.INTERFACEHEADERSEQ=intpolicyd1_.INTERFACEHEADERSEQ )and(intpolicyp3_.SUBTRANCHENO=intpolicyc2_.SUBTRANCHENO )and(intpolicyp3_.REFTRANNO=intpolicyd1_.REFTRANNO )and(intpolicyp3_.INTERFACEHEADERSEQ=intpolicyd1_.INTERFACEHEADERSEQ )and(intpolicyc4_.POLICYNUM=intpolicyd1_.POLICYNUM )and(intpolicyc4_.REFTRANNO=intpolicyd1_.REFTRANNO )and(intpolicyc4_.INTERFACEHEADERSEQ=intpolicyd1_.INTERFACEHEADERSEQ )",0h 13m 27s,40,178,0h 0m 4.53s,0
+5841,02000000C5A4D430C481A838AC627D809D7BA4855A2CF7890000000000000000000000000000000000000000,"(@P0 bigint)SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION from BATCH_JOB_EXECUTION where JOB_INSTANCE_ID = @P0 order by JOB_EXECUTION_ID desc",0h 13m 19s,60,5841,0h 0m 0.14s,0
+16,02000000215D1D097AB1E507C09A0A15A51EA05C06BC7EA70000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT *fROM PREMIUM NOLOCK
+WHERE [SYSTEMUPDATEDDT] BETWEEN @P1 AND @P2",0h 12m 54s,5,16,0h 0m 48.38s,0
+0,02000000F7CAAE38E50E6C53A32580C415E3A1CD64BC02790000000000000000000000000000000000000000,"WITH CTEResults AS
+(SELECT
+ROW_NUMBER() OVER(ORDER BY A.AGENTCD) AS NOMOR,
+A.* FROM
+(SELECT
+DISTINCT PREMIUMSEQ,
+P.POLICYNUM,
+CONVERT(VARCHAR(?),P.POLICYISSUEDT,?) [POLICYISSUEDT],
+PREM.POLICYYEARINFORCE,
+convert(VARCHAR(?),PREM.PREMIUMDUEDT,?) [PREMIUMDUEDT],
+CONVERT(VARCHAR(?),PREM.APPROPRIATIONDT,?) [APPROPRIATIONDT],
+PREM.APPROPRIATIONAMT,
+PS.AGENTCD,
+B.AGENTNAME,
+PP.PRODUCTCD,
+PP.PREMIUMTYPECD,
+PREM.PREMIUMSUBTYPECD,
+P.POLICYSTATUSCD,
+P.SELFCONTRACTINDICATORFL,
+CASE
+WHEN LEFT(PS.AGENTCD, ?)=? THEN ?
+WHEN LEFT(PS.AGENTCD, ?)=? THEN ?
+WHEN LEFT(PS.AGENTCD, ?)=? THEN ?
+END [CHANNEL]
+FROM
+POLICY_M P
+INNER JOIN POLICYPRODUCT_D PP ON P.POLICYNUM = PP.POLICYNUM
+INNER JOIN PREMIUM PREM ON PP.SUBTRANCHENO = PREM.SUBTRANCHENO
+INNER JOIN POLICYSERVICING_D PS ON (
+P.POLICYNUM = PS.POLICYNUM
+AND EFFECTIVEFROMDT &lt;= PREM.APPROPRIATIONDT
+AND (
+EFFECTIVETODT &gt;= PREM.APPROPRIATIONDT
+OR EFFECTIVETODT IS NULL
+)
+)
+INNER JOIN AGENT B ON PS.AGENTCD = B.AGENTID
+) A )
+SELECT * FROM CTEResults WHERE nomor BETWEEN (? * ? - (?-?)) AND ?*?;",0h 12m 41s,2,0,'-,0
+19,02000000759E943A0699A5B5FBC8D0B4E699FBA1CB0B60C80000000000000000000000000000000000000000,"select top ? kpiresultd0_.KPIRESULTSEQ as KPIRESUL1_75_, kpiresultd0_.versionid as versionid75_, kpiresultd0_.guid as guid75_, kpiresultd0_.POSTINGDT as POSTINGDT75_, kpiresultd0_.PRODUCTIONEFFECTIVEDT as PRODUCTI5_75_, kpiresultd0_.DEFINITIONCD as DEFINITI6_75_, kpiresultd0_.VERSIONNUM as VERSIONNUM75_, kpiresultd0_.DEFINITIONTYPECD as DEFINITI8_75_, kpiresultd0_.DEFINITIONSUBTYPECD as DEFINITI9_75_, kpiresultd0_.INDIVIDUALFL as INDIVID10_75_, kpiresultd0_.RESULTVALUE as RESULTV11_75_, kpiresultd0_.DTREFGUID as DTREFGUID75_, kpiresultd0_.TIMEDIMENSIONSEQ as TIMEDIM13_75_, kpiresultd0_.ZEROMTHFINJOINTIMESEQ as ZEROMTH14_75_, kpiresultd0_.ZEROMTHPRODJOINTIMESEQ as ZEROMTH15_75_, kpiresultd0_.ZEROMTHCALJOINTIMESEQ as ZEROMTH16_75_, kpiresultd0_.ZEROMTHFINDESIGTIMESEQ as ZEROMTH17_75_, kpiresultd0_.ZEROMTHPRODDESIGTIMESEQ as ZEROMTH18_75_, kpiresultd0_.ZEROMTHCALDESIGTIMESEQ as ZEROMTH19_75_, kpiresultd0_.ZEROQTRFINJOINTIMESEQ as ZEROQTR20_75_, kpiresultd0_.ZEROQTRPRODJOINTIMESEQ as ZEROQTR21_75_, kpiresultd0_.ZEROQTRCALJOINTIMESEQ as ZEROQTR22_75_, kpiresultd0_.ZEROQTRFINDESIGTIMESEQ as ZEROQTR23_75_, kpiresultd0_.ZEROQTRPRODDESIGTIMESEQ as ZEROQTR24_75_, kpiresultd0_.ZEROQTRCALDESIGTIMESEQ as ZEROQTR25_75_, kpiresultd0_.ZEROHYRFINJOINTIMESEQ as ZEROHYR26_75_, kpiresultd0_.ZEROHYRPRODJOINTIMESEQ as ZEROHYR27_75_, kpiresultd0_.ZEROHYRCALJOINTIMESEQ as ZEROHYR28_75_, kpiresultd0_.ZEROHYRFINDESIGTIMESEQ as ZEROHYR29_75_, kpiresultd0_.ZEROHYRPRODDESIGTIMESEQ as ZEROHYR30_75_, kpiresultd0_.ZEROHYRCALDESIGTIMESEQ as ZEROHYR31_75_, kpiresultd0_.ZEROYRFINJOINTIMESEQ as ZEROYRF32_75_, kpiresultd0_.ZEROYRPRODJOINTIMESEQ as ZEROYRP33_75_, kpiresultd0_.ZEROYRCALJOINTIMESEQ as ZEROYRC34_75_, kpiresultd0_.ZEROYRFINDESIGTIMESEQ as ZEROYRF35_75_, kpiresultd0_.ZEROYRPRODDESIGTIMESEQ as ZEROYRP36_75_, kpiresultd0_.ZEROYRCALDESIGTIMESEQ as ZEROYRC37_75_, kpiresultd0_.PRODUCTIONSHARINGPERC as PRODUCT38_75_, kpiresultd0_.TRANSFERSHARINGPERC as TRANSFE39_75_, kpiresultd0_.AGENTHISTORYSEQ as AGENTHI40_75_, kpiresultd0_.KPIINDICATORFL as KPIINDI41_75_, kpiresultd0_.SUBKPISTYPECD as SUBKPIS42_75_, kpiresultd0_.BASEKPICD as BASEKPICD75_, kpiresultd0_.BASEKPISUBTYPECD as BASEKPI44_75_, kpiresultd0_.BASEKPISEQ as BASEKPISEQ75_, kpiresultd0_.COUNTOFACTIONCD as COUNTOF46_75_, kpiresultd0_.HIERARCHYTYPECD as HIERARC47_75_, kpiresultd0_.DESIGNATIONCD as DESIGNA48_75_, kpiresultd0_.AGENTSTATUSCD as AGENTST49_75_, kpiresultd0_.RECRUITMENTCATEGORYCD as RECRUIT50_75_, kpiresultd0_.TIER as TIER75_, kpiresultd0_.REPORTINGLINKCD as REPORTI52_75_, kpiresultd0_.SOURCEAGENTID as SOURCEA53_75_, kpiresultd0_.SOURCEDESIGNATIONCD as SOURCED54_75_, kpiresultd0_.SOURCECHANNELCD as SOURCEC55_75_, kpiresultd0_.SOURCEAGENCYID as SOURCEA56_75_, kpiresultd0_.KPIFREQUENCYCD as KPIFREQ57_75_, kpiresultd0_.DORMANTSTATUSFL as DORMANT58_75_, kpiresultd0_.CLASSIFICATIONCD as CLASSIF59_75_, kpiresultd0_.SUBORDINATEDESIGNATIONCD as SUBORDI60_75_, kpiresultd0_.SUBORDINATECLASSIFYCD as SUBORDI61_75_, kpiresultd0_.SUBORDINATEAGENTSTATUSCD as SUBORDI62_75_, kpiresultd0_.SUBRECRUITMENTCATGCD as SUBRECR63_75_, kpiresultd0_.SUBORDINATETYPE as SUBORDI64_75_, kpiresultd0_.CMSPOLICYINTERFACESEQ as CMSPOLI65_75_, kpiresultd0_.GROUPPROCESSEDFL as GROUPPR66_75_, kpiresultd0_.AGENTID as AGENTID75_, kpiresultd0_.PROCESSTYPECD as PROCESS68_75_, kpiresultd0_.NUMERATORVALUE as NUMERAT69_75_, kpiresultd0_.DENOMINATORVALUE as DENOMIN70_75_, kpiresultd0_.REINSTATEMENTPERC as REINSTA71_75_, kpiresultd0_.ACTIONFIELDTYPECD as ACTIONF72_75_, kpiresultd0_.EVALUATIONDEFNCD as EVALUAT73_75_, kpiresultd0_.HIERARCHYCOMMFL as HIERARC74_75_, kpiresultd0_.RATE as RATE75_, kpiresultd0_.ROPCLAWBACKFL as ROPCLAW76_75_, kpiresultd0_.POLICYISSUEDT as POLICYI77_75_, kpiresultd0_.LOGINDT as LOGINDT75_, kpiresultd0_.POLICYNUM as POLICYNUM75_, kpiresultd0_.PARTYSEQ as PARTYSEQ75_, kpiresultd0_.OLDKPISEQ as OLDKPISEQ75_, kpiresultd0_.CREATEDDT as CREATEDDT75_, kpiresultd0_.CREATEDBY as CREATEDBY75_, kpiresultd0_.UPDATEDDT as UPDATEDDT75_, kpiresultd0_.UPDATEDBY as UPDATEDBY75_, kpiresultd0_.SYSTEMCREATEDDT as SYSTEMC86_75_, kpiresultd0_.SYSTEMUPDATEDDT as SYSTEMU87_75_, kpiresultd0_.PREMIUMDUEDT as PREMIUM88_75_, kpiresultd0_.PREMIUMCHANGETYPE as PREMIUM89_75_, kpiresultd0_.MULTIPLIER as MULTIPLIER75_, kpiresultd0_.LOTNO as LOTNO75_ from KPIResult kpiresultd0_, DMSDEFINITIONMASTER dmsdefinit1_ where (kpiresultd0_.HIERARCHYCOMMFL=? )and(kpiresultd0_.DEFINITIONCD=dmsdefinit1_.DEFINITIONCD )and(dmsdefinit1_.OVERRIDINGREQUIREDFL=? )and(dmsdefinit1_.VERSIONNUM=(select max(dmsdefinit2_.VERSIONNUM) from DMSDEFINITIONMASTER dmsdefinit2_ where (dmsdefinit2_.DEFINITIONCD=dmsdefinit1_.DEFINITIONCD )))",0h 12m 7s,6,19,0h 0m 38.26s,0
+0,020000007D26902D18CA46FAE652F12C23B05A46DD97F1F20000000000000000000000000000000000000000,"select count(?) as jumlah from (SELECT
+ROW_NUMBER() OVER(ORDER BY A.AGENTCD) AS NOMOR,
+A.* FROM
+(SELECT
+DISTINCT PREMIUMSEQ,
+P.POLICYNUM,
+CONVERT(VARCHAR(?),P.POLICYISSUEDT,?) [POLICYISSUEDT],
+PREM.POLICYYEARINFORCE,
+convert(VARCHAR(?),PREM.PREMIUMDUEDT,?) [PREMIUMDUEDT],
+CONVERT(VARCHAR(?),PREM.APPROPRIATIONDT,?) [APPROPRIATIONDT],
+PREM.APPROPRIATIONAMT,
+PS.AGENTCD,
+B.AGENTNAME,
+PP.PRODUCTCD,
+PP.PREMIUMTYPECD,
+PREM.PREMIUMSUBTYPECD,
+P.POLICYSTATUSCD,
+P.SELFCONTRACTINDICATORFL,
+CASE
+WHEN LEFT(PS.AGENTCD, ?)=? THEN ?
+WHEN LEFT(PS.AGENTCD, ?)=? THEN ?
+WHEN LEFT(PS.AGENTCD, ?)=? THEN ?
+END [CHANNEL]
+FROM
+POLICY_M P
+INNER JOIN POLICYPRODUCT_D PP ON P.POLICYNUM = PP.POLICYNUM
+INNER JOIN PREMIUM PREM ON PP.SUBTRANCHENO = PREM.SUBTRANCHENO
+INNER JOIN POLICYSERVICING_D PS ON (
+P.POLICYNUM = PS.POLICYNUM
+AND EFFECTIVEFROMDT &lt;= PREM.APPROPRIATIONDT
+AND (
+EFFECTIVETODT &gt;= PREM.APPROPRIATIONDT
+OR EFFECTIVETODT IS NULL
+)
+)
+INNER JOIN AGENT B ON PS.AGENTCD = B.AGENTID
+) A ) p ",0h 11m 55s,2,0,'-,0
+0,0300060063A69C39F3E89600D1B3000001000000000000000000000000000000000000000000000000000000,CS_RPA_OFFICEALLOWANCE,0h 11m 52s,4,0,'-,0
+18,02000000E363ED04172DAA3F2BA0C01B0999AAE7EB5B35680000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?),@P2 nvarchar(?),@P3 nvarchar(?),@P4 nvarchar(?),@P5 nvarchar(?),@P6 nvarchar(?),@P7 nvarchar(?),@P8 nvarchar(?),@P9 nvarchar(?),@P10 nvarchar(?),@P11 nvarchar(?),@P12 nvarchar(?),@P13 nvarchar(?),@P14 nvarchar(?),@P15 nvarchar(?),@P16 nvarchar(?),@P17 nvarchar(?),@P18 nvarchar(?),@P19 nvarchar(?),@P20 nvarchar(?),@P21 nvarchar(?),@P22 nvarchar(?),@P23 nvarchar(?),@P24 nvarchar(?),@P25 nvarchar(?),@P26 nvarchar(?),@P27 nvarchar(?),@P28 nvarchar(?),@P29 nvarchar(?),@P30 nvarchar(?),@P31 nvarchar(?),@P32 nvarchar(?),@P33 nvarchar(?),@P34 nvarchar(?),@P35 nvarchar(?),@P36 nvarchar(?),@P37 nvarchar(?),@P38 nvarchar(?),@P39 nvarchar(?),@P40 nvarchar(?),@P41 nvarchar(?),@P42 nvarchar(?),@P43 nvarchar(?),@P44 nvarchar(?),@P45 nvarchar(?),@P46 nvarchar(?),@P47 nvarchar(?),@P48 nvarchar(?),@P49 nvarchar(?),@P50 nvarchar(?),@P51 nvarchar(?),@P52 nvarchar(?),@P53 nvarchar(?),@P54 nvarchar(?),@P55 nvarchar(?),@P56 nvarchar(?),@P57 nvarchar(?),@P58 nvarchar(?),@P59 nvarchar(?),@P60 nvarchar(?),@P61 nvarchar(?),@P62 nvarchar(?),@P63 nvarchar(?),@P64 nvarchar(?),@P65 nvarchar(?),@P66 nvarchar(?),@P67 nvarchar(?),@P68 nvarchar(?),@P69 nvarchar(?),@P70 nvarchar(?),@P71 nvarchar(?),@P72 nvarchar(?),@P73 nvarchar(?),@P74 nvarchar(?),@P75 nvarchar(?),@P76 nvarchar(?),@P77 nvarchar(?),@P78 nvarchar(?),@P79 nvarchar(?),@P80 nvarchar(?),@P81 nvarchar(?),@P82 nvarchar(?),@P83 nvarchar(?),@P84 nvarchar(?),@P85 nvarchar(?),@P86 nvarchar(?),@P87 nvarchar(?),@P88 nvarchar(?),@P89 nvarchar(?),@P90 nvarchar(?),@P91 nvarchar(?),@P92 nvarchar(?),@P93 nvarchar(?),@P94 nvarchar(?),@P95 nvarchar(?),@P96 nvarchar(?),@P97 nvarchar(?),@P98 nvarchar(?),@P99 nvarchar(?),@P100 nvarchar(?),@P101 nvarchar(?),@P102 nvarchar(?),@P103 nvarchar(?),@P104 nvarchar(?),@P105 nvarchar(?),@P106 nvarchar(?),@P107 nvarchar(?),@P108 nvarchar(?),@P109 nvarchar(?),@P110 nvarchar(?),@P111 nvarchar(?),@P112 nvarchar(?),@P113 nvarchar(?),@P114 nvarchar(?),@P115 nvarchar(?),@P116 nvarchar(?),@P117 nvarchar(?),@P118 nvarchar(?),@P119 nvarchar(?),@P120 nvarchar(?),@P121 nvarchar(?),@P122 nvarchar(?),@P123 nvarchar(?),@P124 nvarchar(?),@P125 nvarchar(?),@P126 nvarchar(?),@P127 nvarchar(?),@P128 nvarchar(?),@P129 nvarchar(?),@P130 nvarchar(?),@P131 nvarchar(?),@P132 nvarchar(?),@P133 nvarchar(?),@P134 nvarchar(?),@P135 nvarchar(?),@P136 nvarchar(?),@P137 nvarchar(?),@P138 nvarchar(?),@P139 nvarchar(?),@P140 nvarchar(?),@P141 nvarchar(?),@P142 nvarchar(?),@P143 nvarchar(?),@P144 nvarchar(?),@P145 nvarchar(?),@P146 nvarchar(?),@P147 nvarchar(?),@P148 nvarchar(?),@P149 nvarchar(?),@P150 nvarchar(?),@P151 nvarchar(?),@P152 nvarchar(?),@P153 nvarchar(?),@P154 nvarchar(?),@P155 nvarchar(?),@P156 nvarchar(?),@P157 nvarchar(?),@P158 nvarchar(?),@P159 nvarchar(?),@P160 nvarchar(?),@P161 nvarchar(?),@P162 nvarchar(?),@P163 nvarchar(?),@P164 nvarchar(?),@P165 nvarchar(?),@P166 nvarchar(?),@P167 nvarchar(?),@P168 nvarchar(?),@P169 nvarchar(?),@P170 nvarchar(?),@P171 nvarchar(?),@P172 nvarchar(?),@P173 nvarchar(?),@P174 nvarchar(?),@P175 nvarchar(?),@P176 nvarchar(?),@P177 nvarchar(?),@P178 nvarchar(?),@P179 nvarchar(?),@P180 nvarchar(?),@P181 nvarchar(?),@P182 nvarchar(?),@P183 nvarchar(?),@P184 nvarchar(?),@P185 nvarchar(?),@P186 nvarchar(?),@P187 nvarchar(?),@P188 nvarchar(?),@P189 nvarchar(?),@P190 nvarchar(?),@P191 nvarchar(?),@P192 nvarchar(?),@P193 nvarchar(?),@P194 nvarchar(?),@P195 nvarchar(?),@P196 nvarchar(?),@P197 nvarchar(?),@P198 nvarchar(?),@P199 nvarchar(?),@P200 nvarchar(?),@P201 nvarchar(?),@P202 nvarchar(?),@P203 nvarchar(?),@P204 nvarchar(?),@P205 nvarchar(?),@P206 nvarchar(?),@P207 nvarchar(?),@P208 nvarchar(?),@P209 nvarchar(?),@P210 nvarchar(?),@P211 nvarchar(?),@P212 nvarchar(?),@P213 nvarchar(?),@P214 nvarchar(?),@P215 nvarchar(?),@P216 nvarchar(?),@P217 nvarchar(?),@P218 nvarchar(?),@P219 nvarchar(?),@P220 nvarchar(?),@P221 nvarchar(?),@P222 nvarchar(?),@P223 nvarchar(?),@P224 nvarchar(?),@P225 nvarchar(?),@P226 nvarchar(?),@P227 nvarchar(?),@P228 nvarchar(?),@P229 nvarchar(?),@P230 nvarchar(?),@P231 nvarchar(?),@P232 nvarchar(?),@P233 nvarchar(?),@P234 nvarchar(?),@P235 nvarchar(?),@P236 nvarchar(?),@P237 nvarchar(?),@P238 nvarchar(?),@P239 nvarchar(?),@P240 nvarchar(?),@P241 nvarchar(?),@P242 nvarchar(?),@P243 nvarchar(?),@P244 nvarchar(?),@P245 nvarchar(?),@P246 nvarchar(?),@P247 nvarchar(?),@P248 nvarchar(?),@P249 nvarchar(?),@P250 nvarchar(?),@P251 nvarchar(?),@P252 nvarchar(?),@P253 nvarchar(?),@P254 nvarchar(?),@P255 nvarchar(?),@P256 nvarchar(?),@P257 nvarchar(?),@P258 nvarchar(?),@P259 nvarchar(?),@P260 nvarchar(?),@P261 nvarchar(?),@P262 nvarchar(?),@P263 nvarchar(?),@P264 nvarchar(?),@P265 nvarchar(?),@P266 nvarchar(?),@P267 nvarchar(?),@P268 nvarchar(?),@P269 nvarchar(?),@P270 nvarchar(?),@P271 nvarchar(?),@P272 nvarchar(?),@P273 nvarchar(?),@P274 nvarchar(?),@P275 nvarchar(?),@P276 nvarchar(?),@P277 nvarchar(?),@P278 nvarchar(?),@P279 nvarchar(?),@P280 nvarchar(?),@P281 nvarchar(?),@P282 nvarchar(?),@P283 nvarchar(?),@P284 nvarchar(?),@P285 nvarchar(?),@P286 nvarchar(?),@P287 nvarchar(?),@P288 nvarchar(?),@P289 nvarchar(?),@P290 nvarchar(?),@P291 nvarchar(?),@P292 nvarchar(?),@P293 nvarchar(?),@P294 nvarchar(?),@P295 nvarchar(?),@P296 nvarchar(?),@P297 nvarchar(?),@P298 nvarchar(?),@P299 nvarchar(?),@P300 nvarchar(?),@P301 nvarchar(?),@P302 nvarchar(?),@P303 nvarchar(?),@P304 bigint,@P305 bigint)select k1.kpiresultseq, k1.guid, k1.postingDt, k1.productionEffectiveDt, k1.definitionCd, k1.versionNum, k1.definitionTypeCd,k1.definitionSubTypeCd, k1.individualFl, k1.resultValue, k1.dtRefGuid, k1.timeDimensionSeq, k1.zeroMthFinJoinTimeSeq, k1.zeroMthProdJoinTimeSeq, k1.zeroMthCalJoinTimeSeq, k1.zeroMthFinDesigTimeSeq, k1.zeroMthProdDesigTimeSeq, k1.zeroMthCalDesigTimeSeq, k1.productionSharingPerc, k1.transferSharingPerc, k1.agentHistorySeq, k1.kpiIndicatorFl, k1.subKPIsTypeCd, k1.baseKPICd, k1.baseKPISubTypeCd, k1.baseKPISeq, k1.countOfActionCd, k1.hierarchyTypeCd, k1.designationCd, k1.agentStatusCd, k1.recruitmentCategoryCd, k1.tier, k1.reportingLinkCd, k1.sourceDesignationCd, k1.sourceChannelCd, k1.sourceAgencyId, k1.kpiFrequencyCd, k1.dormantStatusFl, k1.classificationCd, k1.subordinateDesignationCd, k1.subordinateClassifyCd,k1.subordinateAgentStatusCd, k1.subRecruitmentCatgCd, k1.subordinateType, k1.cmsPolicyInterfaceSeq, k1.groupProcessedFl, k1.agentId, k1.processTypeCd, k1.numeratorValue, k1.denominatorValue, k1.reinstatementPerc, k1.actionFieldTypeCd , k1.zeroQtrFinJoinTimeSeq , k1.zeroQtrProdJoinTimeSeq , k1.zeroQtrCalJoinTimeSeq , k1.zeroQtrFinDesigTimeSeq , k1.zeroQtrProdDesigTimeSeq ,k1.zeroQtrCalDesigTimeSeq , k1.zeroHyrFinJoinTimeSeq , k1.zeroHyrProdJoinTimeSeq , k1.zeroHyrCalJoinTimeSeq , k1.zeroHyrFinDesigTimeSeq , k1.zeroHyrProdDesigTimeSeq , k1.zeroHyrCalDesigTimeSeq , k1.zeroYrFinJoinTimeSeq , k1.zeroYrProdJoinTimeSeq , k1.zeroYrCalJoinTimeSeq , k1.zeroYrFinDesigTimeSeq , k1.zeroYrProdDesigTimeSeq , k1.zeroYrCalDesigTimeSeq ,k1.POLICYISSUEDT , k1.logindt,k1.premiumDueDt from KPIResult k1 where ? = ? and k1.definitionCd = @P0 and k1.resultValue not in (?,?) and k1.agentId in ( @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 , @P21 , @P22 , @P23 , @P24 , @P25 , @P26 , @P27 , @P28 , @P29 , @P30 , @P31 , @P32 , @P33 , @P34 , @P35 , @P36 , @P37 , @P38 , @P39 , @P40 , @P41 , @P42 , @P43 , @P44 , @P45 , @P46 , @P47 , @P48 , @P49 , @P50 , @P51 , @P52 , @P53 , @P54 , @P55 , @P56 , @P57 , @P58 , @P59 , @P60 , @P61 , @P62 , @P63 , @P64 , @P65 , @P66 , @P67 , @P68 , @P69 , @P70 , @P71 , @P72 , @P73 , @P74 , @P75 , @P76 , @P77 , @P78 , @P79 , @P80 , @P81 , @P82 , @P83 , @P84 , @P85 , @P86 , @P87 , @P88 , @P89 , @P90 , @P91 , @P92 , @P93 , @P94 , @P95 , @P96 , @P97 , @P98 , @P99 , @P100 , @P101 , @P102 , @P103 , @P104 , @P105 , @P106 , @P107 , @P108 , @P109 , @P110 , @P111 , @P112 , @P113 , @P114 , @P115 , @P116 , @P117 , @P118 , @P119 , @P120 , @P121 , @P122 , @P123 , @P124 , @P125 , @P126 , @P127 , @P128 , @P129 , @P130 , @P131 , @P132 , @P133 , @P134 , @P135 , @P136 , @P137 , @P138 , @P139 , @P140 , @P141 , @P142 , @P143 , @P144 , @P145 , @P146 , @P147 , @P148 , @P149 , @P150 , @P151 , @P152 , @P153 , @P154 , @P155 , @P156 , @P157 , @P158 , @P159 , @P160 , @P161 , @P162 , @P163 , @P164 , @P165 , @P166 , @P167 , @P168 , @P169 , @P170 , @P171 , @P172 , @P173 , @P174 , @P175 , @P176 , @P177 , @P178 , @P179 , @P180 , @P181 , @P182 , @P183 , @P184 , @P185 , @P186 , @P187 , @P188 , @P189 , @P190 , @P191 , @P192 , @P193 , @P194 , @P195 , @P196 , @P197 , @P198 , @P199 , @P200 , @P201 , @P202 , @P203 , @P204 , @P205 , @P206 , @P207 , @P208 , @P209 , @P210 , @P211 , @P212 , @P213 , @P214 , @P215 , @P216 , @P217 , @P218 , @P219 , @P220 , @P221 , @P222 , @P223 , @P224 , @P225 , @P226 , @P227 , @P228 , @P229 , @P230 , @P231 , @P232 , @P233 , @P234 , @P235 , @P236 , @P237 , @P238 , @P239 , @P240 , @P241 , @P242 , @P243 , @P244 , @P245 , @P246 , @P247 , @P248 , @P249 , @P250 , @P251 , @P252 , @P253 , @P254 , @P255 , @P256 , @P257 , @P258 , @P259 , @P260 , @P261 , @P262 , @P263 , @P264 , @P265 , @P266 , @P267 , @P268 , @P269 , @P270 , @P271 , @P272 , @P273 , @P274 , @P275 , @P276 , @P277 , @P278 , @P279 , @P280 , @P281 , @P282 , @P283 , @P284 , @P285 , @P286 , @P287 , @P288 , @P289 , @P290 , @P291 , @P292 , @P293 , @P294 , @P295 , @P296 , @P297 , @P298 , @P299 , @P300 , @P301 , @P302 , @P303 ) and k1.timeDimensionSeq between @P304 and @P305 order by k1.kpiResultSeq asc ",0h 11m 46s,4,18,0h 0m 39.22s,0
+8,020000002C6695310C779F4BE39A666074BC3431E90AFC230000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?),@_msparam_1 nvarchar(?),@_msparam_2 nvarchar(?),@_msparam_3 nvarchar(?),@_msparam_4 nvarchar(?))SELECT
+param.parameter_id AS [ID],
+param.name AS [Name],
+CAST(param.precision AS int) AS [NumericPrecision],
+CAST(param.scale AS int) AS [NumericScale],
+CAST(CASE WHEN baset.name IN (N?, N?) AND param.max_length &lt;&gt; -? THEN param.max_length/? ELSE param.max_length END AS int) AS [Length],
+usrt.name AS [DataType],
+s1param.name AS [DataTypeSchema],
+ISNULL(baset.name, N?) AS [SystemType],
+param.is_output AS [IsOutputParameter],
+param.default_value AS [DefaultValue],
+param.has_default_value AS [HasDefaultValue],
+ISNULL(xscparam.name, N?) AS [XmlSchemaNamespace],
+ISNULL(s2param.name, N?) AS [XmlSchemaNamespaceSchema],
+ISNULL( (case param.is_xml_document when ? then ? else ? end), ?) AS [XmlDocumentConstraint],
+param.is_readonly AS [IsReadOnly],
+sp.object_id AS [IDText],
+db_name() AS [DatabaseName],
+param.name AS [ParamName],
+CAST(
+case
+when sp.is_ms_shipped = ? then ?
+when (
+select
+major_id
+from
+sys.extended_properties
+where
+major_id = sp.object_id and
+minor_id = ? and
+class = ? and
+name = N?)
+is not null then ?
+else ?
+end
+AS bit) AS [ParentSysObj],
+? AS [Number]
+FROM
+sys.all_objects AS sp
+INNER JOIN sys.all_parameters AS param ON param.object_id=sp.object_id
+LEFT OUTER JOIN sys.types AS baset ON (baset.user_type_id = param.system_type_id and baset.user_type_id = baset.system_type_id) or ((baset.system_type_id = param.system_type_id) and (baset.user_type_id = param.user_type_id) and (baset.is_user_defined = ?) and (baset.is_assembly_type = ?))
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = param.user_type_id
+LEFT OUTER JOIN sys.schemas AS s1param ON s1param.schema_id = usrt.schema_id
+LEFT OUTER JOIN sys.xml_schema_collections AS xscparam ON xscparam.xml_collection_id = param.xml_collection_id
+LEFT OUTER JOIN sys.schemas AS s2param ON s2param.schema_id = xscparam.schema_id
+WHERE
+(sp.type = @_msparam_0 OR sp.type = @_msparam_1 OR sp.type=@_msparam_2)and(sp.name=@_msparam_3 and SCHEMA_NAME(sp.schema_id)=@_msparam_4)
+ORDER BY
+[ID] ASC",0h 11m 44s,2,8,0h 1m 28.00s,0
+4419,020000004FD76E1A8E34D749DD43812751C20477723622570000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?))SELECT JOB_INSTANCE_ID, JOB_NAME from BATCH_JOB_INSTANCE where JOB_NAME = @P0 and JOB_KEY = @P1 ",0h 11m 39s,58,4419,0h 0m 0.16s,0
+272,020000001AC29906766A2810338734B78EBBD434A8460D2A0000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?),@P2 nvarchar(?),@P3 nvarchar(?),@P4 nvarchar(?),@P5 nvarchar(?),@P6 nvarchar(?),@P7 nvarchar(?),@P8 nvarchar(?),@P9 nvarchar(?),@P10 nvarchar(?),@P11 nvarchar(?),@P12 nvarchar(?),@P13 nvarchar(?),@P14 nvarchar(?),@P15 nvarchar(?),@P16 nvarchar(?),@P17 nvarchar(?),@P18 nvarchar(?),@P19 nvarchar(?),@P20 nvarchar(?),@P21 nvarchar(?),@P22 nvarchar(?),@P23 nvarchar(?),@P24 nvarchar(?),@P25 nvarchar(?),@P26 nvarchar(?),@P27 nvarchar(?),@P28 nvarchar(?),@P29 nvarchar(?),@P30 nvarchar(?),@P31 nvarchar(?),@P32 nvarchar(?),@P33 nvarchar(?),@P34 nvarchar(?),@P35 nvarchar(?),@P36 nvarchar(?),@P37 nvarchar(?),@P38 nvarchar(?),@P39 nvarchar(?),@P40 nvarchar(?),@P41 nvarchar(?),@P42 nvarchar(?),@P43 nvarchar(?),@P44 nvarchar(?),@P45 nvarchar(?),@P46 nvarchar(?),@P47 nvarchar(?),@P48 nvarchar(?),@P49 nvarchar(?),@P50 nvarchar(?),@P51 nvarchar(?),@P52 nvarchar(?),@P53 nvarchar(?),@P54 nvarchar(?),@P55 nvarchar(?),@P56 nvarchar(?),@P57 nvarchar(?),@P58 nvarchar(?),@P59 nvarchar(?),@P60 nvarchar(?),@P61 nvarchar(?),@P62 nvarchar(?),@P63 nvarchar(?),@P64 nvarchar(?),@P65 nvarchar(?),@P66 nvarchar(?),@P67 nvarchar(?),@P68 nvarchar(?),@P69 nvarchar(?),@P70 nvarchar(?),@P71 nvarchar(?),@P72 nvarchar(?),@P73 nvarchar(?),@P74 nvarchar(?),@P75 nvarchar(?),@P76 nvarchar(?),@P77 nvarchar(?),@P78 nvarchar(?),@P79 nvarchar(?),@P80 nvarchar(?),@P81 nvarchar(?),@P82 nvarchar(?),@P83 nvarchar(?),@P84 nvarchar(?),@P85 nvarchar(?),@P86 nvarchar(?),@P87 nvarchar(?),@P88 nvarchar(?),@P89 nvarchar(?),@P90 nvarchar(?),@P91 nvarchar(?),@P92 nvarchar(?),@P93 nvarchar(?),@P94 nvarchar(?),@P95 nvarchar(?),@P96 nvarchar(?),@P97 nvarchar(?),@P98 nvarchar(?),@P99 nvarchar(?))select policydo0_.POLICYSEQ as POLICYSEQ229_0_, policyhier1_.POLICYPRODUCTHIERARCHYSEQ as POLICYPR1_231_1_, policydo0_.versionid as versionid229_0_, policydo0_.guid as guid229_0_, policydo0_.POLICYNUM as POLICYNUM229_0_, policydo0_.INSURANCETYPEFL as INSURANC5_229_0_, policydo0_.SOURCE as SOURCE229_0_, policydo0_.POLICYCOMMENCEMENTDT as POLICYCO7_229_0_, policydo0_.POLICYISSUEDT as POLICYIS8_229_0_, policydo0_.FREELOOKCANCELLATIONDT as FREELOOK9_229_0_, policydo0_.LOGINDT as LOGINDT229_0_, policydo0_.POLICYTERM as POLICYTERM229_0_, policydo0_.POLICYTERMUNITCD as POLICYT12_229_0_, policydo0_.PREMIUMPAYINGTERM as PREMIUM13_229_0_, policydo0_.PREMIUMPAYINGTERMUNITCD as PREMIUM14_229_0_, policydo0_.NUMOFLIVES as NUMOFLIVES229_0_, policydo0_.RIDERCOUNT as RIDERCOUNT229_0_, policydo0_.CURRENCYCD as CURRENCYCD229_0_, policydo0_.AGENTBRANCHCD as AGENTBR18_229_0_, policydo0_.POLICYBRANCHCD as POLICYB19_229_0_, policydo0_.SERVICINGAGENTCD as SERVICI20_229_0_, policydo0_.POLICYSTATUSCD as POLICYS21_229_0_, policydo0_.POLICYSTATUSDT as POLICYS22_229_0_, policydo0_.SELFCONTRACTINDICATORFL as SELFCON23_229_0_, policydo0_.KEYMANPOLICYFL as KEYMANP24_229_0_, policydo0_.EMPLOYEEFL as EMPLOYEEFL229_0_, policydo0_.TOTALPREMIUMAMOUNT as TOTALPR26_229_0_, policydo0_.TOTALSUMASSURED as TOTALSU27_229_0_, policydo0_.TOTALANNUALIZEDPREMIUM as TOTALAN28_229_0_, policydo0_.TOTALEXTRAPREMIUMAMT as TOTALEX29_229_0_, policydo0_.TOTALFIRSTPREMIUMAMT as TOTALFI30_229_0_, policydo0_.LOSSRATIO as LOSSRATIO229_0_, policydo0_.SACRIFICEPERC as SACRIFI32_229_0_, policydo0_.PREMIUMSTATUS as PREMIUM33_229_0_, policydo0_.ORIGINALRIDERCOUNT as ORIGINA34_229_0_, policydo0_.SYSTEMCREATEDDT as SYSTEMC35_229_0_, policydo0_.SYSTEMUPDATEDDT as SYSTEMU36_229_0_, policydo0_.ADDITIONALFIELD1 as ADDITIO37_229_0_, policydo0_.PAIDTODT as PAIDTODT229_0_, policydo0_.CAMPAIGNCODE as CAMPAIG39_229_0_, policydo0_.MONAGENTID as MONAGENTID229_0_, policydo0_.ORIGINALHSRIDERCOUNT as ORIGINA41_229_0_, policydo0_.HSRIDERCOUNT as HSRIDER42_229_0_, policyhier1_.versionid as versionid231_1_, policyhier1_.guid as guid231_1_, policyhier1_.POLICYGUID as POLICYGUID231_1_, policyhier1_.POLICYPRODUCTGUID as POLICYPR5_231_1_, policyhier1_.HIERARCHYTYPECD as HIERARCH6_231_1_, policyhier1_.HIERARCHYSUBTYPECD as HIERARCH7_231_1_, policyhier1_.HIERARCHYSUBSUBTYPECD as HIERARCH8_231_1_, policyhier1_.PREMIUMSUBTYPECD as PREMIUMS9_231_1_, policyhier1_.AGENTCD as AGENTCD231_1_, policyhier1_.COMMISSIONRULECD as COMMISS11_231_1_, policyhier1_.SPLITMODE as SPLITMODE231_1_, policyhier1_.SHARINGPERCENTAGE as SHARING13_231_1_, policyhier1_.EFFECTIVEFROMDT as EFFECTI14_231_1_, policyhier1_.EFFECTIVETODT as EFFECTI15_231_1_, policyhier1_.SUBTRANCHENO as SUBTRAN16_231_1_, policyhier1_.LEVELFLAG as LEVELFLAG231_1_, policyhier1_.REFMOVEMENTGUID as REFMOVE18_231_1_, policyhier1_.TRANSFERSHARINGPERCENTAGE as TRANSFE19_231_1_, policyhier1_.ENHANCEMENTTYPECD as ENHANCE20_231_1_, policyhier1_.SOURCEAGENTCD as SOURCEA21_231_1_ from POLICY_M policydo0_, POLICYHIERARCHY policyhier1_ where (policydo0_.POLICYNUM in( @P0 , @P1 , @P2 , @P3 , @P4 , @P5 , @P6 , @P7 , @P8 , @P9 , @P10 , @P11 , @P12 , @P13 , @P14 , @P15 , @P16 , @P17 , @P18 , @P19 , @P20 , @P21 , @P22 , @P23 , @P24 , @P25 , @P26 , @P27 , @P28 , @P29 , @P30 , @P31 , @P32 , @P33 , @P34 , @P35 , @P36 , @P37 , @P38 , @P39 , @P40 , @P41 , @P42 , @P43 , @P44 , @P45 , @P46 , @P47 , @P48 , @P49 , @P50 , @P51 , @P52 , @P53 , @P54 , @P55 , @P56 , @P57 , @P58 , @P59 , @P60 , @P61 , @P62 , @P63 , @P64 , @P65 , @P66 , @P67 , @P68 , @P69 , @P70 , @P71 , @P72 , @P73 , @P74 , @P75 , @P76 , @P77 , @P78 , @P79 , @P80 , @P81 , @P82 , @P83 , @P84 , @P85 , @P86 , @P87 , @P88 , @P89 , @P90 , @P91 , @P92 , @P93 , @P94 , @P95 , @P96 , @P97 , @P98 , @P99 ))and(policyhier1_.POLICYGUID=policydo0_.guid )",0h 10m 39s,40,272,0h 0m 2.35s,0
+664611,02000000D7FEEC2F2CA04BD4148DE74822B8E5D75FAE066B0000000000000000000000000000000000000000,"(@P0 bigint)select listpolicy0_.POLICYPRODUCTSEQ as POLICYP16_1_, listpolicy0_.POLICYPRODUCTAGENTSEQ as POLICYPR1_1_, listpolicy0_.POLICYPRODUCTAGENTSEQ as POLICYPR1_228_0_, listpolicy0_.versionid as versionid228_0_, listpolicy0_.guid as guid228_0_, listpolicy0_.POLICYNUM as POLICYNUM228_0_, listpolicy0_.SOURCE as SOURCE228_0_, listpolicy0_.SUBTRANCHENO as SUBTRANC6_228_0_, listpolicy0_.SPLITMODECD as SPLITMOD7_228_0_, listpolicy0_.AGENTCD as AGENTCD228_0_, listpolicy0_.HIERARCHYTYPECD as HIERARCH9_228_0_, listpolicy0_.BASEAGENTFL as BASEAGE10_228_0_, listpolicy0_.COMMISSIONSHARINGPERCENTAGE as COMMISS11_228_0_, listpolicy0_.PRODUCTIONSHARINGPERCENTAGE as PRODUCT12_228_0_, listpolicy0_.EFFECTIVEFROMDT as EFFECTI13_228_0_, listpolicy0_.EFFECTIVETODT as EFFECTI14_228_0_, listpolicy0_.BASEAGENTCD as BASEAGE15_228_0_, listpolicy0_.POLICYPRODUCTSEQ as POLICYP16_228_0_ from POLICYPRODUCTAGENTLINK listpolicy0_ where listpolicy0_.POLICYPRODUCTSEQ= @P0 ",0h 10m 38s,51,664611,0h 0m 0.00s,0
+80,02000000A870940A3C760786C59DE7261ED6B44ADF26CD140000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT * fROM POLICYPRODUCT_D NOLOCK
+WHERE [SYSTEMUPDATEDDT] between @P1 and @P2",0h 10m 4s,14,80,0h 0m 7.55s,0
+0,0200000069E2AD07CCDBEFE8E4756D9633DC48B72513909D0000000000000000000000000000000000000000,"SELECT
+SCHEMA_NAME(obj.schema_id) AS [Schema],
+obj.name AS [Name],
+obj.object_id AS [ID],
+usrt.name AS [DataType]
+FROM
+sys.objects AS obj
+LEFT OUTER JOIN sys.all_parameters AS ret_param ON ret_param.object_id = obj.object_id and ret_param.is_output = ?
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = ret_param.user_type_id
+WHERE
+(obj.type=N?)
+ORDER BY
+[Schema] ASC,[Name] ASC",0h 10m 0s,1,0,'-,0
+0,020000000D6A0A1B1DE8AAA933DFAE46C0616E668C37AA0E0000000000000000000000000000000000000000,"declare @paymentdatebw datetime = ?; with TEMPAGT (AGENTID,AGENTNAME,GUID) as
+(select distinct tpay.AGENTCD,tagt.AGENTNAME,tpb.GUID
+from PAYOUTBANKFILE tpb,PAYOUT tpay , PAYOUTBANKFILELINK tplink,AGENT tagt,PAYMENTSCHEDULE_M tpschedule, AGENTDETAIL ad
+where tpay.PAYOUTSEQ=tplink.PAYOUTSEQ and tplink.BANKFILEGUID=tpb.GUID and tpb.PROCESSDT = @paymentdatebw and tpb.CHEQUENUMBER is null and tpb.CASHBANKCD IN (?,?, ?) and tpay.PAYMENTSCHEDULECD=tpschedule.PAYMENTSCHEDULECD and tpschedule.PAYMENTSCHEDULECD &lt;&gt; ? and tpay.AGENTCD=tagt.AGENTID and tagt.AGENTSEQ = ad.AGENTSEQ and ad.DESIGNATIONCD in (?,?,?,?)
+)
+SELECT TEMP.TRANSACTIONREMARK,TEMP.AGENTID, comp.PAYABLEDT, comp.PAIDVALUE,
+CASE WHEN COMP.PAYHEADCD LIKE ? THEN ?
+WHEN COMP.PAYHEADCD IN (?) THEN ?
+WHEN COMP.PAYHEADCD IN (?) THEN ?
+ELSE ? END AS PAYHEADCD
+FROM COMPENSATIONPAYABLE COMP
+INNER JOIN PAYOUTPAYABLELINK PB ON COMP.COMPENSATIONPAYABLESEQ = PB.PAYABLESEQ
+INNER JOIN PAYOUT P ON PB.PAYOUTSEQ = P.PAYOUTSEQ
+INNER JOIN (select GUID, TRANSACTIONREMARK, PROCESSDT, AGENTID from (select
+ISNULL(substring(?+convert(varchar,pb.PROCESSDT ,?)+TEMPa.AGENTID+?+TEMPa.AGENTNAME,?,?),?) TRANSACTIONREMARK,pb.GUID, pb.PROCESSDT, TEMPa.AGENTID
+from PAYOUTBANKFILE pb,TEMPAGT TEMPa
+where pb.PROCESSDT = @paymentdatebw and pb.CHEQUENUMBER is null and pb.CASHBANKCD IN (?,?,?) and TEMPa.GUID=pb.GUID) TEMP where TRANSACTIONREMARK in (
+select ISNULL(substring(?+convert(varchar,pb.PROCESSDT ,?)+TEMPa.AGENTID+?+TEMPa.AGENTNAME,?,?),?) TRANSACTIONREMARK
+from PAYOUTBANKFILE pb,BANK_M bank ,TEMPAGT TEMPa
+where pb.PROCESSDT = @paymentdatebw and pb.CHEQUENUMBER is null and pb.CASHBANKCD IN (?,?,?) and pb.BENEFICIARYBANKNAME=bank.BANKCD and TEMPa.GUID=pb.GUID
+group by pb.BeneficiaryAccountNumber,pb.BeneficiaryName,pb.PROCESSDT,pb.BeneficiaryBankName,bank.BANKNAME,TEMPa.AGENTID,TEMPa.AGENTNAME,pb.BENEFICIARYBANKNAME)) TEMP on p.BANKFILEGUID = TEMP.GUID
+WHERE
+COMP.PAYHEADCD IN (?,?,?,?,?,?) ",0h 9m 50s,2,0,'-,0
+1,0200000040F67B0A35329594AE31B3965230240970A5635A0000000000000000000000000000000000000000,"(@_msparam_0 nvarchar(?))SELECT
+SCHEMA_NAME(udf.schema_id) AS [Schema],
+udf.name AS [Name],
+udf.object_id AS [ID],
+(case when ? = udf.type then ? when ? = udf.type then ? when ? = udf.type then ? when ? = udf.type then ? when ? = udf.type then ? else ? end) AS [FunctionType],
+CASE WHEN udf.type IN (?,?,?) THEN ? WHEN udf.type IN (?,?) THEN ? ELSE ? END AS [ImplementationType],
+CAST(
+case
+when udf.is_ms_shipped = ? then ?
+when (
+select
+major_id
+from
+sys.extended_properties
+where
+major_id = udf.object_id and
+minor_id = ? and
+class = ? and
+name = N?)
+is not null then ?
+else ?
+end
+AS bit) AS [IsSystemObject],
+CAST(CASE WHEN ISNULL(smudf.definition, ssmudf.definition) IS NULL THEN ? ELSE ? END AS bit) AS [IsEncrypted],
+CAST(ISNULL(OBJECTPROPERTYEX(udf.object_id, N?),?) AS bit) AS [IsSchemaBound],
+usrt.name AS [DataType]
+FROM
+sys.all_objects AS udf
+LEFT OUTER JOIN sys.sql_modules AS smudf ON smudf.object_id = udf.object_id
+LEFT OUTER JOIN sys.system_sql_modules AS ssmudf ON ssmudf.object_id = udf.object_id
+LEFT OUTER JOIN sys.all_parameters AS ret_param ON ret_param.object_id = udf.object_id and ret_param.is_output = @_msparam_0
+LEFT OUTER JOIN sys.types AS usrt ON usrt.user_type_id = ret_param.user_type_id
+WHERE
+(udf.type in (?, ?, ?, ?, ?))
+ORDER BY
+[Schema] ASC,[Name] ASC",0h 9m 39s,4,1,0h 9m 39.00s,0
+3271,020000009783A619065B0FAB94360431D40A4F8CB56409AF0000000000000000000000000000000000000000,"(@P0 bigint)select listnonhie0_.MOVEMENTSEQ as MOVEMEN14_1_, listnonhie0_.NONHIERARCHYMOVEMENTSEQ as NONHIERA1_1_, listnonhie0_.NONHIERARCHYMOVEMENTSEQ as NONHIERA1_60_0_, listnonhie0_.versionid as versionid60_0_, listnonhie0_.guid as guid60_0_, listnonhie0_.ATTRIBUTECD as ATTRIBUT4_60_0_, listnonhie0_.CURRENTVALUE as CURRENTV5_60_0_, listnonhie0_.NEWVALUE as NEWVALUE60_0_, listnonhie0_.LOOKUPKEY as LOOKUPKEY60_0_, listnonhie0_.ISMANDATORYFL as ISMANDAT8_60_0_, listnonhie0_.INPUTTYPE as INPUTTYPE60_0_, listnonhie0_.CONTACTTYPE as CONTACT10_60_0_, listnonhie0_.OBJECTNAME as OBJECTNAME60_0_, listnonhie0_.ADDRESSTYPE as ADDRESS12_60_0_, listnonhie0_.INTERMEDCATCD as INTERME13_60_0_, listnonhie0_.MOVEMENTSEQ as MOVEMEN14_60_0_ from NONHIERARCHYMOVEMENT listnonhie0_ where listnonhie0_.MOVEMENTSEQ= @P0 ",0h 9m 21s,29,3271,0h 0m 0.17s,0
+53,020000005509900464F2FF8C1C24260F89B4985A00F7886A0000000000000000000000000000000000000000,"(@P0 datetime,@P1 datetime,@P2 datetime,@P3 datetime)WITH temp1(AGENTID, PAYTO) as
+(
+SELECT agt.AGENTID, agt.AGENTID PAYTO
+FROM AGENTPAYMENT ap,AGENT agt
+WHERE ap.PAYTOCD = ?
+and @P0 &gt;= ap.effectivefromdt
+and (ap.EFFECTIVEtoDT is null or @P1 &lt;= ap.EFFECTIVETODT)
+and agt.AGENTSEQ = ap.AGENTSEQ
+UNION ALL
+SELECT nplus1.AGENTID, temp1.PAYTO
+FROM AGENTPAYMENT as nplus1, temp1
+WHERE
+nplus1.PAYTOCD != ?
+and temp1.AGENTID = nplus1.PAYTOENTITYID
+and @P2 &gt;= nplus1.effectivefromdt
+and (nplus1.EFFECTIVEtoDT is null or @P3 &lt;= nplus1.EFFECTIVETODT)
+)
+select * from temp1",0h 9m 12s,25,53,0h 0m 10.42s,0
+0,02000000334ACD204448046DD94245F9EDC839FD59AFC80B0000000000000000000000000000000000000000,"SELECT &quot;Tbl1010&quot;.&quot;AGENT_ID&quot; &quot;Col1241&quot;,&quot;Tbl1010&quot;.&quot;RM&quot; &quot;Col1242&quot;,&quot;Tbl1010&quot;.&quot;RMNAME&quot; &quot;Col1243&quot;,&quot;Tbl1010&quot;.&quot;SD&quot; &quot;Col1244&quot;,&quot;Tbl1010&quot;.&quot;SDNAME&quot; &quot;Col1245&quot; FROM &quot;C2L_DMS&quot;.&quot;DBO&quot;.&quot;TN_AGENTVSRM&quot; &quot;Tbl1010&quot; WITH (NOLOCK) ORDER BY &quot;Col1241&quot; ASC",0h 8m 58s,3,0,'-,0
+56,03000600E52622169D87610132AF000001000000000000000000000000000000000000000000000000000000,agentBaseKPILicense,0h 8m 39s,6,56,0h 0m 9.27s,0
+0,02000000B8FEEF2E1ED714F4139AE89AD276E1642146B18A0000000000000000000000000000000000000000,"select count(?) as jumlah from (SELECT
+ROW_NUMBER() OVER(ORDER BY A.AGENTID,A.POSTINGDT) AS NOMOR,
+A.* FROM
+(
+SELECT
+POLICYNUM,
+AGENTID,
+DESIGNATIONCD,
+CONVERT(VARCHAR(?),POSTINGDT,?) [POSTINGDT],
+DEFINITIONCD,
+DEFINITIONTYPECD,
+DEFINITIONSUBTYPECD,
+RESULTVALUE
+FROM
+KPIRESULT WITH (NOLOCK)
+) A
+where [POSTINGDT] &gt;= ? and [POSTINGDT] &lt;= ? ) p ",0h 8m 11s,1,0,'-,0
+83,02000000E7373903922609A9DB731DCB95159754DBA1B6D70000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT *
+FROM AGENTPAYMENT AS NOLOCK
+where AGENTID is not null
+and len(AGENTID ) = ?
+and EFFECTIVETODT is null
+AND [SYSTEMUPDATEDDT] between @P1 and @P2",0h 8m 7s,12,83,0h 0m 5.87s,0
+11,03000600503CAA371CF14101A8B3000001000000000000000000000000000000000000000000000000000000,sp_check_LA_POLICY_BEFCYCLE,0h 8m 7s,6,11,0h 0m 44.27s,0
+20,020000000AB48A20979EF5B2E5689F090BA2E2B3664785FA0000000000000000000000000000000000000000,"select distinct prem.POLICYNUM, prem.PRODUCTCD, prem.PRODUCTTYPECD, prem.APPROPRIATIONAMT FYP,
+prem.APPROPRIATIONDT, prem.POLICYYEARINFORCE, cms.POLICYISSUEDT, kpi.AGENTID, kpi.DEFINITIONCD, kpi.RESULTVALUE FYC,COMMISSIONRULECD,PREM.PREMIUMDUEDT
+from PREMIUM prem with (nolock)
+inner join CMSPOLICYINTERFACE cms with (nolock) on cms.PREMIUMGUID = prem.GUID
+inner join KPIResult kpi with (nolock) on kpi.CMSPOLICYINTERFACESEQ = cms.POLICYINTERFACESEQ
+where DEFINITIONCD in (?,?,?,?)
+AND prem.APPROPRIATIONDT&gt;EOMONTH(DATEADD(MONTH,-?,GETDATE()))",0h 7m 58s,6,20,0h 0m 23.90s,0
+32796,0300FF7F4D2095C929AB840142B1000001000000000000000000000000000000000000000000000000000000,sp_table_statistics2_rowset,0h 7m 56s,40,32796,0h 0m 0.01s,0
+447810,0300FF7F37EFFEFC57B8840142B1000000000000000000000000000000000000000000000000000000000000,"create function [sys].[fn_cdc_has_select_access]
+(
+@capture_instance sysname
+)
+returns bit
+with returns null on null input
+as
+begin
+declare @quoted_source nvarchar(?)
+,@role sysname
+-- Determine the name of the gating role if one exists
+ select @role = [sys].[fn_cdc_get_role](@capture_instance)
+-- If the gating role is not null and the caller is not a member
+ -- of the role, the db_owner, or sysadmin, deny access
+ if (isnull(is_srvrolemember(?),?) = ?)
+and (isnull(is_member(?),?) = ?)
+and (@role is not null)
+and (isnull(is_member(@role),?) = ?)
+begin
+return ?
+end
+-- Determine the name of the associated source table
+ select @quoted_source = [sys].[fn_cdc_get_source](@capture_instance)
+select @quoted_source = quotename(db_name()) + N? + @quoted_source
+-- Determine whether the caller has select access on the tracked columns
+ if exists
+(
+select name from sys.fn_cdc_get_column_list(@capture_instance)
+where has_perms_by_name(@quoted_source, ?, ?, quotename(name), ?) = ?
+)
+begin
+return ?
+end
+return ?
+end
+",0h 7m 47s,1,447810,0h 0m 0.00s,0
+1197,02000000B9CCB3264850D921C57C1C4A2EC6C38653879AD80000000000000000000000000000000000000000,"(@P0 nvarchar(?),@P1 nvarchar(?))select this_.AGENTTAXSUMMARYSEQ as AGENTTAX1_116_0_, this_.versionid as versionid116_0_, this_.guid as guid116_0_, this_.AGENTCD as AGENTCD116_0_, this_.TAXYEAR as TAXYEAR116_0_, this_.YTDTAXABLEAMT as YTDTAXAB6_116_0_, this_.YTDSAMT as YTDSAMT116_0_, this_.YPTAMT as YPTAMT116_0_, this_.YTDSSURCHARGEAMT as YTDSSURC9_116_0_, this_.YTDSCESS1AMT as YTDSCESS10_116_0_, this_.YTDSCECSS2AMT as YTDSCECSS11_116_0_, this_.TAXRULECD as TAXRULECD116_0_, this_.MTDGROSS as MTDGROSS116_0_, this_.MTDTAXABLEAMT as MTDTAXA14_116_0_, this_.TAXMONTH as TAXMONTH116_0_, this_.YTDGROSS as YTDGROSS116_0_, this_.SYSTEMCREATEDDT as SYSTEMC17_116_0_, this_.SYSTEMUPDATEDDT as SYSTEMU18_116_0_ from AGENTTAXSUMMARY this_ where (this_.AGENTCD= @P0 and this_.TAXRULECD= @P1 )",0h 7m 41s,16,1197,0h 0m 0.39s,0
+303,020000002E7D3C3AF73134D9ADF1325C08B45A3B0F8597940000000000000000000000000000000000000000,"(@P1 datetime,@P2 datetime)SELECT *fROM AGENTHISTORY (NOLOCK) where systemupdateddt between @P1 and @P2",0h 7m 37s,25,303,0h 0m 1.51s,0
+24037,02000000F5E54E020AE66C7DD0CF3D18C1CF3602638396CF0000000000000000000000000000000000000000,"(@P1 varbinary(?),@P2 varbinary(?),@P3 binary(?))select TOP(?) query_plan FROM sys.dm_exec_query_stats r outer apply sys.dm_exec_query_plan(@P1) a where r.plan_handle = @P2 and r.query_plan_hash = @P3;",0h 7m 35s,1,24037,0h 0m 0.02s,0
