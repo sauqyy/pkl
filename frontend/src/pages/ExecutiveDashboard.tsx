@@ -46,12 +46,12 @@ export default function ExecutiveDashboard() {
       {/* Header with Panel Toggle */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button 
+          <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               toggleSidebar();
-            }} 
+            }}
             className="p-2 hover:bg-accent rounded-md transition-colors cursor-pointer relative z-50 border border-transparent hover:border-border"
             aria-label="Toggle sidebar"
           >
@@ -66,78 +66,87 @@ export default function ExecutiveDashboard() {
       </div>
 
       {/* 3x2 Grid Layout */}
-      <div className="grid gap-4 grid-cols-3">
-        {/* Response Time Card */}
-        <MetricCard
-          title="Response Time"
-          value={data ? `${data.response_time}` : '--'}
-          unit="ms"
-          subtext="Current Average"
-          icon={<Clock className="h-4 w-4" />}
-          iconColor="text-blue-500"
-          onClick={() => navigate('/response-time')}
-        />
+      {data ? (
+        <div className="grid gap-4 grid-cols-3">
+          {/* Response Time Card */}
+          <MetricCard
+            title="Response Time"
+            value={`${data.response_time}`}
+            unit="ms"
+            subtext="Current Average"
+            icon={<Clock className="h-4 w-4" />}
+            iconColor="text-blue-500"
+            onClick={() => navigate('/response-time')}
+          />
 
-        {/* Errors Card */}
-        <MetricCard
-          title="Errors"
-          value={data ? data.errors.toLocaleString() : '--'}
-          subtext="Total (Last 30 Days)"
-          icon={<AlertTriangle className="h-4 w-4" />}
-          iconColor="text-red-500"
-          onClick={() => navigate('/error-analysis')}
-        />
+          {/* Errors Card */}
+          <MetricCard
+            title="Errors"
+            value={data.errors.toLocaleString()}
+            subtext="Total (Last 30 Days)"
+            icon={<AlertTriangle className="h-4 w-4" />}
+            iconColor="text-red-500"
+            onClick={() => navigate('/error-analysis')}
+          />
 
-        {/* System Load Card */}
-        <MetricCard
-          title="System Load"
-          value={data ? formatNumber(data.load) : '--'}
-          subtext="Total Calls (Last 30 Days)"
-          icon={<Server className="h-4 w-4" />}
-          iconColor="text-teal-500"
-          onClick={() => navigate('/load-analysis')}
-        />
+          {/* System Load Card */}
+          <MetricCard
+            title="System Load"
+            value={formatNumber(data.load)}
+            subtext="Total Calls (Last 30 Days)"
+            icon={<Server className="h-4 w-4" />}
+            iconColor="text-teal-500"
+            onClick={() => navigate('/load-analysis')}
+          />
 
-        {/* Slow Calls Card */}
-        <MetricCard
-          title="Slow Calls"
-          value={data ? data.slow_calls.toLocaleString() : '--'}
-          subtext="Total Slow (Last 30 Days)"
-          icon={<Hourglass className="h-4 w-4" />}
-          iconColor="text-orange-500"
-          onClick={() => navigate('/slow-calls-analysis')}
-        />
+          {/* Slow Calls Card */}
+          <MetricCard
+            title="Slow Calls"
+            value={data.slow_calls.toLocaleString()}
+            subtext="Total Slow (Last 30 Days)"
+            icon={<Hourglass className="h-4 w-4" />}
+            iconColor="text-orange-500"
+            onClick={() => navigate('/slow-calls-analysis')}
+          />
 
-        {/* Business Transactions Card */}
-        <MetricCard
-          title="Business Transactions"
-          value="Analysis"
-          subtext="Health, Volume & Latency"
-          icon={<ListChecks className="h-4 w-4" />}
-          iconColor="text-purple-500"
-          onClick={() => navigate('/business-transactions')}
-        />
+          {/* Business Transactions Card */}
+          <MetricCard
+            title="Business Transactions"
+            value="Analysis"
+            subtext="Health, Volume & Latency"
+            icon={<ListChecks className="h-4 w-4" />}
+            iconColor="text-purple-500"
+            onClick={() => navigate('/business-transactions')}
+          />
 
-        {/* JVM Health Card */}
-        <MetricCard
-          title="Infrastructure Health"
-          value="JVM"
-          subtext="Memory, GC & Availability"
-          icon={<Activity className="h-4 w-4" />}
-          iconColor="text-rose-500"
-          onClick={() => navigate('/jvm-health')}
-        />
+          {/* JVM Health Card */}
+          <MetricCard
+            title="Infrastructure Health"
+            value="JVM"
+            subtext="Memory, GC & Availability"
+            icon={<Activity className="h-4 w-4" />}
+            iconColor="text-rose-500"
+            onClick={() => navigate('/jvm-health')}
+          />
 
-        {/* Database Analysis Card */}
-        <MetricCard
-          title="Database Analysis"
-          value="Query"
-          subtext="Performance & Spikes"
-          icon={<Database className="h-4 w-4" />}
-          iconColor="text-indigo-500"
-          onClick={() => navigate('/database-analysis')}
-        />
-      </div>
+          {/* Database Analysis Card */}
+          <MetricCard
+            title="Database Analysis"
+            value="Query"
+            subtext="Performance & Spikes"
+            icon={<Database className="h-4 w-4" />}
+            iconColor="text-indigo-500"
+            onClick={() => navigate('/database-analysis')}
+          />
+        </div>
+      ) : (
+        <div className="flex h-[50vh] w-full items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-muted-foreground">Loading system overview...</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -154,7 +163,7 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, unit, subtext, icon, iconColor, onClick }: MetricCardProps) {
   return (
-    <Card 
+    <Card
       className="bg-card cursor-pointer transition-all duration-200 hover:shadow-md border-border/50 hover:border-border"
       onClick={onClick}
     >

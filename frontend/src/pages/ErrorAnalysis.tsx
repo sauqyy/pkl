@@ -40,6 +40,7 @@ export default function ErrorAnalysis() {
   }
 
   useEffect(() => {
+    setData(null) // Reset data to trigger loading state
     fetchAnalysis()
   }, [timeframe, selectedTier, selectedTransaction])
 
@@ -81,129 +82,141 @@ export default function ErrorAnalysis() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 grid-cols-3">
-        <Card className="bg-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Errors Detected</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold">{data?.total.toLocaleString() || 'Loading...'}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Peak Error Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-red-400">{data?.peak_hour || '--:--'}</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Highest Error Day</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-orange-400">{data?.peak_day || '--'}</div>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Heatmap */}
-      <Card className="bg-card">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">Weekly Heatmap: When do errors happen?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {data?.heatmap ? (
-            <Heatmap data={data.heatmap} colorScheme="red" />
-          ) : (
-            <div className="text-sm text-muted-foreground text-center py-8">Loading...</div>
-          )}
 
-          {/* Visual Explanation of Axes - Heatmap */}
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                <span>Time of Day (Hour)</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                <span>Day of the Week</span>
-              </div>
+      {
+        data ? (
+          <>
+            {/* Stats Grid */}
+            <div className="grid gap-4 grid-cols-3">
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Errors Detected</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold">{data.total.toLocaleString()}</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Peak Error Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-400">{data.peak_hour}</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Highest Error Day</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-orange-400">{data.peak_day}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Heatmap */}
+            <Card className="bg-card">
+              <CardHeader>
+                <CardTitle className="text-base font-semibold">Weekly Heatmap: When do errors happen?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Heatmap data={data.heatmap} colorScheme="red" />
+
+                {/* Visual Explanation of Axes - Heatmap */}
+                <div className="mt-4 pt-4 border-t border-border/50">
+                  <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                      <span>Time of Day (Hour)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                      <span>Day of the Week</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Charts */}
+            <div className="grid gap-4 grid-cols-2">
+              <Card className="bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base font-semibold">Hourly Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[350px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={hourlyData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                        <XAxis dataKey="hour" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                        <Tooltip contentStyle={tooltipStyles.contentStyle} />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Visual Explanation of Axes - Hourly */}
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                        <span>Time (24-Hour Format)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                        <span>Total Errors count</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base font-semibold">Daily Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[350px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={dailyData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
+                        <XAxis type="number" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis type="category" dataKey="day" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                        <Tooltip contentStyle={tooltipStyles.contentStyle} />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Visual Explanation of Axes - Daily */}
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                        <span>Total Errors count</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                        <span>Day of the Week</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <div className="flex h-[50vh] w-full items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+              <p className="text-muted-foreground">Loading dashboard data...</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Charts */}
-      <div className="grid gap-4 grid-cols-2">
-        <Card className="bg-card">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Hourly Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[350px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                  <XAxis dataKey="hour" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={tooltipStyles.contentStyle} />
-                  <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Visual Explanation of Axes - Hourly */}
-            <div className="mt-4 pt-4 border-t border-border/50">
-              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                  <span>Time (24-Hour Format)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                  <span>Total Errors count</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Daily Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[350px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dailyData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
-                  <XAxis type="number" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis type="category" dataKey="day" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={tooltipStyles.contentStyle} />
-                  <Bar dataKey="count" fill="#ef4444" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            {/* Visual Explanation of Axes - Daily */}
-            <div className="mt-4 pt-4 border-t border-border/50">
-              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                  <span>Total Errors count</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                  <span>Day of the Week</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        )
+      }
     </div>
   )
 }

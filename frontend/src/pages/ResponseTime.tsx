@@ -17,6 +17,7 @@ export default function ResponseTime() {
     const { selectedTier, selectedTransaction } = useBusinessTransaction()
 
     useEffect(() => {
+        setData(null) // Reset data to trigger loading state
         const load = async () => {
             try {
                 const d = await fetchDashboardData(Number(period), selectedTier, selectedTransaction)
@@ -30,24 +31,22 @@ export default function ResponseTime() {
         return () => clearInterval(interval)
     }, [period, selectedTier, selectedTransaction])
 
-    if (!data) return <div className="p-8 text-muted-foreground">Loading dashboard...</div>
-
     // Prepare Chart Data
-    const lineData = data.timeline.map(t => {
+    const lineData = data?.timeline.map(t => {
         // t.timestamp is already the timestamp in milliseconds
         const date = new Date(t.timestamp);
         return {
             time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             value: t.value
         };
-    });
+    }) || [];
 
-    const freqData = Object.entries(data.frequency).map(([ms, count]) => ({
+    const freqData = data ? Object.entries(data.frequency).map(([ms, count]) => ({
         ms: Number(ms),
         count
-    })).sort((a, b) => a.ms - b.ms);
+    })).sort((a, b) => a.ms - b.ms) : [];
 
-    const pieData = Object.entries(data.buckets).map(([name, value]) => ({ name, value }));
+    const pieData = data ? Object.entries(data.buckets).map(([name, value]) => ({ name, value })) : [];
     /* 
        Update Colors for Normal (Green) vs Slow (Red)
        Normal = #22c55e (Green-500)
@@ -56,15 +55,20 @@ export default function ResponseTime() {
     const COLORS = ['#22c55e', '#ef4444'];
 
     // Calculate percentage of Normal transactions
-    const totalCount = (data.buckets['Normal'] || 0) + (data.buckets['Slow'] || 0);
+    const totalCount = data ? (data.buckets['Normal'] || 0) + (data.buckets['Slow'] || 0) : 0;
     const normalPercentage = totalCount > 0
-        ? ((data.buckets['Normal'] || 0) / totalCount * 100).toFixed(0)
+        ? ((data!.buckets['Normal'] || 0) / totalCount * 100).toFixed(0)
         : 0;
 
     // Calculate stats
-    const avg = data.raw_values.length > 0 ? (data.raw_values.reduce((a, b) => a + b, 0) / data.raw_values.length).toFixed(1) : 0;
-    const max = data.raw_values.length > 0 ? Math.max(...data.raw_values) : 0;
-    const min = data.raw_values.length > 0 ? Math.min(...data.raw_values) : 0;
+    const avg = (data?.raw_values?.length || 0) > 0 ? (data!.raw_values.reduce((a, b) => a + b, 0) / data!.raw_values.length).toFixed(1) : 0;
+
+    // Calculate P95
+    const p95 = (data?.raw_values?.length || 0) > 0
+        ? data!.raw_values.sort((a, b) => a - b)[Math.floor(data!.raw_values.length * 0.95)]
+        : 0;
+    const max = (data?.raw_values?.length || 0) > 0 ? Math.max(...data!.raw_values) : 0;
+    const min = (data?.raw_values?.length || 0) > 0 ? Math.min(...data!.raw_values) : 0;
 
     // Dynamic subtitle based on period
     const getPeriodLabel = (minutes: string) => {
@@ -124,177 +128,201 @@ export default function ResponseTime() {
                 </div>
             </div>
 
-            {/* Metrics Grid */}
-            <div className="grid gap-4 grid-cols-2">
-                <MetricCard
-                    title="Total Requests"
-                    value={data.raw_values.length.toLocaleString()}
-                    subtitle="All processed events in the selected timeframe"
-                />
-                <MetricCard
-                    title="Average Response Time"
-                    value={`${avg} ms`}
-                    subtitle="Mean system response across all requests"
-                />
-                <MetricCard
-                    title="Maximum Latency"
-                    value={`${max} ms`}
-                    subtitle="Peak delay recorded during high load"
-                />
-                <MetricCard
-                    title="Minimum Latency"
-                    value={`${min} ms`}
-                    subtitle="Fastest recorded response"
-                />
-            </div>
-
-            {/* Charts Row 1 */}
-            <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
-                <Card className="col-span-2 bg-card">
-                    <CardHeader>
-                        <CardTitle className="text-base font-semibold">Response Time Trend</CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1">Trend for the last {getPeriodLabel(period)}</p>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={lineData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                    <XAxis
-                                        dataKey="time"
-                                        stroke="#888"
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        minTickGap={30}
-                                    />
-                                    <YAxis
-                                        stroke="#888"
-                                        fontSize={12}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickFormatter={(value) => `${value}ms`}
-                                    />
-                                    <Tooltip
-                                        contentStyle={tooltipStyles.contentStyle}
-                                        itemStyle={tooltipStyles.itemStyle}
-                                        formatter={(value: any) => [`${value} ms`, "Response Time"]}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="value"
-                                        stroke="#0ea5e9"
-                                        strokeWidth={2}
-                                        activeDot={{ r: 6, strokeWidth: 0 }}
-                                        fillOpacity={1}
-                                        fill="url(#colorValue)"
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-
-                        {/* Visual Explanation of Axes */}
-                        <div className="mt-4 pt-4 border-t border-border/50">
-                            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                                    <span>Time (Hour:Minute)</span>
+            {data ? (
+                <>
+                    <div className="grid gap-4 grid-cols-4">
+                        <Card className="bg-card">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Total Requests</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{data.raw_values.length}</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-card">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Avg Response Time</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{avg} ms</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-card">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">P95 Response Time</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{p95} ms</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-card">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Error Rate</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-red-400">
+                                    {data.buckets['Slow'] > 0 ? ((data.buckets['Slow'] / data.raw_values.length) * 100).toFixed(1) : 0}%
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                                    <span>Response Time (ms)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="col-span-1 bg-card flex flex-col justify-center">
-                    <CardHeader>
-                        <CardTitle className="text-base font-semibold">Health Distribution</CardTitle>
-                        <p className="text-xs text-muted-foreground mt-1">Overview of system health status</p>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="h-[250px] w-full relative">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        innerRadius={60}
-                                        outerRadius={80}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                        stroke="none"
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip contentStyle={tooltipStyles.contentStyle} />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-4">
-                                <span className="text-4xl font-bold">{normalPercentage}%</span>
-                                <span className="text-xs text-muted-foreground mt-1">Normal</span>
-                            </div>
-                        </div>
-
-                        {/* Legend for Health Distribution */}
-                        <div className="pt-2 border-t border-border/50">
-                            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-[#22c55e]" />
-                                    <span>Normal</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-[#ef4444]" />
-                                    <span>Slow / Error</span>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Charts Row 2 */}
-            <Card className="bg-card">
-                <CardHeader>
-                    <CardTitle className="text-base font-semibold">Frequency Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="h-[250px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={freqData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                                <XAxis dataKey="ms" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                                <Tooltip cursor={tooltipStyles.cursor} contentStyle={tooltipStyles.contentStyle} />
-                                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    {/* Visual Explanation of Axes - Frequency */}
-                    <div className="mt-4 pt-4 border-t border-border/50">
-                        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                                <span>Response Time (ms)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                                <span>Frequency (Count)</span>
-                            </div>
-                        </div>
+                    {/* Charts Row 1 */}
+                    <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
+                        <Card className="col-span-2 bg-card">
+                            <CardHeader>
+                                <CardTitle className="text-base font-semibold">Response Time Trend</CardTitle>
+                                <p className="text-xs text-muted-foreground mt-1">Trend for the last {getPeriodLabel(period)}</p>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="h-[300px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={lineData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                            <XAxis
+                                                dataKey="time"
+                                                stroke="#888"
+                                                fontSize={12}
+                                                tickLine={false}
+                                                axisLine={false}
+                                                minTickGap={30}
+                                            />
+                                            <YAxis
+                                                stroke="#888"
+                                                fontSize={12}
+                                                tickLine={false}
+                                                axisLine={false}
+                                                tickFormatter={(value) => `${value}ms`}
+                                            />
+                                            <Tooltip
+                                                contentStyle={tooltipStyles.contentStyle}
+                                                itemStyle={tooltipStyles.itemStyle}
+                                                formatter={(value: any) => [`${value} ms`, "Response Time"]}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="value"
+                                                stroke="#0ea5e9"
+                                                strokeWidth={2}
+                                                activeDot={{ r: 6, strokeWidth: 0 }}
+                                                fillOpacity={1}
+                                                fill="url(#colorValue)"
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                {/* Visual Explanation of Axes */}
+                                <div className="mt-4 pt-4 border-t border-border/50">
+                                    <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-2">
+                                            <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                                            <span>Time (Hour:Minute)</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                                            <span>Response Time (ms)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="col-span-1 bg-card flex flex-col justify-center">
+                            <CardHeader>
+                                <CardTitle className="text-base font-semibold">Health Distribution</CardTitle>
+                                <p className="text-xs text-muted-foreground mt-1">Overview of system health status</p>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="h-[250px] w-full relative">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={pieData}
+                                                innerRadius={60}
+                                                outerRadius={80}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                                stroke="none"
+                                            >
+                                                {pieData.map((entry, index) => (
+                                                    <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip contentStyle={tooltipStyles.contentStyle} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-4">
+                                        <span className="text-4xl font-bold">{normalPercentage}%</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Normal</span>
+                                    </div>
+                                </div>
+
+                                {/* Legend for Health Distribution */}
+                                <div className="pt-2 border-t border-border/50">
+                                    <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-[#22c55e]" />
+                                            <span>Normal</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded-full bg-[#ef4444]" />
+                                            <span>Slow / Error</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
-                </CardContent>
-            </Card>
+
+                    {/* Charts Row 2 */}
+                    <Card className="bg-card">
+                        <CardHeader>
+                            <CardTitle className="text-base font-semibold">Frequency Distribution</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-[250px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={freqData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
+                                        <XAxis dataKey="ms" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                                        <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+                                        <Tooltip cursor={tooltipStyles.cursor} contentStyle={tooltipStyles.contentStyle} />
+                                        <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            {/* Visual Explanation of Axes - Frequency */}
+                            <div className="mt-4 pt-4 border-t border-border/50">
+                                <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                                        <span>Response Time (ms)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                                        <span>Frequency (Count)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </>
+            ) : (
+                <div className="flex h-[50vh] w-full items-center justify-center">
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                        <p className="text-muted-foreground">Loading dashboard data...</p>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
