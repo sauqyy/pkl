@@ -51,7 +51,7 @@ export default function ErrorAnalysis() {
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               toggleSidebar();
@@ -119,6 +119,20 @@ export default function ErrorAnalysis() {
           ) : (
             <div className="text-sm text-muted-foreground text-center py-8">Loading...</div>
           )}
+
+          {/* Visual Explanation of Axes - Heatmap */}
+          <div className="mt-4 pt-4 border-t border-border/50">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                <span>Time of Day (Hour)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                <span>Day of the Week</span>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -140,6 +154,20 @@ export default function ErrorAnalysis() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+
+            {/* Visual Explanation of Axes - Hourly */}
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                  <span>Time (24-Hour Format)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                  <span>Total Errors count</span>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -158,6 +186,20 @@ export default function ErrorAnalysis() {
                   <Bar dataKey="count" fill="#ef4444" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+
+            {/* Visual Explanation of Axes - Daily */}
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                  <span>Total Errors count</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                  <span>Day of the Week</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>

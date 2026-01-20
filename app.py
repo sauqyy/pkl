@@ -3,6 +3,8 @@ from flask_cors import CORS
 import json
 import os
 import csv
+import hashlib
+import time
 from collections import Counter
 import smtplib
 from email.mime.text import MIMEText
@@ -98,12 +100,40 @@ def fetch_from_appdynamics(url: str, duration_override: int = None) -> list:
         url += '&rollup=false'
     
     print(f"Fetching from AppDynamics: {url[:100]}...")
+    
+    # Caching Logic
+    CACHE_DIR = 'cache'
+    if not os.path.exists(CACHE_DIR):
+        os.makedirs(CACHE_DIR)
+        
+    url_hash = hashlib.md5(url.encode()).hexdigest()
+    cache_file = os.path.join(CACHE_DIR, f"{url_hash}.json")
+    
+    # Check cache (valid for 1 hour)
+    if os.path.exists(cache_file):
+        file_age = time.time() - os.path.getmtime(cache_file)
+        if file_age < 3600: # 1 hour
+            print(f"Loading from cache: {cache_file}")
+            try:
+                with open(cache_file, 'r') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Error reading cache: {e}")
+
     req = urllib.request.Request(url)
     req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
     
     try:
         with urllib.request.urlopen(req, timeout=30) as response:
             data = json.loads(response.read().decode())
+            
+            # Save to cache
+            try:
+                with open(cache_file, 'w') as f:
+                    json.dump(data, f)
+            except Exception as e:
+                print(f"Error writing to cache: {e}")
+                
             return data
     except Exception as e:
         print(f"Error fetching from AppDynamics: {e}")

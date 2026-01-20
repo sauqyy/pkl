@@ -53,7 +53,7 @@ export default function SlowCallsAnalysis() {
   }, [timeframe, metricType, selectedTier, selectedTransaction])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
-  
+
   const trendData = data?.trend.labels.map((label, i) => ({
     date: label,
     count: data.trend.values[i]
@@ -64,7 +64,7 @@ export default function SlowCallsAnalysis() {
     { name: 'Off-Hours', value: data.impact['Off-Hours'], color: '#94a3b8' }
   ] : []
 
-  const subtitle = metricType === 'veryslow' 
+  const subtitle = metricType === 'veryslow'
     ? 'Historical Analysis of "Very Slow Calls"'
     : 'Historical Analysis of "Slow Calls"'
 
@@ -73,7 +73,7 @@ export default function SlowCallsAnalysis() {
       {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               toggleSidebar();
@@ -151,11 +151,11 @@ export default function SlowCallsAnalysis() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
-                <XAxis 
-                  dataKey="date" 
-                  stroke="#666" 
-                  fontSize={12} 
-                  tickLine={false} 
+                <XAxis
+                  dataKey="date"
+                  stroke="#666"
+                  fontSize={12}
+                  tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => {
                     const date = new Date(value)
@@ -163,26 +163,40 @@ export default function SlowCallsAnalysis() {
                   }}
                 />
                 <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={tooltipStyles.contentStyle}
                   labelFormatter={(value) => new Date(value).toLocaleDateString()}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="#0ea5e9" 
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#0ea5e9"
                   strokeWidth={2}
                   dot={false}
                   fill="url(#colorGradient)"
                 />
                 <defs>
                   <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
                   </linearGradient>
                 </defs>
               </LineChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Visual Explanation of Axes - Trend */}
+          <div className="mt-4 pt-4 border-t border-border/50">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                <span>Date (Month/Day)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                <span>Daily Slow Calls Count</span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -198,6 +212,20 @@ export default function SlowCallsAnalysis() {
           ) : (
             <div className="text-sm text-muted-foreground text-center py-8">Loading...</div>
           )}
+
+          {/* Visual Explanation of Axes - Heatmap */}
+          <div className="mt-4 pt-4 border-t border-border/50">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                <span>Time of Day (Hour)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                <span>Day of the Week</span>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -218,6 +246,20 @@ export default function SlowCallsAnalysis() {
                   <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+
+            {/* Visual Explanation of Axes - Hourly */}
+            <div className="mt-4 pt-4 border-t border-border/50">
+              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
+                  <span>Time (24-Hour Format)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
+                  <span>Total Slow Calls</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -244,9 +286,10 @@ export default function SlowCallsAnalysis() {
                     ))}
                   </Pie>
                   <Tooltip contentStyle={tooltipStyles.contentStyle} />
-                  <Legend 
-                    verticalAlign="bottom" 
+                  <Legend
+                    verticalAlign="bottom"
                     height={36}
+                    iconType="circle"
                     formatter={(value) => <span className="text-sm">{value}</span>}
                   />
                 </PieChart>
