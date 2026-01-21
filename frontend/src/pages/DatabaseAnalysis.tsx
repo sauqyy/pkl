@@ -6,6 +6,8 @@ import { Line, Doughnut } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ChartOptions, TimeScale, ArcElement } from 'chart.js'
 import 'chartjs-adapter-date-fns'
 import { useSidebar } from "@/components/SidebarContext"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale, ArcElement)
 
@@ -37,11 +39,16 @@ export default function DatabaseAnalysis() {
   const [loading, setLoading] = useState(true)
   const [duration, setDuration] = useState("60")
   const { toggleSidebar } = useSidebar()
+  const { dateRange } = useDateRange()
 
   const loadData = async (mins: string = duration) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/database-analysis?duration=${mins}`)
+      const params = new URLSearchParams({ duration: mins })
+      if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
+      if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
+      
+      const response = await fetch(`/api/database-analysis?${params}`)
       if (!response.ok) throw new Error('Failed to fetch')
       const result = await response.json()
       setData(result)
@@ -54,7 +61,7 @@ export default function DatabaseAnalysis() {
 
   useEffect(() => {
     loadData()
-  }, [duration])
+  }, [duration, dateRange])
 
   if (loading || !data) {
     return <div className="p-8 text-muted-foreground">Loading specific database analysis data...</div>
@@ -202,6 +209,7 @@ export default function DatabaseAnalysis() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <DateRangePicker />
           <Select value={duration} onValueChange={setDuration}>
             <SelectTrigger className="w-[180px] bg-card"><SelectValue /></SelectTrigger>
             <SelectContent>

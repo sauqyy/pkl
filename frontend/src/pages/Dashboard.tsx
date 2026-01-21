@@ -2,11 +2,13 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Search, Calendar as CalendarIcon, PanelRight } from "lucide-react"
+import { Search, PanelRight } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { fetchDashboardData, DashboardData } from "@/lib/api"
 import { useSidebar } from "@/components/SidebarContext"
 import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null)
@@ -14,11 +16,12 @@ export default function Dashboard() {
   const [period, setPeriod] = useState("60")
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
+  const { dateRange } = useDateRange()
 
   useEffect(() => {
     const load = async () => {
         try {
-            const d = await fetchDashboardData(Number(period))
+            const d = await fetchDashboardData(Number(period), undefined, undefined, dateRange.from, dateRange.to)
             setData(d)
         } catch (e) {
             console.error(e)
@@ -29,14 +32,14 @@ export default function Dashboard() {
     load()
     const interval = setInterval(load, 30000)
     return () => clearInterval(interval)
-  }, [period])
+  }, [period, dateRange])
 
   if (!data) return <div className="p-8 text-muted-foreground">Loading dashboard...</div>
 
   // Prepare Chart Data
   const lineData = data.timeline.map(t => {
       // t.time is already the timestamp in milliseconds
-      const date = new Date(t.time);
+      const date = new Date(t.timestamp);
       return {
           time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           value: t.value
@@ -96,10 +99,7 @@ export default function Dashboard() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input type="search" placeholder="Search for something..." className="pl-8 w-[250px] bg-card" />
             </div>
-            <div className="flex items-center gap-2 bg-card border rounded-md px-3 py-2 text-sm text-muted-foreground">
-                <CalendarIcon className="h-4 w-4" />
-                <span>Select period</span>
-            </div>
+            <DateRangePicker />
              <Select value={period} onValueChange={setPeriod}>
                 <SelectTrigger className="w-[180px] bg-card">
                     <SelectValue placeholder="Select period" />

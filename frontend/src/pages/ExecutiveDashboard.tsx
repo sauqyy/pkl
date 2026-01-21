@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Clock, AlertTriangle, Server, Hourglass, PanelRight, ListChecks, Activity, Database } from "lucide-react"
 import { useSidebar } from "@/components/SidebarContext"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 interface SummaryData {
   response_time: number;
@@ -17,10 +19,18 @@ export default function ExecutiveDashboard() {
   const navigate = useNavigate()
   const { toggleSidebar } = useSidebar()
   const { selectedTier, selectedTransaction } = useBusinessTransaction()
+  const { dateRange } = useDateRange()
 
   const fetchSummary = async () => {
     try {
-      const response = await fetch(`/api/summary?tier=${encodeURIComponent(selectedTier)}&bt=${encodeURIComponent(selectedTransaction)}`)
+      const params = new URLSearchParams({
+        tier: selectedTier,
+        bt: selectedTransaction
+      })
+      if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
+      if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
+      
+      const response = await fetch(`/api/summary?${params}`)
       const result = await response.json()
       setData(result)
     } catch (e) {
@@ -33,7 +43,7 @@ export default function ExecutiveDashboard() {
     // Auto-refresh every 60s
     const interval = setInterval(fetchSummary, 60000)
     return () => clearInterval(interval)
-  }, [selectedTier, selectedTransaction])
+  }, [selectedTier, selectedTransaction, dateRange])
 
   const formatNumber = (num: number) => {
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
@@ -63,6 +73,7 @@ export default function ExecutiveDashboard() {
             <p className="text-xs text-muted-foreground">Real-time dashboard of system health metrics</p>
           </div>
         </div>
+        <DateRangePicker />
       </div>
 
       {/* 3x2 Grid Layout */}

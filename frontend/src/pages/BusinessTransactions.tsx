@@ -4,6 +4,8 @@ import { RefreshCw, PanelRight } from "lucide-react"
 import { Bar, Doughnut, Scatter } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, ChartOptions } from 'chart.js'
 import { useSidebar } from "@/components/SidebarContext"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
 
@@ -13,8 +15,9 @@ interface BusinessTransaction {
   'Response Time (ms)': number
   Calls: number
   '% Errors': number
-  Tier: string
+  Tier?: string
 }
+
 
 interface BusinessTransactionsData {
   health_counts: Record<string, number>
@@ -29,11 +32,16 @@ export default function BusinessTransactions() {
   const [data, setData] = useState<BusinessTransactionsData | null>(null)
   const [loading, setLoading] = useState(true)
   const { toggleSidebar } = useSidebar()
+  const { dateRange } = useDateRange()
 
   const loadData = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/business-transactions')
+      const params = new URLSearchParams()
+      if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
+      if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
+      
+      const response = await fetch(`/api/business-transactions?${params}`)
       if (!response.ok) throw new Error('Failed to fetch')
       const result = await response.json()
       setData(result)
@@ -46,7 +54,7 @@ export default function BusinessTransactions() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [dateRange])
 
   if (loading || !data) {
     return <div className="p-8 text-muted-foreground">Loading business transactions...</div>
@@ -164,6 +172,7 @@ export default function BusinessTransactions() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <DateRangePicker />
           <button onClick={loadData} className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
             <RefreshCw className="h-4 w-4" /> Refresh Data
           </button>
@@ -230,7 +239,7 @@ export default function BusinessTransactions() {
                   <th className="text-left p-3 font-medium text-muted-foreground">Response Time (ms)</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">Calls</th>
                   <th className="text-left p-3 font-medium text-muted-foreground">% Errors</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground">Tier</th>
+                  {data.table.some(t => t.Tier) && <th className="text-left p-3 font-medium text-muted-foreground">Tier</th>}
                 </tr>
               </thead>
               <tbody>
@@ -245,12 +254,13 @@ export default function BusinessTransactions() {
                     <td className="p-3">{txn['Response Time (ms)'].toLocaleString()}</td>
                     <td className="p-3">{txn.Calls.toLocaleString()}</td>
                     <td className="p-3">{txn['% Errors']}%</td>
-                    <td className="p-3">{txn.Tier}</td>
+                    {data.table.some(t => t.Tier) && <td className="p-3">{txn.Tier || '-'}</td>}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
         </CardContent>
       </Card>
     </div>

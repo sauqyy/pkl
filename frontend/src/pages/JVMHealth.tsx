@@ -7,6 +7,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import 'chartjs-adapter-date-fns'
 import { useSidebar } from "@/components/SidebarContext"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale)
 
@@ -32,11 +34,19 @@ export default function JVMHealth() {
   const [duration, setDuration] = useState("60")
   const { toggleSidebar } = useSidebar()
   const { selectedTier } = useBusinessTransaction()
+  const { dateRange } = useDateRange()
 
   const loadData = async (mins: string = duration) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/jvm-data?duration=${mins}&tier=${encodeURIComponent(selectedTier)}`)
+      const params = new URLSearchParams({
+        duration: mins,
+        tier: selectedTier
+      })
+      if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
+      if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
+      
+      const response = await fetch(`/api/jvm-data?${params}`)
       if (!response.ok) throw new Error('Failed to fetch')
       const result = await response.json()
       setData(result)
@@ -49,7 +59,7 @@ export default function JVMHealth() {
 
   useEffect(() => {
     loadData()
-  }, [duration, selectedTier])
+  }, [duration, selectedTier, dateRange])
 
   if (loading || !data) {
     return <div className="p-8 text-muted-foreground">Loading JVM health data...</div>
@@ -135,6 +145,7 @@ export default function JVMHealth() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <DateRangePicker />
           <Select value={duration} onValueChange={setDuration}>
             <SelectTrigger className="w-[180px] bg-card"><SelectValue /></SelectTrigger>
             <SelectContent>
