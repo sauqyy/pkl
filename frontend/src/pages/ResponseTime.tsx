@@ -2,12 +2,14 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Search, Calendar as CalendarIcon, PanelRight } from "lucide-react"
+import { Search, PanelRight } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { fetchDashboardData, DashboardData } from "@/lib/api"
 import { useSidebar } from "@/components/SidebarContext"
 import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 export default function ResponseTime() {
     const [data, setData] = useState<DashboardData | null>(null)
@@ -15,12 +17,12 @@ export default function ResponseTime() {
     const { toggleSidebar } = useSidebar()
     const tooltipStyles = useChartTooltipStyles()
     const { selectedTier, selectedTransaction } = useBusinessTransaction()
+    const { dateRange } = useDateRange()
 
     useEffect(() => {
-        setData(null) // Reset data to trigger loading state
         const load = async () => {
             try {
-                const d = await fetchDashboardData(Number(period), selectedTier, selectedTransaction)
+                const d = await fetchDashboardData(Number(period), selectedTier, selectedTransaction, dateRange.from, dateRange.to)
                 setData(d)
             } catch (e) {
                 console.error(e)
@@ -29,7 +31,7 @@ export default function ResponseTime() {
         load()
         const interval = setInterval(load, 30000)
         return () => clearInterval(interval)
-    }, [period, selectedTier, selectedTransaction])
+    }, [period, selectedTier, selectedTransaction, dateRange])
 
     // Prepare Chart Data
     const lineData = data?.timeline.map(t => {
@@ -67,8 +69,7 @@ export default function ResponseTime() {
     const p95 = (data?.raw_values?.length || 0) > 0
         ? data!.raw_values.sort((a, b) => a - b)[Math.floor(data!.raw_values.length * 0.95)]
         : 0;
-    const max = (data?.raw_values?.length || 0) > 0 ? Math.max(...data!.raw_values) : 0;
-    const min = (data?.raw_values?.length || 0) > 0 ? Math.min(...data!.raw_values) : 0;
+
 
     // Dynamic subtitle based on period
     const getPeriodLabel = (minutes: string) => {
@@ -110,10 +111,7 @@ export default function ResponseTime() {
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input type="search" placeholder="Search for something..." className="pl-8 w-[250px] bg-card" />
                     </div>
-                    <div className="flex items-center gap-2 bg-card border rounded-md px-3 py-2 text-sm text-muted-foreground">
-                        <CalendarIcon className="h-4 w-4" />
-                        <span>Select period</span>
-                    </div>
+                    <DateRangePicker />
                     <Select value={period} onValueChange={setPeriod}>
                         <SelectTrigger className="w-[180px] bg-card">
                             <SelectValue placeholder="Select period" />
@@ -327,16 +325,4 @@ export default function ResponseTime() {
     )
 }
 
-function MetricCard({ title, value, subtitle }: { title: string; value: string | number; subtitle: string }) {
-    return (
-        <Card className="bg-card">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="text-3xl font-bold text-foreground mb-1">{value}</div>
-                <p className="text-xs text-muted-foreground">{subtitle}</p>
-            </CardContent>
-        </Card>
-    )
-}
+

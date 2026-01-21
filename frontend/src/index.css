@@ -104,3 +104,89 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(128, 128, 128, 0.5);
 }
+
+/* React Day Picker Dark Theme Styling */
+.rdp-custom {
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--popover));
+  --rdp-accent-background-color: hsl(var(--accent));
+  --rdp-outline: 2px solid hsl(var(--ring));
+  --rdp-outline-selected: 2px solid hsl(var(--primary));
+  --rdp-selected-font: inherit;
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  color: hsl(var(--popover-foreground));
+}
+
+.rdp-custom .rdp-month_caption {
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+.rdp-custom .rdp-weekday {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.rdp-custom .rdp-day {
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.rdp-custom .rdp-day_button {
+  width: var(--rdp-day-width);
+  height: var(--rdp-day-height);
+  border-radius: 0.375rem;
+}
+
+.rdp-custom .rdp-day_button:hover {
+  background-color: hsl(var(--accent));
+}
+
+.rdp-custom .rdp-selected .rdp-day_button {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.rdp-custom .rdp-range_middle .rdp-day_button {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.rdp-custom .rdp-today .rdp-day_button {
+  background-color: hsl(var(--accent));
+  font-weight: 600;
+}
+
+/* Fix: Today's date when also selected - ensure white text */
+.rdp-custom .rdp-today.rdp-selected .rdp-day_button,
+.rdp-custom .rdp-today.rdp-range_end .rdp-day_button,
+.rdp-custom .rdp-today.rdp-range_start .rdp-day_button {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.rdp-custom .rdp-outside .rdp-day_button {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+}
+
+.rdp-custom .rdp-nav button {
+  background-color: transparent;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.375rem;
+  padding: 0.25rem;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+}
+
+.rdp-custom .rdp-nav button:hover {
+  background-color: hsl(var(--accent));
+}
+
+.rdp-custom .rdp-chevron {
+  fill: currentColor;
+}
+

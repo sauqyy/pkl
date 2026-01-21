@@ -89,7 +89,10 @@ export function Sidebar({ className, collapsed = false }: SidebarProps) {
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className={dropdownButtonClass}
                 >
-                  <span className="flex-1 text-left truncate text-xs">{selectedTransaction}</span>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="text-[10px] text-muted-foreground truncate">{selectedTier}</div>
+                    <div className="text-xs truncate">{selectedTransaction}</div>
+                  </div>
                   <ChevronsUpDown className="h-4 w-4 opacity-60 flex-shrink-0" />
                 </button>
                 
@@ -136,7 +139,7 @@ export function Sidebar({ className, collapsed = false }: SidebarProps) {
           </div>
 
           {/* Business Transaction Group */}
-          <div className="pt-2">
+          <div className={cn("pt-2", collapsed && "border-t border-border mt-2")}>
             {!collapsed && (
               <div className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Business Transaction
@@ -150,6 +153,7 @@ export function Sidebar({ className, collapsed = false }: SidebarProps) {
               <SidebarItem icon={<Hourglass className="h-4 w-4" />} label="Slow" to="/slow-calls-analysis" collapsed={collapsed} />
             </div>
           </div>
+
         </div>
       </div>
       

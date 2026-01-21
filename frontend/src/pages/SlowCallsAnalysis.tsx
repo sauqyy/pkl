@@ -7,6 +7,8 @@ import { Heatmap } from "@/components/Heatmap"
 import { useSidebar } from "@/components/SidebarContext"
 import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 interface SlowCallsData {
   total: number;
@@ -35,10 +37,20 @@ export default function SlowCallsAnalysis() {
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const { selectedTier, selectedTransaction } = useBusinessTransaction()
+  const { dateRange } = useDateRange()
 
   const fetchAnalysis = async () => {
     try {
-      const response = await fetch(`/api/slow-calls-analysis?timeframe=${timeframe}&type=${metricType}&tier=${encodeURIComponent(selectedTier)}&bt=${encodeURIComponent(selectedTransaction)}`)
+      const params = new URLSearchParams({
+        timeframe,
+        type: metricType,
+        tier: selectedTier,
+        bt: selectedTransaction
+      })
+      if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
+      if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
+      
+      const response = await fetch(`/api/slow-calls-analysis?${params}`)
       const result = await response.json()
       if (!result.error) {
         setData(result)
@@ -51,7 +63,7 @@ export default function SlowCallsAnalysis() {
   useEffect(() => {
     setData(null) // Reset data to trigger loading state
     fetchAnalysis()
-  }, [timeframe, metricType, selectedTier, selectedTransaction])
+  }, [timeframe, metricType, selectedTier, selectedTransaction, dateRange])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
 
@@ -90,6 +102,7 @@ export default function SlowCallsAnalysis() {
           </div>
         </div>
         <div className="flex gap-3">
+          <DateRangePicker />
           <Select value={metricType} onValueChange={setMetricType}>
             <SelectTrigger className="w-[200px] bg-card">
               <SelectValue />

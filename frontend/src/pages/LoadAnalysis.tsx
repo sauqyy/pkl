@@ -7,6 +7,8 @@ import { Heatmap } from "@/components/Heatmap"
 import { useSidebar } from "@/components/SidebarContext"
 import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
+import { DateRangePicker } from "@/components/DateRangePicker"
+import { useDateRange } from "@/components/DateRangeContext"
 
 interface LoadAnalysisData {
   total: number;
@@ -26,10 +28,19 @@ export default function LoadAnalysis() {
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const { selectedTier, selectedTransaction } = useBusinessTransaction()
+  const { dateRange } = useDateRange()
 
   const fetchAnalysis = async () => {
     try {
-      const response = await fetch(`/api/load-analysis?timeframe=${timeframe}&tier=${encodeURIComponent(selectedTier)}&bt=${encodeURIComponent(selectedTransaction)}`)
+      const params = new URLSearchParams({
+        timeframe,
+        tier: selectedTier,
+        bt: selectedTransaction
+      })
+      if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
+      if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
+      
+      const response = await fetch(`/api/load-analysis?${params}`)
       const result = await response.json()
       if (!result.error) {
         setData(result)
@@ -42,7 +53,7 @@ export default function LoadAnalysis() {
   useEffect(() => {
     setData(null) // Reset data to trigger loading state
     fetchAnalysis()
-  }, [timeframe, selectedTier, selectedTransaction])
+  }, [timeframe, selectedTier, selectedTransaction, dateRange])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
   const dailyData = data?.daily.map((count, i) => ({ day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], count })) || []
@@ -67,7 +78,9 @@ export default function LoadAnalysis() {
             <p className="text-xs text-muted-foreground">Historical Analysis of "Calls per Minute" (Last 3 Years)</p>
           </div>
         </div>
-        <Select value={timeframe} onValueChange={setTimeframe}>
+        <div className="flex items-center gap-2">
+          <DateRangePicker />
+          <Select value={timeframe} onValueChange={setTimeframe}>
           <SelectTrigger className="w-[200px] bg-card">
             <SelectValue />
           </SelectTrigger>
@@ -79,6 +92,7 @@ export default function LoadAnalysis() {
             <SelectItem value="7d">Last 7 Days</SelectItem>
           </SelectContent>
         </Select>
+        </div>
       </div>
 
 

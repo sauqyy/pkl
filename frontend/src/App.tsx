@@ -12,11 +12,13 @@ import BusinessTransactions from '@/pages/BusinessTransactions'
 import JVMHealth from '@/pages/JVMHealth'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { BusinessTransactionProvider } from '@/components/BusinessTransactionContext'
+import { DateRangeProvider } from '@/components/DateRangeContext'
 
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="handalin-theme">
-      <BusinessTransactionProvider>
+      <DateRangeProvider>
+        <BusinessTransactionProvider>
         <BrowserRouter>
           <DashboardLayout>
             <Routes>
@@ -33,7 +35,8 @@ function App() {
             </Routes>
           </DashboardLayout>
         </BrowserRouter>
-      </BusinessTransactionProvider>
+        </BusinessTransactionProvider>
+      </DateRangeProvider>
     </ThemeProvider>
   )
 }
