@@ -333,105 +333,309 @@ class LSTMModel(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
 
-MODEL_PATH = 'lstm_model.pth'
-SCALER_PATH = 'scaler.pkl'
-TRAINING_DATA = 'training_data.json'
+from train_model import train_metric_model, get_model_paths
 
-def get_trained_model():
-    if not os.path.exists(MODEL_PATH) or not os.path.exists(SCALER_PATH):
-        return None, None
+def get_trained_model(metric_name='response'):
+    """Load the trained LSTM model and scaler for a specific metric."""
+    model_path, scaler_path = get_model_paths(metric_name)
     
+    if not os.path.exists(model_path) or not os.path.exists(scaler_path):
+        return None, None
+        
     try:
         # Load Model
-        model = LSTMModel(input_size=1, hidden_size=50, num_layers=2, output_size=1)
-        model.load_state_dict(torch.load(MODEL_PATH))
+        input_size = 1
+        hidden_size = 50
+        num_layers = 2
+        output_size = 1
+        
+        model = LSTMModel(input_size, hidden_size, num_layers, output_size)
+        model.load_state_dict(torch.load(model_path))
         model.eval()
         
         # Load Scaler
-        scaler = joblib.load(SCALER_PATH)
+        scaler = joblib.load(scaler_path)
         return model, scaler
     except Exception as e:
-        print(f"Error loading model: {e}")
+        print(f"Error loading model for {metric_name}: {e}")
         return None, None
 
 @app.route('/api/forecast')
 def get_forecast():
-    model, scaler = get_trained_model()
+    metric = request.args.get('metric', 'Response')  # Load, Response, Error, Slow
+    tier = request.args.get('tier', 'integration-service')
+    bt = request.args.get('bt', '/smart-integration/users')
     
-    if not model:
-        return jsonify({'error': 'Model is not trained yet. Please run train_model.py.'})
-
-    # Prepare Input Data (Last 60 hours)
-    # Strategy: Fetch last 3 days of data from AppD -> Resample to Hourly
-    # For demo stability, we try to use training_data.json tail if API fails or as simpler source
+    # Validate metric type
+    valid_metrics = ['Load', 'Response', 'Error', 'Slow']
+    if metric not in valid_metrics:
+        return jsonify({'error': f'Invalid metric type. Must be one of: {valid_metrics}'})
     
     try:
-        # 1. Fetch live data (Last 3 days) to get recent context
-        # duration = 4320 mins (3 days)
-        # However, for simplicity and speed, let's use the cached training_data.json + whatever live data we can get?
-        # Let's just use training_data.json tail for the DEMO to ensure it works immediately.
+        # Fetch historical data from AppDynamics (last 30 days for hourly data)
+        duration = 30 * 24 * 60  # 30 days in minutes
+        url = get_bt_url(tier, bt, metric)
         
-        with open(TRAINING_DATA, 'r') as f:
-            raw = json.load(f)
-            
-        df = pd.DataFrame(raw)
-        df = df.sort_values('startTimeInMillis')
+        if not url:
+            return jsonify({'error': f'No URL configured for metric: {metric}'})
         
-        # Get tail (last 60)
-        last_60 = df.iloc[-60:].copy()
-        history_values = last_60['value'].values.astype('float32')
-        history_timestamps = last_60['startTimeInMillis'].tolist()
+        raw_data = fetch_from_appdynamics(url, duration)
         
-        if len(history_values) < 60:
-             return jsonify({'error': 'Not enough data for prediction'})
-             
-        # Scale
-        input_data = history_values.reshape(-1, 1)
-        scaled_input = scaler.transform(input_data)
+        if not raw_data:
+            return jsonify({'error': f'Failed to fetch {metric} data from AppDynamics'})
         
-        # Tensor
-        X_tensor = torch.tensor(scaled_input, dtype=torch.float32).unsqueeze(0) # (1, 60, 1)
+        # Extract metric values
+        all_values = []
+        for item in raw_data:
+            if 'metricValues' in item:
+                for val in item['metricValues']:
+                    all_values.append({
+                        'timestamp': val.get('startTimeInMillis', 0),
+                        'value': val.get('value', val.get('sum', 0))
+                    })
         
-        # Predict Next 24 Steps
-        forecasts = []
-        current_input = X_tensor
+        if len(all_values) < 24:
+            return jsonify({'error': f'Not enough historical data for {metric} forecast'})
         
-        for _ in range(24): # Predict next 24 hours
-            with torch.no_grad():
-                pred = model(current_input) # (1, 1)
-                
-            forecasts.append(pred.item())
-            
-            # Update input: remove first, add new pred
-            # pred is (1,1) -> (1, 1, 1)
-            new_step = pred.unsqueeze(1)
-            current_input = torch.cat((current_input[:, 1:, :], new_step), dim=1)
+        # Sort by timestamp
+        all_values.sort(key=lambda x: x['timestamp'])
+        
+        # Resample to hourly data
+        df = pd.DataFrame(all_values)
+        df['dt'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df.set_index('dt', inplace=True)
+        
+        # Resample to hourly, using sum for count-based metrics, mean for response time
+        if metric == 'Response':
+            hourly = df['value'].resample('h').mean().dropna()
+        else:
+            hourly = df['value'].resample('h').sum()
+        
+        hourly = hourly.tail(720)  # Last 30 days of hourly data (720 hours)
 
-        # Inverse Scale Predictions
-        forecasts = np.array(forecasts).reshape(-1, 1)
-        inv_forecasts = scaler.inverse_transform(forecasts).flatten()
         
-        # Prepare Response
+        if len(hourly) < 24:
+            return jsonify({'error': f'Not enough hourly data points for {metric}'})
+        
+        history_values = hourly.values.astype('float32')
+        history_timestamps = [int(ts.timestamp() * 1000) for ts in hourly.index]
+        
+        # Use LSTM for ALL metrics
+        # Try to get specific model for this metric
+        model, _ = get_trained_model(metric)
+        
+        lock_file = f'training_{metric}.lock'
+        
+        # Check if currently training
+        if os.path.exists(lock_file):
+             return jsonify({'status': 'training', 'message': f'Model for {metric} is currently training...'})
+             
+        # If no model exists and not training, trigger background training
+        if not model and len(history_values) >= 100:
+             import threading
+             
+             # Prepare data list for training
+             training_data = [{'startTimeInMillis': ts, 'value': val} 
+                              for ts, val in zip(history_timestamps, history_values)]
+                              
+             def run_training_background(data, m_name):
+                 print(f"Background training started for {m_name}...")
+                 train_metric_model(data, m_name)
+                 print(f"Background training finished for {m_name}")
+                 
+             thread = threading.Thread(target=run_training_background, args=(training_data, metric))
+             thread.start()
+             
+             return jsonify({'status': 'training', 'message': f'Started training model for {metric}'})
+        
+        if model and len(history_values) >= 84:  # Need 60 for input + 24 for comparison
+            try:
+                from sklearn.preprocessing import MinMaxScaler
+                
+                # Create a new scaler fitted to THIS metric's data
+                metric_scaler = MinMaxScaler(feature_range=(0, 1))
+                input_data = history_values.reshape(-1, 1)
+                metric_scaler.fit(input_data)  # Fit on all history
+                
+                # --- BACKTESTING: Compare what we predicted vs what actually happened ---
+                # Use data from 24 hours ago to predict, then compare with actual
+                backtest_start = len(history_values) - 84  # 60 for input + 24 for comparison
+                backtest_input = history_values[backtest_start:backtest_start + 60].reshape(-1, 1)
+                scaled_backtest = metric_scaler.transform(backtest_input)
+                X_backtest = torch.tensor(scaled_backtest, dtype=torch.float32).unsqueeze(0)
+                
+                # Generate backtested predictions (what we would have predicted 24h ago)
+                backtest_preds = []
+                current_input = X_backtest
+                for _ in range(24):
+                    with torch.no_grad():
+                        pred = model(current_input)
+                    backtest_preds.append(pred.item())
+                    new_step = pred.unsqueeze(1)
+                    current_input = torch.cat((current_input[:, 1:, :], new_step), dim=1)
+                
+                backtest_preds = np.array(backtest_preds).reshape(-1, 1)
+                backtest_inv = metric_scaler.inverse_transform(backtest_preds).flatten()
+                
+                # Get actual values for comparison (last 24 hours)
+                actual_24h = history_values[-24:]
+                actual_timestamps = history_timestamps[-24:]
+                
+                # Build comparison data (actual vs predicted for same timepoints)
+                comparison = []
+                for i in range(24):
+                    comparison.append({
+                        'timestamp': actual_timestamps[i],
+                        'actual': float(actual_24h[i]),
+                        'predicted': float(max(0, backtest_inv[i]))
+                    })
+                
+                # --- FUTURE FORECAST: Predict next 24 hours ---
+                last_60 = history_values[-60:].reshape(-1, 1)
+                scaled_input = metric_scaler.transform(last_60)
+                X_tensor = torch.tensor(scaled_input, dtype=torch.float32).unsqueeze(0)
+                
+                forecasts = []
+                current_input = X_tensor
+                
+                for _ in range(24):
+                    with torch.no_grad():
+                        pred = model(current_input)
+                    forecasts.append(pred.item())
+                    new_step = pred.unsqueeze(1)
+                    current_input = torch.cat((current_input[:, 1:, :], new_step), dim=1)
+                
+                forecasts = np.array(forecasts).reshape(-1, 1)
+                inv_forecasts = metric_scaler.inverse_transform(forecasts).flatten()
+                
+                # Prepare future forecast response
+                last_ts = history_timestamps[-1]
+                hour_ms = 3600000
+                
+                forecast_response = []
+                for val in inv_forecasts:
+                    last_ts += hour_ms
+                    # Round count-based metrics to integers
+                    final_val = float(max(0, val))
+                    if metric in ['Load', 'Error', 'Slow']:
+                        final_val = int(round(final_val))
+                    forecast_response.append({'timestamp': last_ts, 'value': final_val})
+                
+                # Calculate accuracy metrics
+                if np.mean(actual_24h) > 0:
+                    # Round backtested predictions for counts too
+                    predicted_backtest = backtest_inv
+                    if metric in ['Load', 'Error', 'Slow']:
+                        predicted_backtest = np.round(np.maximum(0, backtest_inv))
+                    
+                    mae = np.mean(np.abs(actual_24h - predicted_backtest))
+                    den = np.mean(actual_24h)
+                    mape = (mae / den) * 100 if den > 0 else 0
+                else:
+                    mae = 0
+                    mape = 0
+                
+                # Update comparison data with rounded values
+                comparison = []
+                for i in range(24):
+                    pred_val = float(max(0, backtest_inv[i]))
+                    if metric in ['Load', 'Error', 'Slow']:
+                        pred_val = int(round(pred_val))
+                        
+                    comparison.append({
+                        'timestamp': actual_timestamps[i],
+                        'actual': float(actual_24h[i]),
+                        'predicted': pred_val
+                    })
+
+                return jsonify({
+                    'comparison': comparison,  # Last 24h: actual vs predicted
+                    'forecast': forecast_response,  # Next 24h predictions
+                    'model': 'LSTM',
+                    'accuracy': {
+                        'mae': float(mae),
+                        'mape': float(min(mape, 100))  # Cap error at 100%
+                    }
+                })
+            except Exception as e:
+                print(f"LSTM prediction failed for {metric}, falling back to statistical: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        # Fallback: Statistical forecast (moving average + trend)
+        window = min(24, len(history_values))
+        recent_values = history_values[-window:]
+        
+        # Calculate trend
+        if len(recent_values) >= 2:
+            trend = (recent_values[-1] - recent_values[0]) / len(recent_values)
+        else:
+            trend = 0
+        
+        # Calculate weighted moving average (more weight to recent values)
+        weights = np.exp(np.linspace(0, 1, len(recent_values)))
+        weights /= weights.sum()
+        weighted_avg = np.average(recent_values, weights=weights)
+        
+        # Calculate hourly pattern (hour of day effect)
+        hourly_pattern = np.zeros(24)
+        hourly_counts = np.zeros(24)
+        for i, val in enumerate(history_values):
+            hour_of_day = (hourly.index[i].hour) % 24
+            hourly_pattern[hour_of_day] += val
+            hourly_counts[hour_of_day] += 1
+        
+        # Avoid division by zero
+        hourly_counts = np.where(hourly_counts == 0, 1, hourly_counts)
+        hourly_avg = hourly_pattern / hourly_counts
+        overall_avg = np.mean(hourly_avg) if np.mean(hourly_avg) > 0 else 1
+        hourly_factors = hourly_avg / overall_avg
+        
+        # Generate comparison (last 24h actual vs simple prediction)
+        comparison = []
+        for i in range(min(24, len(history_values))):
+            idx = len(history_values) - 24 + i
+            if idx >= 0:
+                comparison.append({
+                    'timestamp': history_timestamps[idx],
+                    'actual': float(history_values[idx]),
+                    'predicted': float(weighted_avg * hourly_factors[hourly.index[idx].hour])
+                })
+        
+        # Generate future forecast
         last_ts = history_timestamps[-1]
+        last_hour = hourly.index[-1].hour
         hour_ms = 3600000
         
         forecast_response = []
-        for i, val in enumerate(inv_forecasts):
+        current_value = weighted_avg
+        
+        for i in range(24):
+            forecast_hour = (last_hour + i + 1) % 24
+            hourly_factor = hourly_factors[forecast_hour] if hourly_factors[forecast_hour] > 0 else 1
+            
+            predicted_value = current_value * hourly_factor + trend * (i + 1)
+            predicted_value = max(0, predicted_value)
+            
             last_ts += hour_ms
-            forecast_response.append({'timestamp': last_ts, 'value': float(val)})
+            forecast_response.append({'timestamp': last_ts, 'value': float(predicted_value)})
             
-        history_response = []
-        for i in range(len(history_values)):
-            history_response.append({'timestamp': history_timestamps[i], 'value': float(history_values[i])})
-            
+            current_value = 0.9 * current_value + 0.1 * weighted_avg
+        
         return jsonify({
-            'history': history_response,
-            'forecast': forecast_response
+            'comparison': comparison,
+            'forecast': forecast_response,
+            'model': 'Statistical',
+            'accuracy': {'mae': 0, 'mape': 0}
         })
-
+        
     except Exception as e:
-        print(e)
+        print(f"Forecast error for {metric}: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)})
+
+
 
 
 @app.route('/api/training-status')
@@ -913,17 +1117,31 @@ def get_business_transactions():
         df['Health'] = df['Health'].fillna('Unknown')
         scatter_data = df[['Name', 'Calls', 'Response Time (ms)', 'Health']].to_dict(orient='records')
 
-        # 6. Table Data
-        table_data = df[['Name', 'Health', 'Response Time (ms)', 'Calls', '% Errors']].head(50).to_dict(orient='records')
+
+        # 6. Table Data - include Tier column if it exists
+        table_cols = ['Name', 'Health', 'Response Time (ms)', 'Calls', '% Errors']
+        if 'Tier' in df.columns:
+            table_cols.append('Tier')
+        table_data = df[table_cols].head(50).to_dict(orient='records')
 
         return jsonify({
-            'health_dist': health_counts,
-            'top_slowest': top_slowest.to_dict(orient='records'),
-            'top_volume': top_volume.to_dict(orient='records'),
-            'top_errors': top_errors.to_dict(orient='records'),
+            'health_counts': health_counts,
+            'top_slowest': {
+                'labels': top_slowest['Name'].tolist(),
+                'values': top_slowest['Response Time (ms)'].tolist()
+            },
+            'top_volume': {
+                'labels': top_volume['Name'].tolist(),
+                'values': top_volume['Calls'].tolist()
+            },
+            'top_errors': {
+                'labels': top_errors['Name'].tolist(),
+                'values': top_errors['% Errors'].tolist()
+            },
             'scatter': scatter_data,
             'table': table_data
         })
+
 
     except Exception as e:
         print(f"Error processing stats: {e}")
