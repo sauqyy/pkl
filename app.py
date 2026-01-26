@@ -12,11 +12,30 @@ from email.mime.multipart import MIMEMultipart
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 import requests
+import threading
+import re
+import logging
+from logging.handlers import RotatingFileHandler
 
 # Telegram Configuration
 TELEGRAM_BOT_TOKEN = "8290043825:AAFeZVa2F8kBXJduCktSJOJ162SRF9QDhFM"
 TELEGRAM_CHAT_ID = "5958836175" # Update this with your Chat ID
+
+# --- Monitor Logger Setup ---
+monitor_logger = logging.getLogger('monitor_logger')
+monitor_logger.setLevel(logging.INFO)
+if not monitor_logger.handlers:
+    # File Handler
+    file_handler = RotatingFileHandler('monitor.log', maxBytes=2*1024*1024, backupCount=5)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    monitor_logger.addHandler(file_handler)
+    
+    # Console Handler
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    monitor_logger.addHandler(console_handler)
 
 def send_telegram_alert(message):
     """Sends a Telegram alert when an error occurs."""
@@ -103,28 +122,37 @@ def get_bt_url(tier: str, bt: str, metric_type: str) -> str:
     
     return matches.iloc[0]['URL']
 
-def fetch_from_appdynamics(url: str, duration_override: int = None) -> list:
+def fetch_from_appdynamics(url: str, duration: int = None, allow_rollup: bool = False) -> list:
     """
     Fetch data from an AppDynamics URL.
     Optionally override the duration-in-mins parameter.
+    Allow rollup for large datasets to improve performance.
     """
     if not url:
         return []
     
     # Override duration if specified
-    if duration_override:
+    if duration:
         # Parse and update duration in URL
         if 'duration-in-mins=' in url:
             import re
-            url = re.sub(r'duration-in-mins=\d+', f'duration-in-mins={duration_override}', url)
+            url = re.sub(r'duration-in-mins=\d+', f'duration-in-mins={duration}', url)
     
-    # Add output=JSON and rollup=false if not present
+    # Add output=JSON
     if 'output=JSON' not in url:
         url += '&output=JSON'
-    if 'rollup=false' not in url:
-        url += '&rollup=false'
+        
+    # Handle Rollup
+    if not allow_rollup:
+        if 'rollup=false' not in url:
+            url += '&rollup=false'
+    else:
+        # If allowing rollup, we don't enforce rollup=false.
+        # We can explicitly set rollup=true if needed, or rely on default.
+        # AppDynamics defaults to rolling up large durations.
+        pass
     
-    print(f"Fetching from AppDynamics: {url[:100]}...")
+    print(f"DEBUG FETCH URL (Override={duration}, Rollup={allow_rollup}): {url}")
     
     # Caching Logic
     CACHE_DIR = 'cache'
@@ -134,37 +162,56 @@ def fetch_from_appdynamics(url: str, duration_override: int = None) -> list:
     url_hash = hashlib.md5(url.encode()).hexdigest()
     cache_file = os.path.join(CACHE_DIR, f"{url_hash}.json")
     
-    # Check cache (valid for 1 hour)
+    raw_data = None
+    
+    # Check cache
     if os.path.exists(cache_file):
         file_age = time.time() - os.path.getmtime(cache_file)
-        if file_age < 3600: # 1 hour
+        
+        # Smart TTL based on duration
+        ttl = 3600 # default 1 hour
+        if duration and duration <= 15:
+            ttl = 60 # 1 minute for short windows
+            
+        if file_age < ttl:
             print(f"Loading from cache: {cache_file}")
             try:
                 with open(cache_file, 'r') as f:
-                    return json.load(f)
+                    raw_data = json.load(f)
             except Exception as e:
                 print(f"Error reading cache: {e}")
 
-    req = urllib.request.Request(url)
-    req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
-    
-    try:
-        with urllib.request.urlopen(req, timeout=30) as response:
-            data = json.loads(response.read().decode())
-            
-            # Save to cache
-            try:
-                with open(cache_file, 'w') as f:
-                    json.dump(data, f)
-            except Exception as e:
-                print(f"Error writing to cache: {e}")
+    # Fetch from Network if no cache
+    if raw_data is None:
+        req = urllib.request.Request(url)
+        req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
+        
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                raw_data = json.loads(response.read().decode())
                 
-            return data
-    except Exception as e:
-        error_msg = f"Error fetching from AppDynamics: {e}\nURL: {url}"
-        print(error_msg)
-        send_telegram_alert(error_msg)
-        return []
+                # Save Raw Data to Cache
+                try:
+                    with open(cache_file, 'w') as f:
+                        json.dump(raw_data, f)
+                except Exception as e:
+                    print(f"Error writing to cache: {e}")
+                    
+        except Exception as e:
+            error_msg = f"Error fetching from AppDynamics: {e}\nURL: {url}"
+            print(error_msg)
+            # send_telegram_alert(error_msg) 
+            return []
+
+    # Flatten Data (Source of Truth for callers)
+    # Callers expect a list of 'metricValues' objects, not the raw API response.
+    final_values = []
+    if raw_data and isinstance(raw_data, list):
+        for item in raw_data:
+            if 'metricValues' in item:
+                final_values.extend(item['metricValues'])
+                
+    return final_values
 
 def send_email_alert(error_message):
     """Sends an email alert when an error occurs."""
@@ -286,9 +333,7 @@ def get_summary_data():
             if data and isinstance(data, list):
                 total = 0
                 for item in data:
-                    if 'metricValues' in item:
-                        for v in item['metricValues']:
-                            total += v.get('sum', v.get('value', 0))
+                    total += item.get('sum', item.get('value', 0)) # Item is already flattened value
                 summary['load'] = int(total)
     except Exception as e:
         print(f"Summary Load Error: {e}")
@@ -301,9 +346,7 @@ def get_summary_data():
             if data and isinstance(data, list):
                 total = 0
                 for item in data:
-                    if 'metricValues' in item:
-                        for v in item['metricValues']:
-                            total += v.get('sum', v.get('value', 0))
+                     total += item.get('sum', item.get('value', 0)) # Item is already flattened value
                 summary['slow_calls'] = int(total)
     except Exception as e:
         print(f"Summary Slow Calls Error: {e}")
@@ -333,15 +376,25 @@ def get_data():
     timeline = []  # For Line Chart: {timestamp: ms, value: ms}
     
     if raw_data and isinstance(raw_data, list):
-        for item in raw_data:
-            if 'metricValues' in item:
-                for val in item['metricValues']:
-                    if 'value' in val:
-                        v = val['value']
-                        t = val.get('startTimeInMillis', 0)
-                        
-                        response_times.append(v)
-                        timeline.append({'timestamp': t, 'value': v})
+        for val in raw_data:
+             if 'value' in val:
+                 ms = val['value']
+                 ts = val['startTimeInMillis']
+                 
+                 # Add to list
+                 response_times.append(ms)
+                 
+                 # Add to timeline
+                 # Convert timestamp to HH:MM format
+                 import datetime
+                 dt_object = datetime.datetime.fromtimestamp(ts / 1000) + datetime.timedelta(hours=7) # WIB
+                 time_str = dt_object.strftime("%H:%M")
+                 
+                 timeline.append({
+                     'timestamp': time_str,
+                     'value': ms,
+                     'full_date': dt_object.isoformat()
+                 })
     
     # 1. Frequency Distribution (Bar Chart)
     frequency = Counter(response_times)
@@ -715,6 +768,7 @@ def get_error_analysis():
     # Calculate duration in minutes based on timeframe
     duration_map = {
         '1h': 60,
+        '6h': 360,
         '24h': 24 * 60,
         '7d': 7 * 24 * 60,
         '30d': 30 * 24 * 60,
@@ -729,20 +783,19 @@ def get_error_analysis():
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Error', 'total': 0})
     
+    # Optimize: Allow rollup? No, because rollup=True gives 1 point which breaks Heatmaps.
+    # We must fetch detailed data (rollup=False) to get daily distribution.
     raw_data = fetch_from_appdynamics(url, duration)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
     
     try:
-        # Extract metric values
-        all_values = []
-        for item in raw_data:
-            if 'metricValues' in item:
-                all_values.extend(item['metricValues'])
-        
-        if not all_values:
-            return jsonify({'error': 'No metric values in response', 'total': 0})
+        if not raw_data:
+            return jsonify({'error': 'No data returned', 'total': 0})
+            
+        # Data is already flattened by fetch_from_appdynamics
+        all_values = raw_data
             
         df = pd.DataFrame(all_values)
         if df.empty:
@@ -760,20 +813,86 @@ def get_error_analysis():
         # Calculate total errors
         total_errors = int(df[value_col].sum())
         
-        if timeframe == '1h':
-            # Minute-level aggregation for last hour
-            df['minute'] = df['dt'].dt.minute
+
+
+        if timeframe == '6h':
+            # Create a full 6-hour range ending now
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(hours=6) + pd.Timedelta(minutes=1) # last 360 mins inclusive
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
             
-            # Heatmap: 1 row (Last Hour), 60 columns (minutes)
-            heatmap_pivot = df.groupby(['minute'])[value_col].sum().reindex(range(60), fill_value=0).to_frame().T
+            # Resample strictly to this range
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            # Create helper columns for pivoting
+            df_pivot = df_resampled.reset_index()
+            df_pivot.columns = ['dt', 'val']
+            df_pivot['hour_label'] = df_pivot['dt'].dt.strftime('%H:00')
+            df_pivot['minute_col'] = df_pivot['dt'].dt.minute
+            
+            # Heatmap: Rows = Hours (e.g. 10:00, 11:00), Cols = Minutes (0-59)
+            heatmap_pivot = df_pivot.pivot(index='hour_label', columns='minute_col', values='val').fillna(0)
+            # Ensure all 60 minutes are present as columns
+            heatmap_pivot = heatmap_pivot.reindex(columns=range(60), fill_value=0)
+            
+            # Recalculate total
+            total_errors = int(df_resampled.sum())
+            
+            hourly_dist = df_resampled.tolist() # Flattened list still useful for hourly chart if needed
+            daily_dist = [total_errors]
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe == '1h':
+            # Minute-level aggregation for last hour
+            minutes_count = 60
+            
+            # Anchor to NOW
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(minutes=minutes_count - 1)
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
+            
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            heatmap_pivot = df_resampled.to_frame().T
+            heatmap_pivot.columns = heatmap_pivot.columns.strftime('%H:%M')
             heatmap_pivot.index = ['Last Hour']
             
-            # Hourly distribution doesn't make sense for 1h view, reuse minute dist or zero
-            hourly_dist = df.groupby('minute')[value_col].sum().reindex(range(60), fill_value=0).tolist()
+            # Recalculate total
+            total_errors = int(df_resampled.sum())
             
-            # Daily dist -> just total
+            hourly_dist = df_resampled.tolist()
             daily_dist = [total_errors]
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe in ['5m', '15m']:
+            # Linear minute aggregation for short durations
+            # Create a full range of timestamps for the last N minutes
+            minutes_count = 5 if timeframe == '5m' else 15
             
+            # Anchor to NOW, not the data's max time.
+            # This ensures we show the actual "Last 5 Minutes" even if data is old/missing.
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(minutes=minutes_count - 1)
+            
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
+            
+            # Resample and fill missing with 0
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            # Heatmap: 1 row, N columns
+            # Heatmap: 1 row, N columns
+            heatmap_pivot = df_resampled.to_frame().T
+            heatmap_pivot.columns = heatmap_pivot.columns.strftime('%H:%M')
+            heatmap_pivot.index = [f'Last {minutes_count} Mins']
+            
+            # Recalculate total for this short timeframe to match the heatmap
+            total_errors = int(df_resampled.sum())
+            
+            # "Hourly" dist -> actually minute dist here
+            hourly_dist = df_resampled.tolist()
+            daily_dist = [total_errors]
             peak_hour = f"Minute {np.argmax(hourly_dist)}"
             peak_day = "Today"
 
@@ -834,12 +953,13 @@ def get_load_analysis():
     # Calculate duration in minutes based on timeframe
     duration_map = {
         '1h': 60,
+        '6h': 360,
         '24h': 24 * 60,
         '7d': 7 * 24 * 60,
         '30d': 30 * 24 * 60,
         '6m': 180 * 24 * 60,
         '1y': 365 * 24 * 60,
-        'all': 43200  # 30 days default for 'all'
+        'all': 2628000  # 5 Years (approx) - effectively Lifetime
     }
     duration = duration_map.get(timeframe, 43200)
     
@@ -848,20 +968,19 @@ def get_load_analysis():
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Load', 'total': 0})
     
+    # Optimize: Allow rollup? No, because rollup=True gives 1 point which breaks Heatmaps.
+    # We must fetch detailed data (rollup=False) to get daily distribution.
     raw_data = fetch_from_appdynamics(url, duration)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
     
     try:
-        # Extract metric values
-        all_values = []
-        for item in raw_data:
-            if 'metricValues' in item:
-                all_values.extend(item['metricValues'])
-        
-        if not all_values:
-            return jsonify({'error': 'No metric values in response', 'total': 0})
+        if not raw_data:
+            return jsonify({'error': 'No data returned', 'total': 0})
+            
+        # Data is already flattened by fetch_from_appdynamics
+        all_values = raw_data
             
         df = pd.DataFrame(all_values)
         if df.empty:
@@ -879,20 +998,77 @@ def get_load_analysis():
         # Calculate total load
         total_load = int(df[value_col].sum())
         
-        if timeframe == '1h':
-            # Minute-level aggregation for last hour
-            df['minute'] = df['dt'].dt.minute
+        if timeframe == '6h':
+            # Create a full 6-hour range ending now
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(hours=6) + pd.Timedelta(minutes=1)
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
             
-            # Heatmap: 1 row (Last Hour), 60 columns (minutes)
-            heatmap_pivot = df.groupby(['minute'])[value_col].sum().reindex(range(60), fill_value=0).to_frame().T
+            # Resample strictly to this range
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            # Create helper columns for pivoting
+            df_pivot = df_resampled.reset_index()
+            df_pivot.columns = ['dt', 'val']
+            df_pivot['hour_label'] = df_pivot['dt'].dt.strftime('%H:00')
+            df_pivot['minute_col'] = df_pivot['dt'].dt.minute
+            
+            # Heatmap: Rows = Hours, Cols = Minutes
+            heatmap_pivot = df_pivot.pivot(index='hour_label', columns='minute_col', values='val').fillna(0)
+            heatmap_pivot = heatmap_pivot.reindex(columns=range(60), fill_value=0)
+            
+            # Recalculate total
+            total_load = int(df_resampled.sum())
+            
+            hourly_dist = df_resampled.tolist()
+            daily_dist = [total_load]
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe == '1h':
+            # Minute-level aggregation for last hour
+            minutes_count = 60
+            
+            # Anchor to NOW
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(minutes=minutes_count - 1)
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
+            
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            heatmap_pivot = df_resampled.to_frame().T
+            heatmap_pivot.columns = heatmap_pivot.columns.strftime('%H:%M')
             heatmap_pivot.index = ['Last Hour']
             
-            # Hourly distribution -> used for minutes in frontend if wanted, or just pass minutes
-            hourly_dist = df.groupby('minute')[value_col].sum().reindex(range(60), fill_value=0).tolist()
+            # Recalculate total
+            total_load = int(df_resampled.sum())
             
-            # Daily dist -> just total
+            hourly_dist = df_resampled.tolist()
             daily_dist = [total_load]
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe in ['5m', '15m']:
+            # Linear minute aggregation
+            minutes_count = 5 if timeframe == '5m' else 15
             
+            # Fix: Anchor to NOW
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(minutes=minutes_count - 1)
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
+            
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            heatmap_pivot = df_resampled.to_frame().T
+            # Fix: Format columns as HH:mm
+            heatmap_pivot.columns = heatmap_pivot.columns.strftime('%H:%M')
+            heatmap_pivot.index = [f'Last {minutes_count} Mins']
+            
+            # Recalculate total for this short timeframe
+            total_load = int(df_resampled.sum())
+            
+            hourly_dist = df_resampled.tolist()
+            daily_dist = [total_load]
             peak_hour = f"Minute {np.argmax(hourly_dist)}"
             peak_day = "Today"
 
@@ -953,6 +1129,7 @@ def get_slow_calls_analysis():
     # Calculate duration in minutes based on timeframe
     duration_map = {
         '1h': 60,
+        '6h': 360,
         '24h': 24 * 60,
         '7d': 7 * 24 * 60,
         '30d': 30 * 24 * 60,
@@ -970,20 +1147,19 @@ def get_slow_calls_analysis():
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type={metric_name}', 'total': 0})
     
+    # Optimize: Allow rollup? No, because rollup=True gives 1 point which breaks Heatmaps.
+    # We must fetch detailed data (rollup=False) to get daily distribution.
     raw_data = fetch_from_appdynamics(url, duration)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
     
     try:
-        # Extract metric values
-        all_values = []
-        for item in raw_data:
-            if 'metricValues' in item:
-                all_values.extend(item['metricValues'])
-        
-        if not all_values:
-            return jsonify({'error': 'No metric values in response', 'total': 0})
+        if not raw_data:
+            return jsonify({'error': 'No data returned', 'total': 0})
+            
+        # Data is already flattened by fetch_from_appdynamics
+        all_values = raw_data
             
         df = pd.DataFrame(all_values)
         if df.empty:
@@ -998,23 +1174,77 @@ def get_slow_calls_analysis():
         # Aggregation - use 'sum' column if available, else 'value'
         value_col = 'sum' if 'sum' in df.columns else 'value'
         
-        # Calculate total calls
-        total_calls = int(df[value_col].sum())
-        
-        if timeframe == '1h':
-            # Minute-level aggregation for last hour
-            df['minute'] = df['dt'].dt.minute
+        if timeframe == '6h':
+            # Create a full 6-hour range ending now
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(hours=6) + pd.Timedelta(minutes=1)
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
             
-            # Heatmap: 1 row (Last Hour), 60 columns (minutes)
-            heatmap_pivot = df.groupby(['minute'])[value_col].sum().reindex(range(60), fill_value=0).to_frame().T
+            # Resample strictly to this range
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            # Create helper columns for pivoting
+            df_pivot = df_resampled.reset_index()
+            df_pivot.columns = ['dt', 'val']
+            df_pivot['hour_label'] = df_pivot['dt'].dt.strftime('%H:00')
+            df_pivot['minute_col'] = df_pivot['dt'].dt.minute
+            
+            # Heatmap: Rows = Hours, Cols = Minutes
+            heatmap_pivot = df_pivot.pivot(index='hour_label', columns='minute_col', values='val').fillna(0)
+            heatmap_pivot = heatmap_pivot.reindex(columns=range(60), fill_value=0)
+            
+            # Recalculate total
+            total_slow = int(df_resampled.sum())
+            
+            hourly_dist = df_resampled.tolist()
+            daily_dist = [total_slow]
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe == '1h':
+            # Minute-level aggregation for last hour
+            minutes_count = 60
+            
+            # Anchor to NOW
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(minutes=minutes_count - 1)
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
+            
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            heatmap_pivot = df_resampled.to_frame().T
+            heatmap_pivot.columns = heatmap_pivot.columns.strftime('%H:%M')
             heatmap_pivot.index = ['Last Hour']
             
-            # Hourly distribution -> used for minutes in frontend if wanted
-            hourly_dist = df.groupby('minute')[value_col].sum().reindex(range(60), fill_value=0).tolist()
+            # Recalculate total
+            total_slow = int(df_resampled.sum())
             
-            # Daily dist -> just total
-            daily_dist = [total_calls]
+            hourly_dist = df_resampled.tolist()
+            daily_dist = [total_slow]
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe in ['5m', '15m']:
+            # Linear minute aggregation
+            minutes_count = 5 if timeframe == '5m' else 15
             
+            # Anchor to NOW
+            end_time = pd.Timestamp.now().floor('min')
+            start_time = end_time - pd.Timedelta(minutes=minutes_count - 1)
+            full_range = pd.date_range(start=start_time, end=end_time, freq='min')
+            
+            df_resampled = df.set_index('dt').resample('min')[value_col].sum().reindex(full_range, fill_value=0)
+            
+            heatmap_pivot = df_resampled.to_frame().T
+            # Fix: Format columns as HH:mm
+            heatmap_pivot.columns = heatmap_pivot.columns.strftime('%H:%M')
+            heatmap_pivot.index = [f'Last {minutes_count} Mins']
+            
+            # Recalculate total for this short timeframe
+            total_slow = int(df_resampled.sum())
+            
+            hourly_dist = df_resampled.tolist()
+            daily_dist = [total_slow]
             peak_hour = f"Minute {np.argmax(hourly_dist)}"
             peak_day = "Today"
 
@@ -1451,5 +1681,116 @@ def get_database_analysis():
         'queries': queries_data
     })
 
+
+# Background Monitor Global State
+last_alert_minutes = {} # Key: (tier, bt), Value: timestamp
+
+def background_error_monitor():
+    """
+    Runs in the background to check for errors every minute.
+    Iterates through ALL Business Transactions defined in the CSV with MetricType='Error'.
+    Alerts only if errors are found in the LATEST minute to avoid duplicates.
+    """
+    global last_alert_minutes
+    global last_alert_minutes
+    monitor_logger.info("Background Error Monitor Started (Checking All BTs every 5 minutes)...")
+    
+    while True:
+        try:
+            # 1. Load BTs
+            df_bts = load_bt_csv()
+            if df_bts.empty:
+                monitor_logger.warning("BT CSV empty or not found. Skipping monitor cycle.")
+                time.sleep(60) # Retry sooner if file missing
+                continue
+                
+            # Filter for Error metric type
+            error_bts = df_bts[df_bts['MetricType'] == 'Error']
+            monitor_logger.info(f"Starting Monitor Cycle: Checking {len(error_bts)} Business Transactions...")
+            
+            # 2. Iterate through each BT
+            checks_count = 0
+            alerts_count = 0
+            
+            for index, row in error_bts.iterrows():
+                tier = row['Tier']
+                bt = row['BT']
+                url = row['URL']
+                
+                if not url: continue
+                
+                try:
+                    # Use the new fetch_from_appdynamics helper
+                    # For background monitor, we always want the latest 5 minutes
+                    data = fetch_from_appdynamics(url, duration=5)
+                    checks_count += 1
+                    
+                    if not data: 
+                        # monitor_logger.debug(f"No data fetched for {bt}")
+                        monitor_logger.warning(f"[Empty Response] BT: {bt} | Tier: {tier}")
+                        continue
+        
+                    df = pd.DataFrame(data)
+                    if df.empty: 
+                        monitor_logger.warning(f"[Empty DataFrame] BT: {bt} | Tier: {tier}")
+                        continue
+                    
+                    # Process timestamps
+                    df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms') + pd.Timedelta(hours=7)
+                    
+                    # We want the latest completed minute.
+                    latest_data_dt = df['dt'].max()
+                    
+                    # Unique key for this BT
+                    bt_key = (tier, bt)
+                    
+                    # If we haven't alerted for this timestamp + BT combo yet
+                    if last_alert_minutes.get(bt_key) != latest_data_dt:
+                        # Check sum of errors at this latest timestamp
+                        latest_val = df[df['dt'] == latest_data_dt]['value'].sum()
+                        if 'sum' in df.columns:
+                            latest_val = df[df['dt'] == latest_data_dt]['sum'].sum()
+                            
+                        monitor_logger.info(f"[Success] BT: {bt} | Time: {latest_data_dt.strftime('%H:%M')} | Errors: {int(latest_val)}")
+                            
+                        # monitor_logger.info(f"Checked {bt}: {int(latest_val)} errors at {latest_data_dt.strftime('%H:%M')}")
+                        
+                        if latest_val > 0:
+                            alert_msg = (
+                                f"⚠️ *Background Monitor Alert*\n"
+                                f"New Errors Detected: `{int(latest_val)}`\n"
+                                f"Time: `{latest_data_dt.strftime('%H:%M')}`\n"
+                                f"BT: `{bt}`\n"
+                                f"Tier: `{tier}`"
+                            )
+                            send_telegram_alert(alert_msg)
+                            monitor_logger.warning(f"ALERT SENT for {bt}: {int(latest_val)} errors")
+                            
+                            last_alert_minutes[bt_key] = latest_data_dt
+                            alerts_count += 1
+                            
+                    # Small sleep to avoid hammering the API too fast in the loop
+                    time.sleep(0.5) 
+                    
+                except Exception as inner_e:
+                    monitor_logger.error(f"Error checking BT {bt}: {inner_e}")
+                    continue
+            
+            monitor_logger.info(f"Cycle Completed. Checked {checks_count} BTs. Sent {alerts_count} Alerts. Waiting 5 minutes...")
+            
+            # wait 300 seconds (5 minutes) between full check cycles
+            time.sleep(300)
+
+        except Exception as e:
+            monitor_logger.error(f"Background monitor critical error: {e}")
+            time.sleep(60) # Wait before retry on crash
+            time.sleep(60) # wait before retrying
+
 if __name__ == '__main__':
+    # Ensure thread starts only once (Flask reloader protection)
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        monitor_thread = threading.Thread(target=background_error_monitor)
+        monitor_thread.daemon = True
+        monitor_thread.start()
+        
     app.run(debug=True, port=5000)

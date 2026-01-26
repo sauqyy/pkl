@@ -25,7 +25,7 @@ interface LoadAnalysisData {
 
 export default function LoadAnalysis() {
   const [data, setData] = useState<LoadAnalysisData | null>(null)
-  const [timeframe, setTimeframe] = useState("all")
+  const [timeframe, setTimeframe] = useState("7d")
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const { selectedTier, selectedTransaction } = useBusinessTransaction()
@@ -86,13 +86,16 @@ export default function LoadAnalysis() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="5m">Last 5 Minutes</SelectItem>
+              <SelectItem value="15m">Last 15 Minutes</SelectItem>
               <SelectItem value="1h">Last 1 Hour</SelectItem>
+              <SelectItem value="6h">Last 6 Hours</SelectItem>
               <SelectItem value="24h">Last 24 Hours</SelectItem>
-              <SelectItem value="all">All Time (Lifetime)</SelectItem>
-              <SelectItem value="1y">Last 1 Year</SelectItem>
-              <SelectItem value="6m">Last 6 Months</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
               <SelectItem value="7d">Last 7 Days</SelectItem>
+              <SelectItem value="30d">Last 30 Days</SelectItem>
+              <SelectItem value="6m">Last 6 Months</SelectItem>
+              <SelectItem value="1y">Last 1 Year</SelectItem>
+              <SelectItem value="all">All Time (Lifetime)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -153,11 +156,11 @@ export default function LoadAnalysis() {
                   <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                      <span>{timeframe === '1h' ? 'Minute' : 'Time of Day (Hour)'}</span>
+                      <span>{['5m', '15m'].includes(timeframe) ? 'Minute' : (timeframe === '1h' ? 'Minute Index' : 'Time of Day (Hour)')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                      <span>{timeframe === '24h' ? 'Date' : (timeframe === '1h' ? 'Current' : 'Day of the Week')}</span>
+                      <span>{timeframe === '24h' ? 'Date' : (['5m', '15m', '1h'].includes(timeframe) ? 'Current' : 'Day of the Week')}</span>
                     </div>
                   </div>
                 </div>

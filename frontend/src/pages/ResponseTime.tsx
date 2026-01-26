@@ -14,7 +14,7 @@ import InfoTooltip from "@/components/InfoTooltip"
 
 export default function ResponseTime() {
     const [data, setData] = useState<DashboardData | null>(null)
-    const [period, setPeriod] = useState("60")
+    const [period, setPeriod] = useState("10080")
     const { toggleSidebar } = useSidebar()
     const tooltipStyles = useChartTooltipStyles()
     const { selectedTier, selectedTransaction } = useBusinessTransaction()
@@ -79,6 +79,11 @@ export default function ResponseTime() {
             case "60": return "1 hour";
             case "360": return "6 hours";
             case "1440": return "24 hours";
+            case "10080": return "7 days";
+            case "43200": return "30 days";
+            case "262800": return "6 months";
+            case "525600": return "1 year";
+            case "2628000": return "All Time";
             default: return `${minutes} minutes`;
         }
     };
@@ -118,10 +123,16 @@ export default function ResponseTime() {
                             <SelectValue placeholder="Select period" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="5">Last 5 Minutes</SelectItem>
                             <SelectItem value="15">Last 15 Minutes</SelectItem>
                             <SelectItem value="60">Last 1 Hour</SelectItem>
                             <SelectItem value="360">Last 6 Hours</SelectItem>
                             <SelectItem value="1440">Last 24 Hours</SelectItem>
+                            <SelectItem value="10080">Last 7 Days</SelectItem>
+                            <SelectItem value="43200">Last 30 Days</SelectItem>
+                            <SelectItem value="262800">Last 6 Months</SelectItem>
+                            <SelectItem value="525600">Last 1 Year</SelectItem>
+                            <SelectItem value="2628000">All Time (Lifetime)</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
