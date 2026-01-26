@@ -103,20 +103,40 @@ def get_bt_url(tier: str, bt: str, metric_type: str) -> str:
     
     return matches.iloc[0]['URL']
 
-def fetch_from_appdynamics(url: str, duration_override: int = None) -> list:
+def fetch_from_appdynamics(url: str, duration_override: int = None, start_time: int = None, end_time: int = None) -> list:
     """
     Fetch data from an AppDynamics URL.
-    Optionally override the duration-in-mins parameter.
+    Optionally override the duration-in-mins parameter OR use start/end time.
     """
     if not url:
         return []
     
-    # Override duration if specified
-    if duration_override:
+    # CASE 1: Specific Time Range (BETWEEN_TIMES)
+    if start_time and end_time:
+        # Remove existing duration or time-range params
+        import re
+        url = re.sub(r'duration-in-mins=\d+', '', url)
+        url = re.sub(r'time-range-type=[^&]+', '', url)
+        
+        # Add new params
+        separator = '&' if '?' in url else '?'
+        url += f"{separator}time-range-type=BETWEEN_TIMES&start-time={start_time}&end-time={end_time}"
+        
+        # Clean up double && from replacements
+        url = url.replace('&&', '&').replace('?&', '?')
+
+    # CASE 2: Duration Override (BEFORE_NOW)
+    elif duration_override:
         # Parse and update duration in URL
         if 'duration-in-mins=' in url:
             import re
             url = re.sub(r'duration-in-mins=\d+', f'duration-in-mins={duration_override}', url)
+        elif 'time-range-type=BETWEEN_TIMES' not in url:
+             # Ensure we specify BEFORE_NOW if we are just giving a duration
+             if 'time-range-type=' not in url:
+                 url += "&time-range-type=BEFORE_NOW"
+             if 'duration-in-mins=' not in url:
+                 url += f"&duration-in-mins={duration_override}"
     
     # Add output=JSON and rollup=false if not present
     if 'output=JSON' not in url:
@@ -124,7 +144,7 @@ def fetch_from_appdynamics(url: str, duration_override: int = None) -> list:
     if 'rollup=false' not in url:
         url += '&rollup=false'
     
-    print(f"Fetching from AppDynamics: {url[:100]}...")
+    print(f"Fetching from AppDynamics: {url[:150]}...")
     
     # Caching Logic
     CACHE_DIR = 'cache'
@@ -244,6 +264,21 @@ def get_summary_data():
     bt = request.args.get('bt', '/smart-integration/users')
     duration = 43200  # 30 days in minutes
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_time = None
+    end_time = None
+
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
+
     summary = {
         'response_time': 0,
         'load': 0,
@@ -255,19 +290,21 @@ def get_summary_data():
     try:
         url = get_bt_url(tier, bt, 'Response')
         if url:
-            data = fetch_from_appdynamics(url, 60)  # Last 60 mins for current
-            if data and isinstance(data, list) and len(data) > 0:
+             # If start/end provided, use them. Else use 60 mins (default)
+             resp_duration = 60 if not start_time else None
+             data = fetch_from_appdynamics(url, resp_duration, start_time, end_time)
+             if data and isinstance(data, list) and len(data) > 0:
                 values = data[0].get('metricValues', [])
                 if values:
                     summary['response_time'] = round(sum(v['value'] for v in values) / len(values))
     except Exception as e:
         print(f"Summary Response Time Error: {e}")
 
-    # 2. Errors (Total Last 30 Days)
+    # 2. Errors (Total)
     try:
         url = get_bt_url(tier, bt, 'Error')
         if url:
-            data = fetch_from_appdynamics(url, duration)
+            data = fetch_from_appdynamics(url, duration if not start_time else None, start_time, end_time)
             if data and isinstance(data, list):
                 total = 0
                 for item in data:
@@ -278,11 +315,11 @@ def get_summary_data():
     except Exception as e:
         print(f"Summary Errors Error: {e}")
 
-    # 3. Load (Total Calls Last 30 Days)
+    # 3. Load (Total Calls)
     try:
         url = get_bt_url(tier, bt, 'Load')
         if url:
-            data = fetch_from_appdynamics(url, duration)
+            data = fetch_from_appdynamics(url, duration if not start_time else None, start_time, end_time)
             if data and isinstance(data, list):
                 total = 0
                 for item in data:
@@ -293,11 +330,11 @@ def get_summary_data():
     except Exception as e:
         print(f"Summary Load Error: {e}")
     
-    # 4. Slow Calls (Total Last 30 Days)
+    # 4. Slow Calls (Total)
     try:
         url = get_bt_url(tier, bt, 'Slow')
         if url:
-            data = fetch_from_appdynamics(url, duration)
+            data = fetch_from_appdynamics(url, duration if not start_time else None, start_time, end_time)
             if data and isinstance(data, list):
                 total = 0
                 for item in data:
@@ -320,13 +357,30 @@ def get_data():
     tier = request.args.get('tier', 'integration-service')
     bt = request.args.get('bt', '/smart-integration/users')
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_time = None
+    end_time = None
+
+    if start_date and end_date:
+        try:
+            # Parse ISO string to datetime
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            # Convert to milliseconds
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError as e:
+            print(f"Date parse error: {e}")
+
     # Get URL and fetch data
     url = get_bt_url(tier, bt, 'Response')
     if not url:
         # Fallback to old method if no URL found
         raw_data = load_data(duration)
     else:
-        raw_data = fetch_from_appdynamics(url, duration)
+        raw_data = fetch_from_appdynamics(url, duration, start_time, end_time)
     
     # Data structures for visualization
     response_times = []
@@ -429,15 +483,51 @@ def get_forecast():
     if metric not in valid_metrics:
         return jsonify({'error': f'Invalid metric type. Must be one of: {valid_metrics}'})
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    start_time = None
+    end_time = None
+    
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
+
     try:
         # Fetch historical data from AppDynamics (last 30 days for hourly data)
+        # If we have a specific range, we might still want 30 days history for training? 
+        # Actually for forecasting we usually need history relative to the requested range.
+        # But here 'forecast' usually implies "future from now". 
+        # If user selects a past range, do they want to see the forecast *as it would have been*?
+        # For simplicity, let's keep the training history large (30 days from NOW or END_DATE).
+        
         duration = 30 * 24 * 60  # 30 days in minutes
         url = get_bt_url(tier, bt, metric)
         
         if not url:
             return jsonify({'error': f'No URL configured for metric: {metric}'})
         
-        raw_data = fetch_from_appdynamics(url, duration)
+        # We need enough history for LSTM.
+        # If start_time/end_time are provided, we should probably fetch data ending at end_time, 
+        # but starting 30 days BEFORE end_time to ensure we have context.
+        
+        req_start = start_time
+        req_end = end_time
+
+        if req_end:
+             # If we have an end time, we want 30 days history BEFORE that end time
+             # The fetch_from_appdynamics handles BETWEEN_TIMES.
+             # We want history = [end_time - 30days, end_time]
+             hist_end = req_end
+             hist_start = req_end - (30 * 24 * 60 * 60 * 1000)
+             raw_data = fetch_from_appdynamics(url, None, hist_start, hist_end)
+        else:
+             raw_data = fetch_from_appdynamics(url, duration)
         
         if not raw_data:
             return jsonify({'error': f'Failed to fetch {metric} data from AppDynamics'})
@@ -722,12 +812,27 @@ def get_error_analysis():
     }
     duration = duration_map.get(timeframe, 43200)
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_time = None
+    end_time = None
+
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
+    
     # Get URL and fetch data
     url = get_bt_url(tier, bt, 'Error')
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Error', 'total': 0})
     
-    raw_data = fetch_from_appdynamics(url, duration)
+    raw_data = fetch_from_appdynamics(url, duration, start_time, end_time)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
@@ -807,12 +912,27 @@ def get_load_analysis():
     }
     duration = duration_map.get(timeframe, 43200)
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_time = None
+    end_time = None
+
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
+
     # Get URL and fetch data
     url = get_bt_url(tier, bt, 'Load')
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Load', 'total': 0})
     
-    raw_data = fetch_from_appdynamics(url, duration)
+    raw_data = fetch_from_appdynamics(url, duration, start_time, end_time)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
@@ -891,6 +1011,21 @@ def get_slow_calls_analysis():
     }
     duration = duration_map.get(timeframe, 43200)
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_time = None
+    end_time = None
+
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
+
     # Map metric type to CSV metric name
     metric_name = 'Very Slow' if metric_type == 'veryslow' else 'Slow'
     
@@ -899,7 +1034,7 @@ def get_slow_calls_analysis():
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type={metric_name}', 'total': 0})
     
-    raw_data = fetch_from_appdynamics(url, duration)
+    raw_data = fetch_from_appdynamics(url, duration, start_time, end_time)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
@@ -985,6 +1120,21 @@ def get_jvm_data():
     duration = request.args.get('duration', default=60, type=int)
     tier = request.args.get('tier', 'integration-service')
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_time = None
+    end_time = None
+
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
+    
     # Map tier names to their node identifiers (from the user's tier URLs)
     TIER_NODE_MAP = {
         'integration-service': 'integration-service--1',
@@ -1010,17 +1160,23 @@ def get_jvm_data():
     
     results = {}
     
-    def fetch_metric_flexible(metric_path, duration_mins):
+    def fetch_metric_flexible(metric_path, duration_mins=None, s_time=None, e_time=None):
         encoded_metric = urllib.parse.quote(metric_path)
         target_app = "Smart2"
         
+        # Build URL parameters
+        params = f"metric-path={encoded_metric}&output=JSON&rollup=false"
+        
+        if s_time and e_time:
+            params += f"&time-range-type=BETWEEN_TIMES&start-time={s_time}&end-time={e_time}"
+        elif duration_mins:
+            params += f"&time-range-type=BEFORE_NOW&duration-in-mins={duration_mins}"
+        else:
+             # Default
+            params += f"&time-range-type=BEFORE_NOW&duration-in-mins=60"
+
         url = (
-            f"{BASE_URL}/controller/rest/applications/{target_app}/metric-data?"
-            f"metric-path={encoded_metric}&"
-            f"time-range-type=BEFORE_NOW&"
-            f"duration-in-mins={duration_mins}&"
-            f"output=JSON&"
-            f"rollup=false"
+            f"{BASE_URL}/controller/rest/applications/{target_app}/metric-data?{params}"
         )
         req = urllib.request.Request(url)
         req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
@@ -1033,7 +1189,7 @@ def get_jvm_data():
 
     # Fetch all metrics
     for key, path in METRICS.items():
-        data = fetch_metric_flexible(path, duration)
+        data = fetch_metric_flexible(path, duration, start_time, end_time)
         
         # Process data into simple Time/Value pairs
         series = []
@@ -1213,6 +1369,20 @@ def database_analysis_page():
 def get_database_analysis():
     # 1. Fetch Data
     duration = request.args.get('duration', default=60, type=int)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
+    start_time = None
+    end_time = None
+
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
     
     # Metric Paths
     metric_time_spent = "Databases|C2L_DMS|KPI|Time Spent in Executions (s)"
@@ -1223,13 +1393,15 @@ def get_database_analysis():
     def fetch_metric(m_path):
         encoded_metric = urllib.parse.quote(m_path)
         target_app = "Database Monitoring"
+        
+        params = f"metric-path={encoded_metric}&output=JSON&rollup=false"
+        if start_time and end_time:
+             params += f"&time-range-type=BETWEEN_TIMES&start-time={start_time}&end-time={end_time}"
+        else:
+             params += f"&time-range-type=BEFORE_NOW&duration-in-mins={duration}"
+
         url = (
-            f"{BASE_URL}/controller/rest/applications/{urllib.parse.quote(target_app)}/metric-data?"
-            f"metric-path={encoded_metric}&"
-            f"time-range-type=BEFORE_NOW&"
-            f"duration-in-mins={duration}&"
-            f"output=JSON&"
-            f"rollup=false"
+            f"{BASE_URL}/controller/rest/applications/{urllib.parse.quote(target_app)}/metric-data?{params}"
         )
         req = urllib.request.Request(url)
         req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")

@@ -96,8 +96,8 @@ export default function ExecutiveDashboard() {
           <MetricCard
             title="Errors"
             value={data.errors.toLocaleString()}
-            subtext="Total (Last 30 Days)"
-            description="Total number of failed transactions or exceptions recorded in the last 30 days."
+            subtext="Total Events"
+            description="Total number of failed transactions or exceptions recorded in the selected period."
             icon={<AlertTriangle className="h-4 w-4" />}
             iconColor="text-red-500"
             onClick={() => navigate('/error-analysis')}
@@ -107,8 +107,8 @@ export default function ExecutiveDashboard() {
           <MetricCard
             title="System Load"
             value={formatNumber(data.load)}
-            subtext="Total Calls (Last 30 Days)"
-            description="The total number of requests processed by the system over the last 30 days."
+            subtext="Total Calls"
+            description="The total number of requests processed by the system over the selected period."
             icon={<Server className="h-4 w-4" />}
             iconColor="text-teal-500"
             onClick={() => navigate('/load-analysis')}
@@ -118,7 +118,7 @@ export default function ExecutiveDashboard() {
           <MetricCard
             title="Slow Calls"
             value={data.slow_calls.toLocaleString()}
-            subtext="Total Slow (Last 30 Days)"
+            subtext="Total Slow Transactions"
             description="Number of transactions that took longer than the defined threshold to complete."
             icon={<Hourglass className="h-4 w-4" />}
             iconColor="text-orange-500"

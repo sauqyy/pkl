@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Search, PanelRight } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
@@ -14,7 +13,6 @@ import InfoTooltip from "@/components/InfoTooltip"
 
 export default function ResponseTime() {
     const [data, setData] = useState<DashboardData | null>(null)
-    const [period, setPeriod] = useState("60")
     const { toggleSidebar } = useSidebar()
     const tooltipStyles = useChartTooltipStyles()
     const { selectedTier, selectedTransaction } = useBusinessTransaction()
@@ -23,7 +21,8 @@ export default function ResponseTime() {
     useEffect(() => {
         const load = async () => {
             try {
-                const d = await fetchDashboardData(Number(period), selectedTier, selectedTransaction, dateRange.from, dateRange.to)
+                // Default duration to 60 if dateRange is not set (handled by backend if passed, but here we pass 60 as fallback for 'period' arg)
+                const d = await fetchDashboardData(60, selectedTier, selectedTransaction, dateRange.from, dateRange.to)
                 setData(d)
             } catch (e) {
                 console.error(e)
@@ -32,7 +31,7 @@ export default function ResponseTime() {
         load()
         const interval = setInterval(load, 30000)
         return () => clearInterval(interval)
-    }, [period, selectedTier, selectedTransaction, dateRange])
+    }, [selectedTier, selectedTransaction, dateRange])
 
     // Prepare Chart Data
     const lineData = data?.timeline.map(t => {
@@ -73,14 +72,12 @@ export default function ResponseTime() {
 
 
     // Dynamic subtitle based on period
-    const getPeriodLabel = (minutes: string) => {
-        switch (minutes) {
-            case "15": return "15 minutes";
-            case "60": return "1 hour";
-            case "360": return "6 hours";
-            case "1440": return "24 hours";
-            default: return `${minutes} minutes`;
+    // Dynamic subtitle based on dateRange
+    const getPeriodLabel = () => {
+        if (dateRange.from && dateRange.to) {
+            return `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
         }
+        return "Last Hour"
     };
 
     return (
@@ -104,7 +101,7 @@ export default function ResponseTime() {
                     <div className="h-6 w-px bg-border"></div>
                     <div>
                         <h1 className="text-lg font-semibold">Business Transaction - Response</h1>
-                        <p className="text-xs text-muted-foreground">Trend for the last {getPeriodLabel(period)}</p>
+                        <p className="text-xs text-muted-foreground">Trend for {getPeriodLabel()}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -113,17 +110,6 @@ export default function ResponseTime() {
                         <Input type="search" placeholder="Search for something..." className="pl-8 w-[250px] bg-card" />
                     </div>
                     <DateRangePicker />
-                    <Select value={period} onValueChange={setPeriod}>
-                        <SelectTrigger className="w-[180px] bg-card">
-                            <SelectValue placeholder="Select period" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="15">Last 15 Minutes</SelectItem>
-                            <SelectItem value="60">Last 1 Hour</SelectItem>
-                            <SelectItem value="360">Last 6 Hours</SelectItem>
-                            <SelectItem value="1440">Last 24 Hours</SelectItem>
-                        </SelectContent>
-                    </Select>
                 </div>
             </div>
 
@@ -183,7 +169,7 @@ export default function ResponseTime() {
                         <Card className="col-span-2 bg-card">
                             <CardHeader>
                                 <CardTitle className="text-base font-semibold">Response Time Trend</CardTitle>
-                                <p className="text-xs text-muted-foreground mt-1">Trend for the last {getPeriodLabel(period)}</p>
+                                <p className="text-xs text-muted-foreground mt-1">Trend for {getPeriodLabel()}</p>
                             </CardHeader>
                             <CardContent>
                                 <div className="h-[300px] w-full">

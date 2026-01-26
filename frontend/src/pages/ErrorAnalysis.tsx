@@ -25,7 +25,6 @@ interface ErrorAnalysisData {
 
 export default function ErrorAnalysis() {
   const [data, setData] = useState<ErrorAnalysisData | null>(null)
-  const [timeframe, setTimeframe] = useState("all")
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const { selectedTier, selectedTransaction } = useBusinessTransaction()
@@ -34,7 +33,6 @@ export default function ErrorAnalysis() {
   const fetchAnalysis = async () => {
     try {
       const params = new URLSearchParams({
-        timeframe,
         tier: selectedTier,
         bt: selectedTransaction
       })
@@ -54,7 +52,7 @@ export default function ErrorAnalysis() {
   useEffect(() => {
     setData(null) // Reset data to trigger loading state
     fetchAnalysis()
-  }, [timeframe, selectedTier, selectedTransaction, dateRange])
+  }, [selectedTier, selectedTransaction, dateRange])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
   const dailyData = data?.daily.map((count, i) => ({ day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], count })) || []
@@ -81,18 +79,6 @@ export default function ErrorAnalysis() {
         </div>
         <div className="flex items-center gap-2">
           <DateRangePicker />
-          <Select value={timeframe} onValueChange={setTimeframe}>
-            <SelectTrigger className="w-[200px] bg-card">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time (Lifetime)</SelectItem>
-              <SelectItem value="1y">Last 1 Year</SelectItem>
-              <SelectItem value="6m">Last 6 Months</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 

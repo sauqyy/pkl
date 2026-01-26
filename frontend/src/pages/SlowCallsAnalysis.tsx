@@ -33,7 +33,6 @@ interface SlowCallsData {
 
 export default function SlowCallsAnalysis() {
   const [data, setData] = useState<SlowCallsData | null>(null)
-  const [timeframe, setTimeframe] = useState("30d")
   const [metricType, setMetricType] = useState("slow")
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
@@ -43,7 +42,6 @@ export default function SlowCallsAnalysis() {
   const fetchAnalysis = async () => {
     try {
       const params = new URLSearchParams({
-        timeframe,
         type: metricType,
         tier: selectedTier,
         bt: selectedTransaction
@@ -64,7 +62,7 @@ export default function SlowCallsAnalysis() {
   useEffect(() => {
     setData(null) // Reset data to trigger loading state
     fetchAnalysis()
-  }, [timeframe, metricType, selectedTier, selectedTransaction, dateRange])
+  }, [metricType, selectedTier, selectedTransaction, dateRange])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
 
@@ -111,18 +109,6 @@ export default function SlowCallsAnalysis() {
             <SelectContent>
               <SelectItem value="slow">Slow Calls</SelectItem>
               <SelectItem value="veryslow">Very Slow Calls</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={timeframe} onValueChange={setTimeframe}>
-            <SelectTrigger className="w-[200px] bg-card">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time</SelectItem>
-              <SelectItem value="1y">Last 1 Year</SelectItem>
-              <SelectItem value="6m">Last 6 Months</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
             </SelectContent>
           </Select>
         </div>

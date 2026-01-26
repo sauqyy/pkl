@@ -6,6 +6,7 @@ import { useSidebar } from "@/components/SidebarContext"
 import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import InfoTooltip from "@/components/InfoTooltip"
+import { useDateRange } from "@/components/DateRangeContext"
 
 interface ComparisonPoint {
   timestamp: number;
@@ -85,12 +86,12 @@ export default function Forecasting() {
   const [forecasts, setForecasts] = useState<Record<MetricType, MetricForecast>>({
     Load: { data: null, loading: true, error: null },
     Response: { data: null, loading: true, error: null },
-    Error: { data: null, loading: true, error: null },
     Slow: { data: null, loading: true, error: null }
   })
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const { dateRange } = useDateRange() // Add this hook usage
 
   const fetchForecast = async (metric: MetricType, showLoading = true) => {
     try {
@@ -100,7 +101,12 @@ export default function Forecasting() {
           [metric]: { ...prev[metric], loading: true, error: null }
         }))
       }
-      const response = await fetch(`/api/forecast?metric=${metric}`)
+      
+      const params = new URLSearchParams({ metric });
+      if (dateRange.from) params.append('start_date', dateRange.from.toISOString());
+      if (dateRange.to) params.append('end_date', dateRange.to.toISOString());
+
+      const response = await fetch(`/api/forecast?${params}`)
       const result = await response.json()
 
       if (result.status === 'training') {
@@ -138,7 +144,7 @@ export default function Forecasting() {
   }
 
   useEffect(() => {
-    // Initial fetch
+    // Initial fetch depends on dateRange
     fetchAllForecasts(true)
 
     // Set up auto-refresh
@@ -151,7 +157,7 @@ export default function Forecasting() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [])
+  }, [dateRange]) // Add dateRange dependency
 
   const getChartData = (data: ForecastData | null) => {
     if (!data) return []
