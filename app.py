@@ -1174,6 +1174,9 @@ def get_slow_calls_analysis():
         # Aggregation - use 'sum' column if available, else 'value'
         value_col = 'sum' if 'sum' in df.columns else 'value'
         
+        # Calculate total slow calls (default)
+        total_slow = int(df[value_col].sum())
+        
         if timeframe == '6h':
             # Create a full 6-hour range ending now
             end_time = pd.Timestamp.now().floor('min')
@@ -1258,7 +1261,7 @@ def get_slow_calls_analysis():
             
             # Standard hourly dist
             hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
-            daily_dist = [total_calls]
+            daily_dist = [total_slow]
             
             peak_hour_idx = np.argmax(hourly_dist)
             peak_hour = f"{peak_hour_idx:02d}:00"
@@ -1287,7 +1290,7 @@ def get_slow_calls_analysis():
         # Business Hours Impact
         business_hours_mask = (df['hour'] >= 8) & (df['hour'] < 18)
         business_calls = int(df[business_hours_mask][value_col].sum())
-        off_hours_calls = total_calls - business_calls
+        off_hours_calls = total_slow - business_calls
         
         impact_data = {
             'Business Hours (8-18)': business_calls,
@@ -1298,7 +1301,7 @@ def get_slow_calls_analysis():
             'heatmap': heatmap_pivot.to_dict(orient='split'),
             'hourly': hourly_dist,
             'daily': daily_dist,
-            'total': total_calls,
+            'total': total_slow,
             'peak_hour': peak_hour,
             'peak_day': peak_day,
             'trend': trend_data,
