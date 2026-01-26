@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RefreshCw, PanelRight } from "lucide-react"
+import { PanelRight, FileSpreadsheet } from "lucide-react"
 import { Bar, Doughnut, Scatter } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, ChartOptions } from 'chart.js'
 import { useSidebar } from "@/components/SidebarContext"
-import { DateRangePicker } from "@/components/DateRangePicker"
-import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
@@ -33,16 +32,11 @@ export default function BusinessTransactions() {
   const [data, setData] = useState<BusinessTransactionsData | null>(null)
   const [loading, setLoading] = useState(true)
   const { toggleSidebar } = useSidebar()
-  const { dateRange } = useDateRange()
 
   const loadData = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams()
-      if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
-      if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
-
-      const response = await fetch(`/api/business-transactions?${params}`)
+      const response = await fetch(`/api/business-transactions`)
       if (!response.ok) throw new Error('Failed to fetch')
       const result = await response.json()
       setData(result)
@@ -55,7 +49,7 @@ export default function BusinessTransactions() {
 
   useEffect(() => {
     loadData()
-  }, [dateRange])
+  }, [])
 
   if (loading || !data) {
     return <div className="p-8 text-muted-foreground">Loading business transactions...</div>
@@ -173,10 +167,11 @@ export default function BusinessTransactions() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <DateRangePicker />
-          <button onClick={loadData} className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-            <RefreshCw className="h-4 w-4" /> Refresh Data
-          </button>
+          <GlobalSearch />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border border-border text-xs font-medium text-muted-foreground">
+            <FileSpreadsheet className="h-3.5 w-3.5" />
+            Static Snapshot
+          </div>
         </div>
       </div>
 

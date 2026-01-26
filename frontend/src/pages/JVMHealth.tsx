@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { RefreshCw, PanelRight, AlertCircle, AlertTriangle, CheckCircle, Info } from "lucide-react"
+import { PanelRight, AlertCircle, AlertTriangle, CheckCircle, Info } from "lucide-react"
 import { Line, Bar } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ChartOptions, TimeScale } from 'chart.js'
 import 'chartjs-adapter-date-fns'
@@ -9,6 +8,7 @@ import { useSidebar } from "@/components/SidebarContext"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale)
@@ -32,12 +32,11 @@ interface JVMData {
 export default function JVMHealth() {
   const [data, setData] = useState<JVMData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [duration, setDuration] = useState("60")
   const { toggleSidebar } = useSidebar()
   const { selectedTier } = useBusinessTransaction()
   const { dateRange } = useDateRange()
 
-  const loadData = async (mins: string = duration) => {
+  const loadData = async (mins: string = "60") => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
@@ -60,7 +59,7 @@ export default function JVMHealth() {
 
   useEffect(() => {
     loadData()
-  }, [duration, selectedTier, dateRange])
+  }, [selectedTier, dateRange])
 
   if (loading || !data) {
     return <div className="p-8 text-muted-foreground">Loading JVM health data...</div>
@@ -155,21 +154,8 @@ export default function JVMHealth() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <GlobalSearch />
           <DateRangePicker />
-          <Select value={duration} onValueChange={setDuration}>
-            <SelectTrigger className="w-[180px] bg-card"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="60">Last 1 Hour</SelectItem>
-              <SelectItem value="360">Last 6 Hours</SelectItem>
-              <SelectItem value="720">Last 12 Hours</SelectItem>
-              <SelectItem value="1440">Last 1 Day</SelectItem>
-              <SelectItem value="4320">Last 3 Days</SelectItem>
-              <SelectItem value="10080">Last 1 Week</SelectItem>
-            </SelectContent>
-          </Select>
-          <button onClick={() => loadData()} className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
-            <RefreshCw className="h-4 w-4" /> Refresh
-          </button>
         </div>
       </div>
 
