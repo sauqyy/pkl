@@ -8,6 +8,7 @@ import { useSidebar } from "@/components/SidebarContext"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale)
@@ -153,6 +154,7 @@ export default function JVMHealth() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <GlobalSearch />
           <DateRangePicker />
         </div>
       </div>

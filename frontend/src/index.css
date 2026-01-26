@@ -190,3 +190,14 @@
   fill: currentColor;
 }
 
+
+/* Search Highlight Styles */
+.search-highlight {
+  background-color: black;
+  color: white;
+}
+
+.dark .search-highlight {
+  background-color: white;
+  color: black;
+}

@@ -4,9 +4,8 @@ import { PanelRight, TrendingUp, TrendingDown, Activity, AlertTriangle, Clock, Z
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useSidebar } from "@/components/SidebarContext"
 import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
-import { DateRangePicker } from "@/components/DateRangePicker"
 import InfoTooltip from "@/components/InfoTooltip"
-import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 
 interface ComparisonPoint {
   timestamp: number;
@@ -86,12 +85,12 @@ export default function Forecasting() {
   const [forecasts, setForecasts] = useState<Record<MetricType, MetricForecast>>({
     Load: { data: null, loading: true, error: null },
     Response: { data: null, loading: true, error: null },
+    Error: { data: null, loading: true, error: null },
     Slow: { data: null, loading: true, error: null }
   })
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
-  const { dateRange } = useDateRange() // Add this hook usage
 
   const fetchForecast = async (metric: MetricType, showLoading = true) => {
     try {
@@ -103,9 +102,7 @@ export default function Forecasting() {
       }
       
       const params = new URLSearchParams({ metric });
-      if (dateRange.from) params.append('start_date', dateRange.from.toISOString());
-      if (dateRange.to) params.append('end_date', dateRange.to.toISOString());
-
+      
       const response = await fetch(`/api/forecast?${params}`)
       const result = await response.json()
 
@@ -157,7 +154,7 @@ export default function Forecasting() {
         clearInterval(intervalRef.current)
       }
     }
-  }, [dateRange]) // Add dateRange dependency
+  }, [])
 
   const getChartData = (data: ForecastData | null) => {
     if (!data) return []
@@ -171,24 +168,28 @@ export default function Forecasting() {
     }))
 
     // Future forecast (next 24h)
-    const lastActual = data.comparison[data.comparison.length - 1]
-    const forecastData = [
-      // Connection point
-      {
-        time: new Date(lastActual.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        actual: lastActual.actual,
-        predicted: lastActual.predicted,
-        forecast: lastActual.actual,
-        type: 'connection'
-      },
-      ...data.forecast.map(d => ({
+    const forecastData = []
+    
+    // Only attempt to create a connection point if we have historical data
+    if (data.comparison.length > 0) {
+        const lastActual = data.comparison[data.comparison.length - 1]
+        forecastData.push({
+            time: new Date(lastActual.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            actual: lastActual.actual,
+            predicted: lastActual.predicted,
+            forecast: lastActual.actual,
+            type: 'connection'
+        })
+    }
+
+    forecastData.push(...data.forecast.map(d => ({
         time: new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         actual: null as number | null,
         predicted: null as number | null,
         forecast: d.value,
         type: 'forecast'
-      }))
-    ]
+    })))
+
 
     return [...comparisonData, ...forecastData.slice(1)]
   }
@@ -229,21 +230,11 @@ export default function Forecasting() {
             <p className="text-xs text-muted-foreground">LSTM Model • Auto-refreshes every 60s • Last 24h Actual vs Predicted + Next 24h Forecast</p>
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-0.5 bg-blue-500"></div>
-            <span>Actual</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-0.5 bg-blue-300" style={{ borderStyle: 'dashed', borderWidth: '1px', backgroundColor: 'transparent', borderColor: '#93c5fd' }}></div>
-            <span>Predicted</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-0.5" style={{ borderStyle: 'dotted', borderWidth: '2px', backgroundColor: 'transparent', borderColor: '#a855f7' }}></div>
-            <span>Forecast</span>
-          </div>
+
+
+        <div className="flex items-center gap-2">
+            <GlobalSearch />
         </div>
-        <DateRangePicker />
       </div>
 
       {/* Forecast Charts Grid */}

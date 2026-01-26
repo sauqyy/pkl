@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Search, PanelRight } from "lucide-react"
+import { PanelRight } from "lucide-react"
+
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { fetchDashboardData, DashboardData } from "@/lib/api"
 import { useSidebar } from "@/components/SidebarContext"
@@ -9,7 +9,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
-import InfoTooltip from "@/components/InfoTooltip"
+import { GlobalSearch } from "@/components/GlobalSearch"
 
 export default function ResponseTime() {
     const [data, setData] = useState<DashboardData | null>(null)
@@ -105,10 +105,7 @@ export default function ResponseTime() {
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input type="search" placeholder="Search for something..." className="pl-8 w-[250px] bg-card" />
-                    </div>
+                    <GlobalSearch />
                     <DateRangePicker />
                 </div>
             </div>

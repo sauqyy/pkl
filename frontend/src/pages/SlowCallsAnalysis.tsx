@@ -9,6 +9,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 interface SlowCallsData {
@@ -101,6 +102,7 @@ export default function SlowCallsAnalysis() {
           </div>
         </div>
         <div className="flex gap-3">
+          <GlobalSearch />
           <DateRangePicker />
           <Select value={metricType} onValueChange={setMetricType}>
             <SelectTrigger className="w-[200px] bg-card">

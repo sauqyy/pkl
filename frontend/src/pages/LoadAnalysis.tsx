@@ -8,6 +8,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 interface LoadAnalysisData {
@@ -77,6 +78,7 @@ export default function LoadAnalysis() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <GlobalSearch />
           <DateRangePicker />
 
         </div>

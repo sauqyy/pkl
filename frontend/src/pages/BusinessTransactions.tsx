@@ -4,6 +4,7 @@ import { PanelRight, FileSpreadsheet } from "lucide-react"
 import { Bar, Doughnut, Scatter } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, ChartOptions } from 'chart.js'
 import { useSidebar } from "@/components/SidebarContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
@@ -166,6 +167,7 @@ export default function BusinessTransactions() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <GlobalSearch />
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border border-border text-xs font-medium text-muted-foreground">
             <FileSpreadsheet className="h-3.5 w-3.5" />
             Static Snapshot
