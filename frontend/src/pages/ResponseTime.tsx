@@ -10,6 +10,7 @@ import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
 import { GlobalSearch } from "@/components/GlobalSearch"
+import InfoTooltip from "@/components/InfoTooltip"
 
 export default function ResponseTime() {
     const [data, setData] = useState<DashboardData | null>(null)
@@ -48,18 +49,24 @@ export default function ResponseTime() {
         count
     })).sort((a, b) => a.ms - b.ms) : [];
 
-    const pieData = data ? Object.entries(data.buckets).map(([name, value]) => ({ name, value })) : [];
+    // Aggregate backend buckets to frontend categories
+    const normalCount = data ? (data.buckets['Fast (<50ms)'] || 0) + (data.buckets['Normal (50-100ms)'] || 0) : 0;
+    const slowCount = data ? (data.buckets['Slow (>100ms)'] || 0) : 0;
+
+    const pieData = data ? [
+        { name: 'Normal', value: normalCount },
+        { name: 'Slow', value: slowCount }
+    ] : [];
+
     /* 
-       Update Colors for Normal (Green) vs Slow (Red)
-       Normal = #22c55e (Green-500)
-       Slow = #ef4444 (Red-500) - acting as warning/error
+       Colors for Normal (Green) vs Slow (Red)
     */
-    const COLORS = ['#22c55e', '#ef4444'];
+    const getCellColor = (name: string) => name === 'Normal' ? '#22c55e' : '#ef4444';
 
     // Calculate percentage of Normal transactions
-    const totalCount = data ? (data.buckets['Normal'] || 0) + (data.buckets['Slow'] || 0) : 0;
+    const totalCount = normalCount + slowCount;
     const normalPercentage = totalCount > 0
-        ? ((data!.buckets['Normal'] || 0) / totalCount * 100).toFixed(0)
+        ? Math.round((normalCount / totalCount) * 100)
         : 0;
 
     // Calculate stats
@@ -155,7 +162,7 @@ export default function ResponseTime() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-red-400">
-                                    {data.buckets['Slow'] > 0 ? ((data.buckets['Slow'] / data.raw_values.length) * 100).toFixed(1) : 0}%
+                                    {slowCount > 0 ? ((slowCount / (data?.raw_values?.length || 1)) * 100).toFixed(1) : 0}%
                                 </div>
                             </CardContent>
                         </Card>
@@ -246,7 +253,7 @@ export default function ResponseTime() {
                                                 stroke="none"
                                             >
                                                 {pieData.map((entry, index) => (
-                                                    <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    <Cell key={`cell-${entry.name}-${index}`} fill={getCellColor(entry.name)} />
                                                 ))}
                                             </Pie>
                                             <Tooltip contentStyle={tooltipStyles.contentStyle} />
