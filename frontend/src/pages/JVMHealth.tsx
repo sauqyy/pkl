@@ -9,6 +9,7 @@ import { useSidebar } from "@/components/SidebarContext"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale)
 
@@ -45,7 +46,7 @@ export default function JVMHealth() {
       })
       if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
       if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
-      
+
       const response = await fetch(`/api/jvm-data?${params}`)
       if (!response.ok) throw new Error('Failed to fetch')
       const result = await response.json()
@@ -91,7 +92,16 @@ export default function JVMHealth() {
     }
   }
 
-  const createLineChartData = (dataPoints: Array<{ t: number; v: number}>, label: string, color: string) => ({
+  const barOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { type: 'time', time: { unit: 'minute' }, ticks: { display: false } },
+      y: { beginAtZero: true }
+    }
+  }
+
+  const createLineChartData = (dataPoints: Array<{ t: number; v: number }>, label: string, color: string) => ({
     labels: dataPoints.map(d => new Date(d.t)),
     datasets: [{
       label,
@@ -104,7 +114,7 @@ export default function JVMHealth() {
     }]
   })
 
-  const createBarChartData = (dataPoints: Array<{ t: number; v: number}>, label: string, color: string) => ({
+  const createBarChartData = (dataPoints: Array<{ t: number; v: number }>, label: string, color: string) => ({
     labels: dataPoints.map(d => new Date(d.t)),
     datasets: [{
       label,
@@ -114,7 +124,7 @@ export default function JVMHealth() {
   })
 
   const getInsightIcon = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'critical': return <AlertCircle className="h-5 w-5 text-red-500" />
       case 'warning': return <AlertTriangle className="h-5 w-5 text-yellow-500" />
       case 'success': return <CheckCircle className="h-5 w-5 text-green-500" />
@@ -123,7 +133,7 @@ export default function JVMHealth() {
   }
 
   const getInsightBgClass = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'critical': return 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400'
       case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400'
       case 'success': return 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400'
@@ -168,6 +178,7 @@ export default function JVMHealth() {
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Info className="h-5 w-5" /> Smart Insights
+              <InfoTooltip content="AI-driven analysis of JVM health metrics." />
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -187,7 +198,12 @@ export default function JVMHealth() {
         </Card>
 
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">System Availability</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              System Availability
+              <InfoTooltip content="Percentage of time the JVM was up and running." />
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center justify-center h-[200px]">
               <div className={`text-5xl font-bold ${availability.isHealthy ? 'text-green-500' : 'text-red-500'}`}>{availability.percent}</div>
@@ -202,7 +218,12 @@ export default function JVMHealth() {
 
       <div className="grid gap-4 grid-cols-2">
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Heap Memory (%)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Heap Memory (%)
+              <InfoTooltip content="Percentage of allocated heap memory currently in use." />
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               {data.data.heap_used && <Line data={createLineChartData(data.data.heap_used, 'Heap Used (%)', 'rgb(99, 102, 241)')} options={heapOptions} />}
@@ -211,7 +232,12 @@ export default function JVMHealth() {
         </Card>
 
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">CPU Usage (%)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              CPU Usage (%)
+              <InfoTooltip content="CPU utilization by the JVM process." />
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               {data.data.cpu_busy && <Line data={createLineChartData(data.data.cpu_busy, 'CPU Busy %', 'rgb(6, 182, 212)')} options={heapOptions} />}
@@ -222,7 +248,12 @@ export default function JVMHealth() {
 
       <div className="grid gap-4 grid-cols-2">
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Live Threads</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Live Threads
+              <InfoTooltip content="Number of active threads in the JVM." />
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               {data.data.threads_live && <Line data={createLineChartData(data.data.threads_live, 'Active Threads', 'rgb(139, 92, 246)')} options={lineOptions} />}
@@ -231,7 +262,12 @@ export default function JVMHealth() {
         </Card>
 
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">CPU Usage (%)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              CPU Usage (%)
+              <InfoTooltip content="CPU utilization by the JVM process." />
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               {data.data.cpu_busy && <Line data={createLineChartData(data.data.cpu_busy, 'CPU Busy %', 'rgb(6, 182, 212)')} options={heapOptions} />}
@@ -242,19 +278,29 @@ export default function JVMHealth() {
 
       <div className="grid gap-4 grid-cols-2">
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Major GC Time (ms/min)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Major GC Time (ms/min)
+              <InfoTooltip content="Time spent in major garbage collection per minute." />
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-[300px]">
-              {data.data.gc_time && <Bar data={createBarChartData(data.data.gc_time, 'Major GC Time (ms/min)', 'rgb(245, 158, 11)')} options={lineOptions} />}
+              {data.data.gc_time && <Bar data={createBarChartData(data.data.gc_time, 'Major GC Time (ms/min)', 'rgb(245, 158, 11)')} options={barOptions} />}
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Number of Major Collections (/min)</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Number of Major Collections (/min)
+              <InfoTooltip content="Frequency of major garbage collection events per minute." />
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="h-[300px]">
-              {data.data.gc_count && <Bar data={createBarChartData(data.data.gc_count, 'Major Collections/min', 'rgb(236, 72, 153)')} options={lineOptions} />}
+              {data.data.gc_count && <Bar data={createBarChartData(data.data.gc_count, 'Major Collections/min', 'rgb(236, 72, 153)')} options={barOptions} />}
             </div>
           </CardContent>
         </Card>

@@ -6,6 +6,7 @@ import { useSidebar } from "@/components/SidebarContext"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 interface SummaryData {
   response_time: number;
@@ -29,7 +30,7 @@ export default function ExecutiveDashboard() {
       })
       if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
       if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
-      
+
       const response = await fetch(`/api/summary?${params}`)
       const result = await response.json()
       setData(result)
@@ -85,6 +86,7 @@ export default function ExecutiveDashboard() {
             value={`${data.response_time}`}
             unit="ms"
             subtext="Current Average"
+            description="The average time taken for the system to process requests."
             icon={<Clock className="h-4 w-4" />}
             iconColor="text-blue-500"
             onClick={() => navigate('/response-time')}
@@ -95,6 +97,7 @@ export default function ExecutiveDashboard() {
             title="Errors"
             value={data.errors.toLocaleString()}
             subtext="Total (Last 30 Days)"
+            description="Total number of failed transactions or exceptions recorded in the last 30 days."
             icon={<AlertTriangle className="h-4 w-4" />}
             iconColor="text-red-500"
             onClick={() => navigate('/error-analysis')}
@@ -105,6 +108,7 @@ export default function ExecutiveDashboard() {
             title="System Load"
             value={formatNumber(data.load)}
             subtext="Total Calls (Last 30 Days)"
+            description="The total number of requests processed by the system over the last 30 days."
             icon={<Server className="h-4 w-4" />}
             iconColor="text-teal-500"
             onClick={() => navigate('/load-analysis')}
@@ -115,6 +119,7 @@ export default function ExecutiveDashboard() {
             title="Slow Calls"
             value={data.slow_calls.toLocaleString()}
             subtext="Total Slow (Last 30 Days)"
+            description="Number of transactions that took longer than the defined threshold to complete."
             icon={<Hourglass className="h-4 w-4" />}
             iconColor="text-orange-500"
             onClick={() => navigate('/slow-calls-analysis')}
@@ -125,6 +130,7 @@ export default function ExecutiveDashboard() {
             title="Business Transactions"
             value="Analysis"
             subtext="Health, Volume & Latency"
+            description="Overview of key business operations, their health status, and performance metrics."
             icon={<ListChecks className="h-4 w-4" />}
             iconColor="text-purple-500"
             onClick={() => navigate('/business-transactions')}
@@ -135,6 +141,7 @@ export default function ExecutiveDashboard() {
             title="Infrastructure Health"
             value="JVM"
             subtext="Memory, GC & Availability"
+            description="Monitoring of JVM performance including memory usage, garbage collection, and uptime."
             icon={<Activity className="h-4 w-4" />}
             iconColor="text-rose-500"
             onClick={() => navigate('/jvm-health')}
@@ -145,6 +152,7 @@ export default function ExecutiveDashboard() {
             title="Database Analysis"
             value="Query"
             subtext="Performance & Spikes"
+            description="Insights into database query performance, execution times, and detected spikes."
             icon={<Database className="h-4 w-4" />}
             iconColor="text-indigo-500"
             onClick={() => navigate('/database-analysis')}
@@ -167,12 +175,13 @@ interface MetricCardProps {
   value: string;
   unit?: string;
   subtext: string;
+  description?: string;
   icon: React.ReactNode;
   iconColor: string;
   onClick: () => void;
 }
 
-function MetricCard({ title, value, unit, subtext, icon, iconColor, onClick }: MetricCardProps) {
+function MetricCard({ title, value, unit, subtext, description, icon, iconColor, onClick }: MetricCardProps) {
   return (
     <Card
       className="bg-card cursor-pointer transition-all duration-200 hover:shadow-md border-border/50 hover:border-border"
@@ -181,7 +190,10 @@ function MetricCard({ title, value, unit, subtext, icon, iconColor, onClick }: M
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-2">
           <span className={iconColor}>{icon}</span>
-          <div className="text-sm font-medium text-muted-foreground">{title}</div>
+          <div className="text-sm font-medium text-muted-foreground flex items-center">
+            {title}
+            {description && <InfoTooltip content={description} />}
+          </div>
         </div>
         <div className="flex items-baseline gap-2 mb-1">
           <div className="text-3xl font-bold text-foreground">{value}</div>
@@ -193,3 +205,4 @@ function MetricCard({ title, value, unit, subtext, icon, iconColor, onClick }: M
     </Card>
   )
 }
+

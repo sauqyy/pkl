@@ -9,6 +9,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 interface ErrorAnalysisData {
   total: number;
@@ -39,7 +40,7 @@ export default function ErrorAnalysis() {
       })
       if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
       if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
-      
+
       const response = await fetch(`/api/error-analysis?${params}`)
       const result = await response.json()
       if (!result.error) {
@@ -81,17 +82,17 @@ export default function ErrorAnalysis() {
         <div className="flex items-center gap-2">
           <DateRangePicker />
           <Select value={timeframe} onValueChange={setTimeframe}>
-          <SelectTrigger className="w-[200px] bg-card">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Time (Lifetime)</SelectItem>
-            <SelectItem value="1y">Last 1 Year</SelectItem>
-            <SelectItem value="6m">Last 6 Months</SelectItem>
-            <SelectItem value="30d">Last 30 Days</SelectItem>
-            <SelectItem value="7d">Last 7 Days</SelectItem>
-          </SelectContent>
-        </Select>
+            <SelectTrigger className="w-[200px] bg-card">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time (Lifetime)</SelectItem>
+              <SelectItem value="1y">Last 1 Year</SelectItem>
+              <SelectItem value="6m">Last 6 Months</SelectItem>
+              <SelectItem value="30d">Last 30 Days</SelectItem>
+              <SelectItem value="7d">Last 7 Days</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -105,7 +106,10 @@ export default function ErrorAnalysis() {
             <div className="grid gap-4 grid-cols-3">
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Errors Detected</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Total Errors Detected
+                    <InfoTooltip content="Total count of error events recorded." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{data.total.toLocaleString()}</div>
@@ -113,7 +117,10 @@ export default function ErrorAnalysis() {
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Peak Error Time</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Peak Error Time
+                    <InfoTooltip content="The hour of the day with the highest frequency of errors." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-red-400">{data.peak_hour}</div>
@@ -121,7 +128,10 @@ export default function ErrorAnalysis() {
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Highest Error Day</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Highest Error Day
+                    <InfoTooltip content="The day of the week with the most errors." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-orange-400">{data.peak_day}</div>

@@ -10,6 +10,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 export default function ResponseTime() {
     const [data, setData] = useState<DashboardData | null>(null)
@@ -131,7 +132,10 @@ export default function ResponseTime() {
                     <div className="grid gap-4 grid-cols-4">
                         <Card className="bg-card">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Total Requests</CardTitle>
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                                    Total Requests
+                                    <InfoTooltip content="Total number of transactions processed in the selected period." />
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{data.raw_values.length}</div>
@@ -139,7 +143,10 @@ export default function ResponseTime() {
                         </Card>
                         <Card className="bg-card">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Avg Response Time</CardTitle>
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                                    Avg Response Time
+                                    <InfoTooltip content="Average time taken for transactions to complete." />
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{avg} ms</div>
@@ -147,7 +154,10 @@ export default function ResponseTime() {
                         </Card>
                         <Card className="bg-card">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">P95 Response Time</CardTitle>
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                                    P95 Response Time
+                                    <InfoTooltip content="95th percentile response time (95% of requests are faster than this)." />
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{p95} ms</div>
@@ -155,7 +165,10 @@ export default function ResponseTime() {
                         </Card>
                         <Card className="bg-card">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Error Rate</CardTitle>
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                                    Error Rate
+                                    <InfoTooltip content="Percentage of transactions that resulted in an error or were slow." />
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-red-400">

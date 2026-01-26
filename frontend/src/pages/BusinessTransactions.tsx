@@ -6,6 +6,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { useSidebar } from "@/components/SidebarContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend)
 
@@ -40,7 +41,7 @@ export default function BusinessTransactions() {
       const params = new URLSearchParams()
       if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
       if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
-      
+
       const response = await fetch(`/api/business-transactions?${params}`)
       if (!response.ok) throw new Error('Failed to fetch')
       const result = await response.json()
@@ -140,7 +141,7 @@ export default function BusinessTransactions() {
     plugins: {
       tooltip: {
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             const point = context.raw
             return `${point.name}: ${point.y}ms (${point.x} calls)`
           }
@@ -180,16 +181,19 @@ export default function BusinessTransactions() {
       </div>
 
       <div className="grid gap-4 grid-cols-4">
-        <StatCard label="Total Transactions" value={data.table.length.toString()} />
-        <StatCard label="Healthy (Normal)" value={(data.health_counts['Normal'] || 0).toString()} valueColor="text-green-500" />
-        <StatCard label="Warning" value={(data.health_counts['Warning'] || 0).toString()} valueColor="text-yellow-500" />
-        <StatCard label="Critical" value={(data.health_counts['Critical'] || 0).toString()} valueColor="text-red-500" />
+        <StatCard label="Total Transactions" value={data.table.length.toString()} description="Total number of transactions monitored." />
+        <StatCard label="Healthy (Normal)" value={(data.health_counts['Normal'] || 0).toString()} valueColor="text-green-500" description="Transactions performing within acceptable limits." />
+        <StatCard label="Warning" value={(data.health_counts['Warning'] || 0).toString()} valueColor="text-yellow-500" description="Transactions showing signs of performance degradation." />
+        <StatCard label="Critical" value={(data.health_counts['Critical'] || 0).toString()} valueColor="text-red-500" description="Transactions failing or exceeding critical thresholds." />
       </div>
 
       <div className="grid gap-4 grid-cols-3">
         <Card className="bg-card">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Health Distribution</CardTitle>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Health Distribution
+              <InfoTooltip content="Breakdown of transactions by health status." />
+            </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">Transaction health categories</p>
           </CardHeader>
           <CardContent>
@@ -199,7 +203,10 @@ export default function BusinessTransactions() {
 
         <Card className="col-span-2 bg-card">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Top 10 Slowest Transactions</CardTitle>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Top 10 Slowest Transactions
+              <InfoTooltip content="Transactions with the highest average response times." />
+            </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">Highest response times</p>
           </CardHeader>
           <CardContent>
@@ -210,18 +217,31 @@ export default function BusinessTransactions() {
 
       <div className="grid gap-4 grid-cols-2">
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Top 10 High Volume Transactions</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Top 10 High Volume Transactions
+              <InfoTooltip content="Transactions with the most execution counts." />
+            </CardTitle>
+          </CardHeader>
           <CardContent><div className="h-[350px]"><Bar data={volumeChartData} options={barOptions} /></div></CardContent>
         </Card>
         <Card className="bg-card">
-          <CardHeader><CardTitle className="text-base font-semibold">Transactions with Highest Error Rates</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold flex items-center">
+              Transactions with Highest Error Rates
+              <InfoTooltip content="Transactions encountering the most errors." />
+            </CardTitle>
+          </CardHeader>
           <CardContent><div className="h-[350px]"><Bar data={errorChartData} options={barOptions} /></div></CardContent>
         </Card>
       </div>
 
       <Card className="bg-card">
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Calls vs Response Time (Correlation)</CardTitle>
+          <CardTitle className="text-base font-semibold flex items-center">
+            Calls vs Response Time (Correlation)
+            <InfoTooltip content="Scatter plot showing relationship between load and latency." />
+          </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">Color indicates health status</p>
         </CardHeader>
         <CardContent><div className="h-[350px]"><Scatter data={scatterChartData} options={scatterOptions} /></div></CardContent>
@@ -267,10 +287,15 @@ export default function BusinessTransactions() {
   )
 }
 
-function StatCard({ label, value, valueColor = "text-foreground" }: { label: string; value: string; valueColor?: string }) {
+function StatCard({ label, value, valueColor = "text-foreground", description }: { label: string; value: string; valueColor?: string; description?: string }) {
   return (
     <Card className="bg-card">
-      <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{label}</CardTitle></CardHeader>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+          {label}
+          {description && <InfoTooltip content={description} />}
+        </CardTitle>
+      </CardHeader>
       <CardContent><div className={`text-3xl font-bold ${valueColor}`}>{value}</div></CardContent>
     </Card>
   )

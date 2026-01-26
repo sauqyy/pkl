@@ -9,6 +9,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 interface SlowCallsData {
   total: number;
@@ -49,7 +50,7 @@ export default function SlowCallsAnalysis() {
       })
       if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
       if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
-      
+
       const response = await fetch(`/api/slow-calls-analysis?${params}`)
       const result = await response.json()
       if (!result.error) {
@@ -136,7 +137,10 @@ export default function SlowCallsAnalysis() {
             <div className="grid gap-4 grid-cols-3">
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Slow Calls</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Total Slow Calls
+                    <InfoTooltip content="Total number of requests exceeding the slow threshold." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{data.total.toLocaleString()}</div>
@@ -144,7 +148,10 @@ export default function SlowCallsAnalysis() {
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Peak Time (Jam Paling Lambat)</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Peak Time (Jam Paling Lambat)
+                    <InfoTooltip content="Hour of the day when most slow calls occur." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-red-500">{data.peak_hour}</div>
@@ -152,7 +159,10 @@ export default function SlowCallsAnalysis() {
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Peak Day (Hari Paling Lambat)</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Peak Day (Hari Paling Lambat)
+                    <InfoTooltip content="Day of the week with the highest frequency of slow calls." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-orange-500">{data.peak_day}</div>

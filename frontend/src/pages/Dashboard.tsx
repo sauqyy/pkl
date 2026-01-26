@@ -9,10 +9,10 @@ import { useSidebar } from "@/components/SidebarContext"
 import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 export default function Dashboard() {
     const [data, setData] = useState<DashboardData | null>(null)
-    const [loading, setLoading] = useState(true)
     const [period, setPeriod] = useState("60")
     const { toggleSidebar } = useSidebar()
     const tooltipStyles = useChartTooltipStyles()
@@ -25,8 +25,6 @@ export default function Dashboard() {
                 setData(d)
             } catch (e) {
                 console.error(e)
-            } finally {
-                setLoading(false)
             }
         }
         load()
@@ -120,21 +118,25 @@ export default function Dashboard() {
                             title="Total Requests"
                             value={data.raw_values.length.toLocaleString()}
                             subtitle="All processed events in the selected timeframe"
+                            description="Total count of all HTTP requests processed by the backend services."
                         />
                         <MetricCard
                             title="Average Response Time"
                             value={`${avg} ms`}
                             subtitle="Mean system response across all requests"
+                            description="The average time (in milliseconds) taken to process requests."
                         />
                         <MetricCard
                             title="Maximum Latency"
                             value={`${max} ms`}
                             subtitle="Peak delay recorded during high load"
+                            description="The highest response time recorded for a single request."
                         />
                         <MetricCard
                             title="Minimum Latency"
                             value={`${min} ms`}
                             subtitle="Fastest recorded response"
+                            description="The lowest response time recorded for a single request."
                         />
                     </div>
 
@@ -231,11 +233,14 @@ export default function Dashboard() {
     )
 }
 
-function MetricCard({ title, value, subtitle }: { title: string; value: string | number; subtitle: string }) {
+function MetricCard({ title, value, subtitle, description }: { title: string; value: string | number; subtitle: string; description?: string }) {
     return (
         <Card className="bg-card">
             <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    {title}
+                    {description && <InfoTooltip content={description} />}
+                </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="text-3xl font-bold text-foreground mb-1">{value}</div>

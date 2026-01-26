@@ -9,6 +9,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import InfoTooltip from "@/components/InfoTooltip"
 
 interface LoadAnalysisData {
   total: number;
@@ -39,7 +40,7 @@ export default function LoadAnalysis() {
       })
       if (dateRange.from) params.append('start_date', dateRange.from.toISOString())
       if (dateRange.to) params.append('end_date', dateRange.to.toISOString())
-      
+
       const response = await fetch(`/api/load-analysis?${params}`)
       const result = await response.json()
       if (!result.error) {
@@ -81,17 +82,17 @@ export default function LoadAnalysis() {
         <div className="flex items-center gap-2">
           <DateRangePicker />
           <Select value={timeframe} onValueChange={setTimeframe}>
-          <SelectTrigger className="w-[200px] bg-card">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Time (Lifetime)</SelectItem>
-            <SelectItem value="1y">Last 1 Year</SelectItem>
-            <SelectItem value="6m">Last 6 Months</SelectItem>
-            <SelectItem value="30d">Last 30 Days</SelectItem>
-            <SelectItem value="7d">Last 7 Days</SelectItem>
-          </SelectContent>
-        </Select>
+            <SelectTrigger className="w-[200px] bg-card">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time (Lifetime)</SelectItem>
+              <SelectItem value="1y">Last 1 Year</SelectItem>
+              <SelectItem value="6m">Last 6 Months</SelectItem>
+              <SelectItem value="30d">Last 30 Days</SelectItem>
+              <SelectItem value="7d">Last 7 Days</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -104,7 +105,10 @@ export default function LoadAnalysis() {
             <div className="grid gap-4 grid-cols-3">
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Calls Processed</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Total Calls Processed
+                    <InfoTooltip content="Total number of HTTP requests processed by the application." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold">{data.total.toLocaleString()}</div>
@@ -112,7 +116,10 @@ export default function LoadAnalysis() {
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Peak Load Time</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Peak Load Time
+                    <InfoTooltip content="Hour of the day with the highest traffic volume." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-blue-400">{data.peak_hour}</div>
@@ -120,7 +127,10 @@ export default function LoadAnalysis() {
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Highest Load Day</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Highest Load Day
+                    <InfoTooltip content="Day of the week with the most traffic." />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-green-400">{data.peak_day}</div>

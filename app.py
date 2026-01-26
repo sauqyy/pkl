@@ -12,6 +12,31 @@ from email.mime.multipart import MIMEMultipart
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+import requests
+
+# Telegram Configuration
+TELEGRAM_BOT_TOKEN = "8290043825:AAFeZVa2F8kBXJduCktSJOJ162SRF9QDhFM"
+TELEGRAM_CHAT_ID = "5958836175" # Update this with your Chat ID
+
+def send_telegram_alert(message):
+    """Sends a Telegram alert when an error occurs."""
+    if not TELEGRAM_CHAT_ID or TELEGRAM_CHAT_ID == "YOUR_CHAT_ID_HERE":
+        print("Telegram Chat ID not configured. Skipping alert.")
+        return
+
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        data = {
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": f"🚨 *AppDynamics Alert*\n\n{message}",
+            "parse_mode": "Markdown"
+        }
+        response = requests.post(url, json=data)
+        if response.status_code != 200:
+            print(f"Failed to send Telegram alert: {response.text}")
+    except Exception as e:
+        print(f"Error sending Telegram alert: {e}")
+
 
 app = Flask(__name__)
 CORS(app) # Enable CORS for all routes
@@ -136,7 +161,9 @@ def fetch_from_appdynamics(url: str, duration_override: int = None) -> list:
                 
             return data
     except Exception as e:
-        print(f"Error fetching from AppDynamics: {e}")
+        error_msg = f"Error fetching from AppDynamics: {e}\nURL: {url}"
+        print(error_msg)
+        send_telegram_alert(error_msg)
         return []
 
 def send_email_alert(error_message):
@@ -189,6 +216,7 @@ def load_data(duration=60):
         error_msg = f"API Error: {e}"
         print(f"{error_msg}. Falling back to cached file.")
         send_email_alert(error_msg)
+        send_telegram_alert(error_msg)
         
     # Fallback
     if not os.path.exists(DATA_FILE):
