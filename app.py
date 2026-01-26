@@ -804,6 +804,8 @@ def get_error_analysis():
     
     # Calculate duration in minutes based on timeframe
     duration_map = {
+        '1h': 60,
+        '24h': 24 * 60,
         '7d': 7 * 24 * 60,
         '30d': 30 * 24 * 60,
         '6m': 180 * 24 * 60,
@@ -860,23 +862,55 @@ def get_error_analysis():
         # Aggregation - use 'sum' column if available, else 'value'
         value_col = 'sum' if 'sum' in df.columns else 'value'
         
-        # Heatmap
-        heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
-        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
-        
-        # Hourly
-        hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
-        
-        # Daily
-        daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
-        
-        # Stats
+        # Calculate total errors
         total_errors = int(df[value_col].sum())
-        peak_hour_idx = np.argmax(hourly_dist)
-        peak_hour = f"{peak_hour_idx:02d}:00"
-        peak_day_idx = np.argmax(daily_dist)
-        peak_day = days_order[peak_day_idx] if daily_dist else 'N/A'
+        
+        if timeframe == '1h':
+            # Minute-level aggregation for last hour
+            df['minute'] = df['dt'].dt.minute
+            
+            # Heatmap: 1 row (Last Hour), 60 columns (minutes)
+            heatmap_pivot = df.groupby(['minute'])[value_col].sum().reindex(range(60), fill_value=0).to_frame().T
+            heatmap_pivot.index = ['Last Hour']
+            
+            # Hourly distribution doesn't make sense for 1h view, reuse minute dist or zero
+            hourly_dist = df.groupby('minute')[value_col].sum().reindex(range(60), fill_value=0).tolist()
+            
+            # Daily dist -> just total
+            daily_dist = [total_errors]
+            
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe == '24h':
+            # Hourly aggregation for last 24h, specific dates as rows
+            df['date_short'] = df['dt'].dt.strftime('%d-%b')
+            
+            # Heatmap: Rows = Dates, Cols = Hours
+            heatmap_pivot = df.groupby(['date_short', 'hour'])[value_col].sum().reset_index().pivot(index='date_short', columns='hour', values=value_col).fillna(0)
+            heatmap_pivot = heatmap_pivot.reindex(columns=range(24), fill_value=0).fillna(0)
+            
+            # Standard hourly dist
+            hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
+            
+            daily_dist = [total_errors]
+            
+            peak_hour_idx = np.argmax(hourly_dist)
+            peak_hour = f"{peak_hour_idx:02d}:00"
+            peak_day = "Today"
+            
+        else:
+            # Standard Day vs Hour
+            heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
+            days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
+            
+            hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
+            daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
+            
+            peak_hour_idx = np.argmax(hourly_dist)
+            peak_hour = f"{peak_hour_idx:02d}:00"
+            peak_day = days_order[np.argmax(daily_dist)] if daily_dist else 'N/A'
         
         return jsonify({
             'heatmap': heatmap_pivot.to_dict(orient='split'),
@@ -904,6 +938,8 @@ def get_load_analysis():
     
     # Calculate duration in minutes based on timeframe
     duration_map = {
+        '1h': 60,
+        '24h': 24 * 60,
         '7d': 7 * 24 * 60,
         '30d': 30 * 24 * 60,
         '6m': 180 * 24 * 60,
@@ -960,21 +996,54 @@ def get_load_analysis():
         # Aggregation - use 'sum' column if available, else 'value'
         value_col = 'sum' if 'sum' in df.columns else 'value'
         
-        # Heatmap
-        heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
-        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
-        
-        # Hourly
-        hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
-        
-        # Daily
-        daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
-        
-        # Stats
+        # Calculate total load
         total_load = int(df[value_col].sum())
-        peak_hour = f"{np.argmax(hourly_dist)}:00"
-        peak_day = days_order[np.argmax(daily_dist)] if daily_dist else 'N/A'
+        
+        if timeframe == '1h':
+            # Minute-level aggregation for last hour
+            df['minute'] = df['dt'].dt.minute
+            
+            # Heatmap: 1 row (Last Hour), 60 columns (minutes)
+            heatmap_pivot = df.groupby(['minute'])[value_col].sum().reindex(range(60), fill_value=0).to_frame().T
+            heatmap_pivot.index = ['Last Hour']
+            
+            # Hourly distribution -> used for minutes in frontend if wanted, or just pass minutes
+            hourly_dist = df.groupby('minute')[value_col].sum().reindex(range(60), fill_value=0).tolist()
+            
+            # Daily dist -> just total
+            daily_dist = [total_load]
+            
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe == '24h':
+            # Hourly aggregation for last 24h, specific dates as rows
+            df['date_short'] = df['dt'].dt.strftime('%d-%b')
+            
+            # Heatmap: Rows = Dates, Cols = Hours
+            heatmap_pivot = df.groupby(['date_short', 'hour'])[value_col].sum().reset_index().pivot(index='date_short', columns='hour', values=value_col).fillna(0)
+            heatmap_pivot = heatmap_pivot.reindex(columns=range(24), fill_value=0).fillna(0)
+            
+            # Standard hourly dist
+            hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
+            
+            daily_dist = [total_load]
+            
+            peak_hour_idx = np.argmax(hourly_dist)
+            peak_hour = f"{peak_hour_idx:02d}:00"
+            peak_day = "Today"
+            
+        else:
+            # Standard Day vs Hour
+            heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
+            days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
+            
+            hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
+            daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
+            
+            peak_hour = f"{np.argmax(hourly_dist)}:00"
+            peak_day = days_order[np.argmax(daily_dist)] if daily_dist else 'N/A'
         
         return jsonify({
             'heatmap': heatmap_pivot.to_dict(orient='split'),
@@ -1003,6 +1072,8 @@ def get_slow_calls_analysis():
     
     # Calculate duration in minutes based on timeframe
     duration_map = {
+        '1h': 60,
+        '24h': 24 * 60,
         '7d': 7 * 24 * 60,
         '30d': 30 * 24 * 60,
         '6m': 180 * 24 * 60,
@@ -1062,21 +1133,53 @@ def get_slow_calls_analysis():
         # Aggregation - use 'sum' column if available, else 'value'
         value_col = 'sum' if 'sum' in df.columns else 'value'
         
-        # Heatmap
-        heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
-        days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
-        
-        # Hourly
-        hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
-        
-        # Daily
-        daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
-        
-        # Stats
+        # Calculate total calls
         total_calls = int(df[value_col].sum())
-        peak_hour = f"{np.argmax(hourly_dist)}:00"
-        peak_day = days_order[np.argmax(daily_dist)] if daily_dist else 'N/A'
+        
+        if timeframe == '1h':
+            # Minute-level aggregation for last hour
+            df['minute'] = df['dt'].dt.minute
+            
+            # Heatmap: 1 row (Last Hour), 60 columns (minutes)
+            heatmap_pivot = df.groupby(['minute'])[value_col].sum().reindex(range(60), fill_value=0).to_frame().T
+            heatmap_pivot.index = ['Last Hour']
+            
+            # Hourly distribution -> used for minutes in frontend if wanted
+            hourly_dist = df.groupby('minute')[value_col].sum().reindex(range(60), fill_value=0).tolist()
+            
+            # Daily dist -> just total
+            daily_dist = [total_calls]
+            
+            peak_hour = f"Minute {np.argmax(hourly_dist)}"
+            peak_day = "Today"
+
+        elif timeframe == '24h':
+            # Hourly aggregation for last 24h, specific dates as rows
+            df['date_short'] = df['dt'].dt.strftime('%d-%b')
+            
+            # Heatmap: Rows = Dates, Cols = Hours
+            heatmap_pivot = df.groupby(['date_short', 'hour'])[value_col].sum().reset_index().pivot(index='date_short', columns='hour', values=value_col).fillna(0)
+            heatmap_pivot = heatmap_pivot.reindex(columns=range(24), fill_value=0).fillna(0)
+            
+            # Standard hourly dist
+            hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
+            daily_dist = [total_calls]
+            
+            peak_hour_idx = np.argmax(hourly_dist)
+            peak_hour = f"{peak_hour_idx:02d}:00"
+            peak_day = "Today"
+            
+        else:
+            # Standard Day vs Hour
+            heatmap_pivot = df.groupby(['day_name', 'hour'])[value_col].sum().reset_index().pivot(index='day_name', columns='hour', values=value_col).fillna(0)
+            days_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            heatmap_pivot = heatmap_pivot.reindex(days_order).reindex(columns=range(24), fill_value=0).fillna(0)
+            
+            hourly_dist = df.groupby('hour')[value_col].sum().reindex(range(24), fill_value=0).tolist()
+            daily_dist = df.groupby('day_name')[value_col].sum().reindex(days_order, fill_value=0).tolist()
+            
+            peak_hour = f"{np.argmax(hourly_dist)}:00"
+            peak_day = days_order[np.argmax(daily_dist)] if daily_dist else 'N/A'
         
         # Trend Analysis (Daily Sum)
         df['date_str'] = df['dt'].dt.strftime('%Y-%m-%d')

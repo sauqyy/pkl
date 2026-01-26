@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PanelRight } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { Heatmap } from "@/components/Heatmap"
@@ -79,6 +78,7 @@ export default function LoadAnalysis() {
         </div>
         <div className="flex items-center gap-2">
           <DateRangePicker />
+
         </div>
       </div>
 
