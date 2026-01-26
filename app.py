@@ -289,7 +289,34 @@ def response_time_dashboard():
 def get_summary_data():
     tier = request.args.get('tier', 'integration-service')
     bt = request.args.get('bt', '/smart-integration/users')
-    duration = 43200  # 30 days in minutes
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+    
+    # Default duration: 7 Days (10080 minutes)
+    duration = 10080 
+    
+    # Calculate duration from dates if provided
+    if start_date_str and end_date_str:
+        try:
+            # Handle JS ISO string (e.g., 2026-01-26T00:00:00.000Z)
+            # Python fromisoformat handles 'Z' in 3.11+ (User is 3.13)
+            # If not, naive replace works for simple UTC assumption
+            if start_date_str.endswith('Z'):
+                start_date_str = start_date_str.replace('Z', '+00:00')
+            if end_date_str.endswith('Z'):
+                end_date_str = end_date_str.replace('Z', '+00:00')
+                
+            s_dt = datetime.fromisoformat(start_date_str)
+            e_dt = datetime.fromisoformat(end_date_str)
+            
+            diff = e_dt - s_dt
+            calculated_mins = int(diff.total_seconds() / 60)
+            if calculated_mins > 0:
+                duration = calculated_mins
+        except Exception as e:
+            print(f"Error parsing dates in get_summary: {e}")
+            # Fallback to default
+            pass
     
     summary = {
         'response_time': 0,
@@ -302,15 +329,22 @@ def get_summary_data():
     try:
         url = get_bt_url(tier, bt, 'Response')
         if url:
-            data = fetch_from_appdynamics(url, 60)  # Last 60 mins for current
+            # Use calculated duration instead of hardcoded 60
+            data = fetch_from_appdynamics(url, duration)
             if data and isinstance(data, list) and len(data) > 0:
-                values = data[0].get('metricValues', [])
+                values = []
+                for item in data:
+                    if 'metricValues' in item:
+                        values.extend(item['metricValues'])
+                
                 if values:
+                    # Calculate average weighted by count if possible, or simple average of points
+                    # Simple average of points:
                     summary['response_time'] = round(sum(v['value'] for v in values) / len(values))
     except Exception as e:
         print(f"Summary Response Time Error: {e}")
 
-    # 2. Errors (Total Last 30 Days)
+    # 2. Errors (Total)
     try:
         url = get_bt_url(tier, bt, 'Error')
         if url:
@@ -325,7 +359,7 @@ def get_summary_data():
     except Exception as e:
         print(f"Summary Errors Error: {e}")
 
-    # 3. Load (Total Calls Last 30 Days)
+    # 3. Load (Total Calls)
     try:
         url = get_bt_url(tier, bt, 'Load')
         if url:
@@ -338,7 +372,7 @@ def get_summary_data():
     except Exception as e:
         print(f"Summary Load Error: {e}")
     
-    # 4. Slow Calls (Total Last 30 Days)
+    # 4. Slow Calls (Total)
     try:
         url = get_bt_url(tier, bt, 'Slow')
         if url:
@@ -774,7 +808,9 @@ def get_error_analysis():
         '30d': 30 * 24 * 60,
         '6m': 180 * 24 * 60,
         '1y': 365 * 24 * 60,
-        'all': 43200  # 30 days default for 'all'
+        'all': 43200,  # 30 days default for 'all'
+        '5m': 30, # Buffer to 30m
+        '15m': 30 # Buffer to 30m
     }
     duration = duration_map.get(timeframe, 43200)
     
@@ -959,7 +995,9 @@ def get_load_analysis():
         '30d': 30 * 24 * 60,
         '6m': 180 * 24 * 60,
         '1y': 365 * 24 * 60,
-        'all': 2628000  # 5 Years (approx) - effectively Lifetime
+        'all': 2628000,  # 5 Years (approx) - effectively Lifetime
+        '5m': 30, # Buffer to 30m
+        '15m': 30 # Buffer to 30m
     }
     duration = duration_map.get(timeframe, 43200)
     
@@ -1135,7 +1173,9 @@ def get_slow_calls_analysis():
         '30d': 30 * 24 * 60,
         '6m': 180 * 24 * 60,
         '1y': 365 * 24 * 60,
-        'all': 43200  # 30 days default for 'all'
+        'all': 43200,  # 30 days default for 'all'
+        '5m': 30, # Buffer to 30m
+        '15m': 30 # Buffer to 30m
     }
     duration = duration_map.get(timeframe, 43200)
     
@@ -1724,12 +1764,11 @@ def background_error_monitor():
                 
                 try:
                     # Use the new fetch_from_appdynamics helper
-                    # For background monitor, we always want the latest 5 minutes
-                    data = fetch_from_appdynamics(url, duration=5)
+                    # Fetch last 20 minutes to ensure we don't miss any data points between 5-min cycles
+                    data = fetch_from_appdynamics(url, duration=20)
                     checks_count += 1
                     
                     if not data: 
-                        # monitor_logger.debug(f"No data fetched for {bt}")
                         monitor_logger.warning(f"[Empty Response] BT: {bt} | Tier: {tier}")
                         continue
         
@@ -1741,37 +1780,62 @@ def background_error_monitor():
                     # Process timestamps
                     df['dt'] = pd.to_datetime(df['startTimeInMillis'], unit='ms') + pd.Timedelta(hours=7)
                     
-                    # We want the latest completed minute.
-                    latest_data_dt = df['dt'].max()
+                    # Sort by time ascending so we process oldest-to-newest
+                    df.sort_values('dt', inplace=True)
                     
                     # Unique key for this BT
                     bt_key = (tier, bt)
                     
-                    # If we haven't alerted for this timestamp + BT combo yet
-                    if last_alert_minutes.get(bt_key) != latest_data_dt:
-                        # Check sum of errors at this latest timestamp
-                        latest_val = df[df['dt'] == latest_data_dt]['value'].sum()
-                        if 'sum' in df.columns:
-                            latest_val = df[df['dt'] == latest_data_dt]['sum'].sum()
-                            
-                        monitor_logger.info(f"[Success] BT: {bt} | Time: {latest_data_dt.strftime('%H:%M')} | Errors: {int(latest_val)}")
-                            
-                        # monitor_logger.info(f"Checked {bt}: {int(latest_val)} errors at {latest_data_dt.strftime('%H:%M')}")
+                    # Get last alerted timestamp for this BT
+                    last_alert_ts = last_alert_minutes.get(bt_key)
+
+                    # Iterate through ALL 20 minutes of data points
+                    for _, row in df.iterrows():
+                        row_dt = row['dt']
                         
-                        if latest_val > 0:
-                            alert_msg = (
-                                f"⚠️ *Background Monitor Alert*\n"
-                                f"New Errors Detected: `{int(latest_val)}`\n"
-                                f"Time: `{latest_data_dt.strftime('%H:%M')}`\n"
-                                f"BT: `{bt}`\n"
-                                f"Tier: `{tier}`"
-                            )
-                            send_telegram_alert(alert_msg)
-                            monitor_logger.warning(f"ALERT SENT for {bt}: {int(latest_val)} errors")
+                        # Use 'sum' if available, else 'value'
+                        val_col = 'sum' if 'sum' in df.columns else 'value'
+                        val = row[val_col]
+                        
+                        # Logic:
+                        # 1. Must be an error (value > 0)
+                        # 2. Must be NEWER than the last alert we sent (to avoid duplicates)
+                        # 3. If last_alert_ts is None (first run), we might want to alert, 
+                        #    BUT to avoid startup spam of old errors, maybe we rely on the loop catching up?
+                        #    Let's alert if val > 0 and (never alerted OR new timestamp).
+                        
+                        if val > 0:
+                            if last_alert_ts is None or row_dt > last_alert_ts:
+                                # FOUND NEW ERROR
+                                monitor_logger.info(f"[Success] BT: {bt} | Time: {row_dt.strftime('%H:%M')} | Errors: {int(val)}")
+
+                                alert_msg = (
+                                    f"⚠️ *Background Monitor Alert*\n"
+                                    f"New Errors Detected: `{int(val)}`\n"
+                                    f"Time: `{row_dt.strftime('%H:%M')}`\n"
+                                    f"BT: `{bt}`\n"
+                                    f"Tier: `{tier}`"
+                                )
+                                send_telegram_alert(alert_msg)
+                                monitor_logger.warning(f"ALERT SENT for {bt}: {int(val)} errors at {row_dt.strftime('%H:%M')}")
+                                
+                                # Update last alert to THIS timestamp
+                                last_alert_minutes[bt_key] = row_dt
+                                last_alert_ts = row_dt # Update local var for next iteration loop
+                                alerts_count += 1
+                            else:
+                                # Already alerted this timestamp, skip
+                                pass
+                        else:
+                            # logging success for 0 errors? verify user request
+                            # User asked for "Success" proof. We can log the latest one outside loop?
+                            pass
                             
-                            last_alert_minutes[bt_key] = latest_data_dt
-                            alerts_count += 1
-                            
+                    # Log heartbeat for latest point (even if 0 errors) to show it's working
+                    latest_dt = df['dt'].max()
+                    latest_val = df[df['dt'] == latest_dt][val_col].sum()
+                    monitor_logger.info(f"[Heartbeat] {bt} checked up to {latest_dt.strftime('%H:%M')} (Latest Value: {int(latest_val)})")
+
                     # Small sleep to avoid hammering the API too fast in the loop
                     time.sleep(0.5) 
                     
