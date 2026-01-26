@@ -86,6 +86,8 @@ export default function ErrorAnalysis() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="1h">Last 1 Hour</SelectItem>
+              <SelectItem value="24h">Last 24 Hours</SelectItem>
               <SelectItem value="all">All Time (Lifetime)</SelectItem>
               <SelectItem value="1y">Last 1 Year</SelectItem>
               <SelectItem value="6m">Last 6 Months</SelectItem>
@@ -152,11 +154,11 @@ export default function ErrorAnalysis() {
                   <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                      <span>Time of Day (Hour)</span>
+                      <span>{timeframe === '1h' ? 'Minute' : 'Time of Day (Hour)'}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                      <span>Day of the Week</span>
+                      <span>{timeframe === '24h' ? 'Date' : (timeframe === '1h' ? 'Current' : 'Day of the Week')}</span>
                     </div>
                   </div>
                 </div>
