@@ -331,6 +331,7 @@
 2026-01-26 16:13:33,659 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
 2026-01-26 16:13:34,066 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
 2026-01-26 16:13:34,066 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+<<<<<<< Updated upstream
 2026-01-26 16:19:11,877 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
 2026-01-26 16:19:11,894 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
 2026-01-26 16:19:12,825 - WARNING - [Empty Response] BT: /smart-integration/users | Tier: integration-service
@@ -899,3 +900,1289 @@
 2026-01-26 16:52:35,056 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
 2026-01-26 16:52:35,557 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
 2026-01-26 16:52:35,559 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+=======
+2026-01-26 16:27:39,226 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-26 16:27:39,242 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-26 16:27:41,280 - WARNING - [Empty Response] BT: /smart-integration/users | Tier: integration-service
+2026-01-26 16:27:42,874 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-26 16:27:43,878 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-26 16:27:44,691 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-26 16:27:45,528 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-26 16:27:46,326 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-26 16:27:47,379 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-26 16:27:48,523 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-26 16:27:49,595 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-26 16:27:51,222 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:25 | Errors: 0
+2026-01-26 16:27:53,258 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-26 16:27:54,302 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-26 16:27:55,333 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-26 16:27:56,515 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-26 16:27:57,312 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-26 16:27:58,509 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-26 16:27:59,483 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-26 16:28:00,467 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-26 16:28:01,635 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-26 16:28:02,611 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-26 16:28:03,689 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-26 16:28:04,521 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-26 16:28:05,228 - INFO - [Success] BT: /smart-integration/error | Time: 16:26 | Errors: 0
+2026-01-26 16:28:06,492 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-26 16:28:07,235 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-26 16:28:08,459 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-26 16:28:09,430 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-26 16:28:10,526 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-26 16:28:11,754 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-26 16:28:12,817 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-26 16:28:12,830 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-26 16:33:12,858 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-26 16:33:13,958 - WARNING - [Empty Response] BT: /smart-integration/users | Tier: integration-service
+2026-01-26 16:33:15,014 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-26 16:33:15,841 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-26 16:33:16,546 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-26 16:33:17,320 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-26 16:33:18,107 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-26 16:33:18,946 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-26 16:33:19,789 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-26 16:33:20,694 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-26 16:33:21,495 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:31 | Errors: 0
+2026-01-26 16:33:22,839 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-26 16:33:23,582 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-26 16:33:24,559 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-26 16:33:25,594 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-26 16:33:26,403 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-26 16:33:27,208 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-26 16:33:28,029 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-26 16:33:28,820 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-26 16:33:29,516 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-26 16:33:30,340 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-26 16:33:31,138 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-26 16:33:31,942 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-26 16:33:32,852 - INFO - [Success] BT: /smart-integration/error | Time: 16:31 | Errors: 0
+2026-01-26 16:33:34,090 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-26 16:33:34,950 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-26 16:33:35,715 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-26 16:33:36,451 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-26 16:33:37,325 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-26 16:33:38,032 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-26 16:33:39,167 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-26 16:33:39,198 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-26 16:37:44,381 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-26 16:37:44,416 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-26 16:37:45,688 - WARNING - [Empty Response] BT: /smart-integration/users | Tier: integration-service
+2026-01-26 16:37:46,609 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-26 16:37:47,354 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-26 16:37:47,934 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-26 16:37:48,685 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-26 16:37:49,311 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-26 16:37:49,923 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-26 16:37:50,628 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-26 16:37:51,330 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-26 16:37:52,041 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:35 | Errors: 0
+2026-01-26 16:37:53,309 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-26 16:37:53,930 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-26 16:37:54,467 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-26 16:37:55,188 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-26 16:37:56,046 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-26 16:37:56,843 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-26 16:37:57,526 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-26 16:37:58,688 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-26 16:37:59,588 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-26 16:38:00,818 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-26 16:38:01,572 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-26 16:38:02,191 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-26 16:38:02,894 - INFO - [Success] BT: /smart-integration/error | Time: 16:36 | Errors: 0
+2026-01-26 16:38:04,062 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-26 16:38:04,735 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-26 16:38:05,349 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-26 16:38:06,066 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-26 16:38:06,906 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-26 16:38:07,703 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-26 16:38:08,601 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-26 16:38:08,611 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-26 16:43:08,643 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-26 16:43:09,435 - INFO - [Success] BT: /smart-integration/users | Time: 16:41 | Errors: 0
+2026-01-26 16:43:10,586 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-26 16:43:11,171 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-26 16:43:11,770 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-26 16:43:12,462 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-26 16:43:13,105 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-26 16:43:13,718 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-26 16:43:14,474 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-26 16:43:15,112 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-26 16:43:15,919 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:41 | Errors: 0
+2026-01-26 16:43:17,076 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-26 16:43:17,709 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-26 16:43:18,534 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-26 16:43:19,532 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-26 16:43:20,273 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-26 16:43:21,009 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-26 16:43:21,789 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-26 16:43:22,430 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-26 16:43:23,039 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-26 16:43:23,751 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-26 16:43:24,373 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-26 16:43:25,082 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-26 16:43:25,765 - INFO - [Success] BT: /smart-integration/error | Time: 16:41 | Errors: 0
+2026-01-26 16:43:27,325 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-26 16:43:28,386 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-26 16:43:29,097 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-26 16:43:29,671 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-26 16:43:30,360 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-26 16:43:31,106 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-26 16:43:31,829 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-26 16:43:31,835 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-26 16:48:31,855 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-26 16:48:32,504 - INFO - [Success] BT: /smart-integration/users | Time: 16:46 | Errors: 0
+2026-01-26 16:48:33,754 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-26 16:48:34,339 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-26 16:48:35,077 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-26 16:48:35,651 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-26 16:48:36,354 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-26 16:48:36,902 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-26 16:48:37,639 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-26 16:48:38,434 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-26 16:48:39,225 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:46 | Errors: 0
+2026-01-26 16:48:40,325 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-26 16:48:41,103 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-26 16:48:41,825 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-26 16:48:42,505 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-26 16:48:43,262 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-26 16:48:43,894 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-26 16:48:44,630 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-26 16:48:45,190 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-26 16:48:45,930 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-26 16:48:46,635 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-26 16:48:47,293 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-26 16:48:47,972 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-26 16:48:48,661 - INFO - [Success] BT: /smart-integration/error | Time: 16:46 | Errors: 0
+2026-01-26 16:48:49,906 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-26 16:48:50,516 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-26 16:48:51,130 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-26 16:48:51,872 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-26 16:48:52,681 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-26 16:48:53,291 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-26 16:48:53,976 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-26 16:48:53,978 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-26 16:53:54,005 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-26 16:53:54,626 - INFO - [Success] BT: /smart-integration/users | Time: 16:51 | Errors: 0
+2026-01-26 16:53:55,674 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-26 16:53:56,362 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-26 16:53:57,067 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-26 16:53:57,824 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-26 16:53:58,688 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-26 16:53:59,365 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-26 16:54:00,078 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-26 16:54:00,685 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-26 16:54:01,415 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:52 | Errors: 0
+2026-01-26 16:54:02,645 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-26 16:54:03,282 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-26 16:54:04,136 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-26 16:54:04,960 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-26 16:54:05,729 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-26 16:54:06,431 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-26 16:54:07,001 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-26 16:54:07,726 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-26 16:54:08,439 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-26 16:54:09,186 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-26 16:54:09,754 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-26 16:54:10,389 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-26 16:54:11,138 - INFO - [Success] BT: /smart-integration/error | Time: 16:52 | Errors: 0
+2026-01-26 16:54:12,214 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-26 16:54:12,758 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-26 16:54:13,434 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-26 16:54:14,224 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-26 16:54:14,787 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-26 16:54:15,425 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-26 16:54:16,277 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-26 16:54:16,308 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-26 16:59:16,330 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-26 16:59:17,041 - INFO - [Success] BT: /smart-integration/users | Time: 16:57 | Errors: 0
+2026-01-26 16:59:18,260 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-26 16:59:19,131 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-26 16:59:20,034 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-26 16:59:20,697 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-26 16:59:21,322 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-26 16:59:22,045 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-26 16:59:22,754 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-26 16:59:23,465 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-26 16:59:24,125 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:57 | Errors: 0
+2026-01-26 16:59:25,367 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-26 16:59:25,920 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-26 16:59:26,598 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-26 16:59:27,359 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-26 16:59:28,111 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-26 16:59:28,855 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-26 16:59:29,500 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-26 16:59:30,238 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-26 16:59:30,937 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-26 16:59:31,627 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-26 16:59:32,390 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-26 16:59:32,989 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-26 16:59:33,607 - INFO - [Success] BT: /smart-integration/error | Time: 16:57 | Errors: 0
+2026-01-26 16:59:34,719 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-26 16:59:35,341 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-26 16:59:35,952 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-26 16:59:36,732 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-26 16:59:38,753 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-26 16:59:39,363 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-26 16:59:40,246 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-26 16:59:40,263 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+>>>>>>> Stashed changes
+2026-01-27 15:33:12,911 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:33:13,316 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:33:13,727 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 15:33:21,738 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 15:33:21,807 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:33:22,552 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:33:22,770 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:33:22,945 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:33:23,123 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:33:23,367 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:33:23,503 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:33:23,698 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:33:23,932 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:33:24,138 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 15:33:28,279 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 15:33:28,349 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 15:33:33,079 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 15:33:33,127 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:33:33,915 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:33:34,249 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:33:34,591 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:33:34,840 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:33:35,008 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:33:35,114 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:33:35,289 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:33:35,394 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:33:35,576 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:33:35,748 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:33:36,025 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:33:36,129 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:33:36,259 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 15:33:41,257 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 15:33:41,274 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 15:33:44,473 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 15:33:44,506 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:33:45,201 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:33:45,219 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:33:45,236 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:33:45,301 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:33:45,319 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:33:45,336 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:33:45,479 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:33:45,516 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 15:38:45,580 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:38:45,594 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:38:46,102 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:38:46,106 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:38:46,112 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:38:46,117 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:38:46,124 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:38:46,128 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:38:46,133 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:38:46,136 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:38:46,148 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:38:46,652 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:38:46,655 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:38:46,658 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:38:46,662 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:38:46,666 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:38:46,670 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:38:46,674 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:38:46,677 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:38:46,681 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:38:46,684 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:38:46,690 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:38:46,694 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:38:46,704 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:38:47,207 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:38:47,210 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:38:47,215 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:38:47,218 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:38:47,221 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:38:47,226 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:38:47,231 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:38:47,231 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 15:43:47,239 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:43:47,246 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:43:47,751 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:43:47,755 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:43:47,759 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:43:47,763 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:43:47,767 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:43:47,770 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:43:47,775 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:43:47,779 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:43:47,788 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:43:48,291 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:43:48,295 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:43:48,298 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:43:48,307 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:43:48,310 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:43:48,314 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:43:48,317 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:43:48,321 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:43:48,325 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:43:48,327 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:43:48,331 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:43:48,334 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:43:48,345 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:43:48,848 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:43:48,862 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:43:48,871 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:43:48,880 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:43:48,895 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:43:48,903 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:43:48,909 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:43:48,910 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 15:48:48,943 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:48:48,953 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:48:49,458 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:48:49,465 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:48:49,469 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:48:49,477 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:48:49,482 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:48:49,490 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:48:49,498 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:48:49,502 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:48:49,513 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:48:50,018 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:48:50,028 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:48:50,031 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:48:50,039 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:48:50,043 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:48:50,047 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:48:50,051 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:48:50,058 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:48:50,063 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:48:50,067 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:48:50,075 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:48:50,078 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:48:50,088 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:48:50,593 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:48:50,595 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:48:50,598 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:48:50,604 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:48:50,607 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:48:50,612 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:48:50,614 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:48:50,617 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 15:49:09,000 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:49:09,027 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:49:09,035 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 15:49:10,937 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 15:49:10,984 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:49:11,567 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:49:11,579 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:49:11,596 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:49:11,612 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:49:11,617 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:49:11,626 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:49:11,632 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:49:11,640 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:49:11,651 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 15:49:14,334 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 15:49:14,343 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 15:49:17,329 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 15:49:17,424 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:49:18,274 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:49:18,394 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:49:18,471 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:49:18,508 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:49:18,526 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:49:18,541 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:49:18,546 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:49:18,564 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:49:18,591 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:49:18,596 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:49:18,612 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:49:18,629 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:49:18,647 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 15:49:22,107 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 15:49:22,207 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 15:49:25,674 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 15:49:25,705 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:49:26,221 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:49:26,238 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:49:26,241 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:49:26,267 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:49:26,273 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:49:26,288 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:49:26,299 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:49:26,302 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 15:51:59,745 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:51:59,760 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:52:00,835 - WARNING - [Empty Response] BT: /smart-integration/users | Tier: integration-service
+2026-01-27 15:52:01,317 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:52:01,767 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:52:02,246 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:52:02,704 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:52:03,130 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:52:03,576 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:52:04,000 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:52:04,475 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:52:04,935 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 15:52:05,385 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:52:05,823 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:52:06,246 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:52:06,677 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:52:07,090 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:52:07,577 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:52:08,028 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:52:08,440 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:52:08,893 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:52:09,336 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:52:09,790 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:52:10,205 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:52:10,611 - WARNING - [Empty Response] BT: /smart-integration/error | Tier: integration-service
+2026-01-27 15:52:11,077 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:52:11,603 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:52:12,009 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:52:12,430 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:52:12,897 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:52:13,323 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:52:13,790 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:52:13,791 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 15:52:32,699 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:52:32,717 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:52:32,728 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 15:52:35,106 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 15:52:35,141 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:52:35,675 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:52:35,687 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:52:35,695 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:52:35,704 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:52:35,711 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:52:35,720 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:52:35,729 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:52:35,747 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:52:35,789 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 15:52:38,282 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 15:52:38,286 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 15:52:41,054 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 15:52:41,057 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:52:41,570 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:52:41,574 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:52:41,585 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:52:41,590 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:52:41,600 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:52:41,604 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:52:41,619 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:52:41,624 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:52:41,638 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:52:41,650 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:52:41,655 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:52:41,664 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:52:41,674 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 15:52:43,470 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 15:52:43,472 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 15:52:45,614 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 15:52:45,616 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:52:46,119 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:52:46,123 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:52:46,128 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:52:46,132 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:52:46,135 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:52:46,138 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:52:46,145 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:52:46,146 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 15:53:52,463 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:53:52,482 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:53:52,493 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 15:53:54,372 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 15:53:54,385 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:53:54,894 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:53:54,897 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:53:54,900 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:53:54,902 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:53:54,911 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:53:54,914 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:53:54,917 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:53:54,921 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:53:54,931 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 15:53:57,135 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 15:53:57,142 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 15:53:58,968 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 15:53:58,972 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:53:59,476 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:53:59,478 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:53:59,482 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:53:59,491 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:53:59,494 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:53:59,496 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:53:59,504 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:53:59,507 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:53:59,510 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:53:59,514 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:53:59,521 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:53:59,524 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:53:59,532 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 15:54:01,481 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 15:54:01,486 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 15:54:03,397 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 15:54:03,419 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:54:03,927 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:54:03,934 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:54:03,937 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:54:03,942 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:54:03,946 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:54:03,956 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:54:03,960 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:54:03,961 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 15:54:32,996 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:54:33,009 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:54:33,022 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 15:54:34,935 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 15:54:34,939 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:54:35,444 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:54:35,447 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:54:35,453 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:54:35,461 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:54:35,464 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:54:35,468 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:54:35,472 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:54:35,479 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:54:35,487 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 15:54:37,335 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 15:54:37,338 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 15:54:39,325 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 15:54:39,329 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:54:39,832 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:54:39,834 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:54:39,842 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:54:39,848 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:54:39,851 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:54:39,858 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:54:39,861 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:54:39,864 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:54:39,869 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:54:39,876 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:54:39,880 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:54:39,884 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:54:39,896 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 15:54:41,647 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 15:54:41,648 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 15:54:43,425 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 15:54:43,428 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:54:43,940 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:54:43,945 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:54:43,949 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:54:43,957 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:54:43,961 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:54:43,965 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:54:43,974 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:54:43,975 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 15:55:05,929 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:55:05,952 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:55:05,973 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 15:55:08,323 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 15:55:08,326 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:55:08,829 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:55:08,838 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:55:08,843 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:55:08,846 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:55:08,856 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:55:08,860 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:55:08,868 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:55:08,875 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:55:08,888 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 15:55:11,119 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 15:55:11,120 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 15:55:12,898 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 15:55:12,903 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:55:13,407 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:55:13,410 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:55:13,416 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:55:13,419 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:55:13,426 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:55:13,433 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:55:13,438 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:55:13,443 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:55:13,451 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:55:13,455 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:55:13,459 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:55:13,465 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:55:13,472 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 15:55:15,230 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 15:55:15,255 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 15:55:16,962 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 15:55:16,973 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:55:17,480 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:55:17,484 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:55:17,487 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:55:17,492 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:55:17,499 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:55:17,502 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:55:17,505 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:55:17,507 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 15:56:08,823 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 15:56:08,833 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 15:56:08,853 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 15:56:11,779 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 15:56:11,790 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:56:12,293 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 15:56:12,295 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 15:56:12,298 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 15:56:12,305 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 15:56:12,308 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 15:56:12,320 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 15:56:12,332 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 15:56:12,347 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 15:56:12,362 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 15:56:14,743 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 15:56:14,745 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 15:56:16,776 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 15:56:16,781 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:56:17,286 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 15:56:17,288 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 15:56:17,290 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 15:56:17,293 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 15:56:17,299 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 15:56:17,305 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 15:56:17,307 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 15:56:17,315 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 15:56:17,319 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 15:56:17,322 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 15:56:17,325 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 15:56:17,333 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 15:56:17,339 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 15:56:19,107 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 15:56:19,108 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 15:56:20,847 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 15:56:20,850 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 15:56:21,577 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 15:56:21,722 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 15:56:21,919 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 15:56:22,044 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 15:56:22,054 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 15:56:22,067 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 15:56:22,188 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 15:56:22,200 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 16:01:22,228 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:01:22,246 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:01:22,758 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:01:22,774 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:01:22,778 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:01:22,793 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:01:22,810 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:01:22,826 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:01:22,837 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 16:01:22,845 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:01:22,867 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:01:23,371 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:01:23,377 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:01:23,388 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:01:23,398 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:01:23,401 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:01:23,409 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:01:23,418 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:01:23,422 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:01:23,425 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:01:23,433 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:01:23,440 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:01:23,445 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:01:23,459 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:01:23,968 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:01:23,974 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:01:23,990 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:01:24,005 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:01:24,011 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:01:24,024 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:01:24,041 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:01:24,057 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 16:06:01,966 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 16:06:01,980 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:06:01,997 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 16:06:03,804 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 16:06:03,807 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:06:04,326 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:06:04,344 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:06:04,418 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:06:04,501 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:06:04,558 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:06:04,664 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:06:04,759 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 16:06:04,856 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:06:05,017 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 16:06:06,889 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 16:06:06,890 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 16:06:08,538 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 16:06:08,551 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:06:09,086 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:06:09,089 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:06:09,099 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:06:09,103 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:06:09,107 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:06:09,115 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:06:09,120 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:06:09,125 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:06:09,143 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:06:09,157 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:06:09,167 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:06:09,170 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:06:09,181 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 16:06:10,898 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 16:06:10,900 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 16:06:12,808 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 16:06:12,812 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:06:13,316 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:06:13,320 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:06:13,323 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:06:13,329 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:06:13,332 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:06:13,335 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:06:13,337 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:06:13,343 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 16:11:13,370 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:11:13,401 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:11:13,926 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:11:13,947 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:11:13,954 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:11:13,969 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:11:13,973 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:11:13,992 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:11:13,999 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 16:11:14,006 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:11:14,023 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:11:14,544 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:11:14,571 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:11:14,586 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:11:14,592 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:11:14,600 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:11:14,605 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:11:14,610 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:11:14,630 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:11:14,660 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:11:14,688 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:11:14,732 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:11:14,738 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:11:14,754 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:11:15,272 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:11:15,274 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:11:15,277 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:11:15,283 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:11:15,287 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:11:15,290 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:11:15,292 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:11:15,298 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 16:16:15,315 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:16:15,330 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:16:15,997 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:16:16,233 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:16:16,255 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:16:16,268 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:16:16,275 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:16:16,281 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:16:16,387 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 16:16:16,391 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:16:16,407 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:16:16,924 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:16:16,930 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:16:16,939 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:16:16,945 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:16:16,962 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:16:16,974 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:16:16,978 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:16:16,990 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:16:16,996 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:16:17,003 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:16:17,009 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:16:17,012 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:16:17,024 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:16:17,528 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:16:17,536 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:16:17,541 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:16:17,547 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:16:17,552 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:16:17,556 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:16:17,560 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:16:17,562 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 16:18:08,904 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 16:18:08,925 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:18:08,951 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 16:18:12,352 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 16:18:12,391 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:18:13,068 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:18:13,090 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:18:13,124 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:18:13,140 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:18:13,155 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:18:13,173 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:18:13,182 - WARNING - [Empty Response] BT: /smart-integration/payment | Tier: integration-service
+2026-01-27 16:18:13,200 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:18:13,213 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:39 | Errors: 1
+2026-01-27 16:18:15,308 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:39
+2026-01-27 16:18:15,312 - INFO - [Success] BT: /smart-integration/dukcapli | Time: 16:42 | Errors: 1
+2026-01-27 16:18:17,345 - WARNING - ALERT SENT for /smart-integration/dukcapli: 1 errors at 16:42
+2026-01-27 16:18:17,348 - INFO - [Heartbeat] /smart-integration/dukcapli checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:18:17,854 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:18:17,862 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:18:17,866 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:18:17,869 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:18:17,876 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:18:17,883 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:18:17,886 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:18:17,893 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:18:17,901 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:18:17,908 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:18:17,911 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:18:17,916 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:18:17,927 - INFO - [Success] BT: /smart-integration/error | Time: 16:39 | Errors: 1
+2026-01-27 16:18:19,973 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:39
+2026-01-27 16:18:19,978 - INFO - [Success] BT: /smart-integration/error | Time: 16:42 | Errors: 1
+2026-01-27 16:18:22,017 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:42
+2026-01-27 16:18:22,025 - INFO - [Heartbeat] /smart-integration/error checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:18:22,617 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:18:22,732 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:18:22,824 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:18:22,932 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:18:23,023 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:18:23,032 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:18:23,066 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:18:23,074 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 16:20:08,172 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 16:20:08,199 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:20:08,214 - INFO - [Success] BT: /smart-integration/users | Time: 16:36 | Errors: 1
+2026-01-27 16:20:10,655 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:36
+2026-01-27 16:20:10,764 - INFO - [Heartbeat] /smart-integration/users checked up to 16:50 (Latest Value: 0)
+2026-01-27 16:20:12,431 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:20:12,827 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:20:13,210 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:20:13,789 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:20:14,226 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:20:14,693 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:20:15,179 - INFO - [Success] BT: /smart-integration/payment | Time: 16:01 | Errors: 3
+2026-01-27 16:20:17,773 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:01
+2026-01-27 16:20:17,828 - INFO - [Success] BT: /smart-integration/payment | Time: 16:02 | Errors: 1
+2026-01-27 16:20:22,169 - WARNING - ALERT SENT for /smart-integration/payment: 1 errors at 16:02
+2026-01-27 16:20:22,220 - INFO - [Success] BT: /smart-integration/payment | Time: 16:07 | Errors: 3
+2026-01-27 16:20:25,355 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:07
+2026-01-27 16:20:25,365 - INFO - [Success] BT: /smart-integration/payment | Time: 16:08 | Errors: 7
+2026-01-27 16:20:27,657 - WARNING - ALERT SENT for /smart-integration/payment: 7 errors at 16:08
+2026-01-27 16:20:27,669 - INFO - [Success] BT: /smart-integration/payment | Time: 16:15 | Errors: 3
+2026-01-27 16:20:30,628 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:15
+2026-01-27 16:20:30,729 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:20:31,978 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:20:32,428 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:20:32,834 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:20:33,457 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:20:34,126 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:20:34,812 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:20:35,320 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:20:35,714 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:20:36,101 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:20:36,484 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:20:37,102 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:20:37,577 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:20:37,986 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:20:38,456 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:20:38,843 - INFO - [Success] BT: /smart-integration/error | Time: 16:01 | Errors: 3
+2026-01-27 16:20:42,161 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:01
+2026-01-27 16:20:42,171 - INFO - [Success] BT: /smart-integration/error | Time: 16:02 | Errors: 1
+2026-01-27 16:20:45,105 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:02
+2026-01-27 16:20:45,121 - INFO - [Success] BT: /smart-integration/error | Time: 16:07 | Errors: 3
+2026-01-27 16:20:47,927 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:07
+2026-01-27 16:20:47,930 - INFO - [Success] BT: /smart-integration/error | Time: 16:08 | Errors: 7
+2026-01-27 16:20:50,962 - WARNING - ALERT SENT for /smart-integration/error: 7 errors at 16:08
+2026-01-27 16:20:51,099 - INFO - [Success] BT: /smart-integration/error | Time: 16:15 | Errors: 3
+2026-01-27 16:20:55,417 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:15
+2026-01-27 16:20:55,449 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:20:56,372 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:20:56,873 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:20:57,365 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:20:57,894 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:20:58,595 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:20:58,989 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:20:59,372 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:20:59,412 - INFO - Cycle Completed. Checked 30 BTs. Sent 11 Alerts. Waiting 5 minutes...
+2026-01-27 16:25:59,476 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:26:00,059 - INFO - [Success] BT: /smart-integration/users | Time: 16:05 | Errors: 1
+2026-01-27 16:26:02,358 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:05
+2026-01-27 16:26:02,361 - INFO - [Success] BT: /smart-integration/users | Time: 16:08 | Errors: 1
+2026-01-27 16:26:04,324 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:08
+2026-01-27 16:26:04,363 - INFO - [Success] BT: /smart-integration/users | Time: 16:21 | Errors: 1
+2026-01-27 16:26:06,638 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:21
+2026-01-27 16:26:06,643 - INFO - [Success] BT: /smart-integration/users | Time: 16:22 | Errors: 3
+2026-01-27 16:26:09,010 - WARNING - ALERT SENT for /smart-integration/users: 3 errors at 16:22
+2026-01-27 16:26:09,011 - INFO - [Success] BT: /smart-integration/users | Time: 16:23 | Errors: 2
+2026-01-27 16:26:11,679 - WARNING - ALERT SENT for /smart-integration/users: 2 errors at 16:23
+2026-01-27 16:26:11,692 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:26:12,254 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:26:12,352 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:26:12,453 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:26:12,503 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:26:12,559 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:26:12,605 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:26:12,687 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:26:13,206 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:26:13,230 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:26:13,249 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:26:13,270 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:26:13,297 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:26:13,324 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:26:13,353 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:26:13,401 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:26:13,438 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:26:13,467 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:26:13,491 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:26:13,519 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:26:13,548 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:26:13,574 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:26:13,608 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:26:14,132 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:26:14,154 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:26:14,171 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:26:14,190 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:26:14,213 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:26:14,233 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:26:14,254 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:26:14,255 - INFO - Cycle Completed. Checked 30 BTs. Sent 5 Alerts. Waiting 5 minutes...
+2026-01-27 16:31:14,270 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:31:14,305 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:31:14,807 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:31:14,810 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:31:14,812 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:31:14,821 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:31:14,824 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:31:14,828 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:31:14,843 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:31:15,351 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:31:15,355 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:31:15,357 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:31:15,362 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:31:15,373 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:31:15,377 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:31:15,387 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:31:15,391 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:31:15,393 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:31:15,404 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:31:15,406 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:31:15,409 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:31:15,412 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:31:15,427 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:31:15,443 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:31:15,949 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:31:15,953 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:31:15,956 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:31:15,970 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:31:15,976 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:31:15,987 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:31:16,006 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:31:16,007 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 16:35:23,427 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 16:35:23,447 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:35:23,478 - INFO - [Success] BT: /smart-integration/users | Time: 16:05 | Errors: 1
+2026-01-27 16:35:25,875 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:05
+2026-01-27 16:35:25,880 - INFO - [Success] BT: /smart-integration/users | Time: 16:08 | Errors: 1
+2026-01-27 16:35:28,027 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:08
+2026-01-27 16:35:28,029 - INFO - [Success] BT: /smart-integration/users | Time: 16:21 | Errors: 1
+2026-01-27 16:35:29,977 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:21
+2026-01-27 16:35:29,978 - INFO - [Success] BT: /smart-integration/users | Time: 16:22 | Errors: 3
+2026-01-27 16:35:32,245 - WARNING - ALERT SENT for /smart-integration/users: 3 errors at 16:22
+2026-01-27 16:35:32,248 - INFO - [Success] BT: /smart-integration/users | Time: 16:23 | Errors: 2
+2026-01-27 16:35:34,262 - WARNING - ALERT SENT for /smart-integration/users: 2 errors at 16:23
+2026-01-27 16:35:34,265 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:35:34,772 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:35:34,776 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:35:34,779 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:35:34,787 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:35:34,789 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:35:34,792 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:35:34,802 - INFO - [Success] BT: /smart-integration/payment | Time: 16:01 | Errors: 3
+2026-01-27 16:35:36,626 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:01
+2026-01-27 16:35:36,627 - INFO - [Success] BT: /smart-integration/payment | Time: 16:02 | Errors: 1
+2026-01-27 16:35:38,891 - WARNING - ALERT SENT for /smart-integration/payment: 1 errors at 16:02
+2026-01-27 16:35:38,892 - INFO - [Success] BT: /smart-integration/payment | Time: 16:07 | Errors: 3
+2026-01-27 16:35:41,104 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:07
+2026-01-27 16:35:41,157 - INFO - [Success] BT: /smart-integration/payment | Time: 16:08 | Errors: 7
+2026-01-27 16:35:43,686 - WARNING - ALERT SENT for /smart-integration/payment: 7 errors at 16:08
+2026-01-27 16:35:43,688 - INFO - [Success] BT: /smart-integration/payment | Time: 16:15 | Errors: 3
+2026-01-27 16:35:45,769 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:15
+2026-01-27 16:35:45,771 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:35:46,284 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:35:46,292 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:35:46,301 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:35:46,317 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:35:46,321 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:35:46,332 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:35:46,337 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:35:46,346 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:35:46,349 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:35:46,364 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:35:46,369 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:35:46,380 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:35:46,386 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:35:46,395 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:35:46,401 - INFO - [Success] BT: /smart-integration/error | Time: 16:01 | Errors: 3
+2026-01-27 16:35:48,919 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:01
+2026-01-27 16:35:48,920 - INFO - [Success] BT: /smart-integration/error | Time: 16:02 | Errors: 1
+2026-01-27 16:35:50,920 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:02
+2026-01-27 16:35:50,935 - INFO - [Success] BT: /smart-integration/error | Time: 16:07 | Errors: 3
+2026-01-27 16:35:52,882 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:07
+2026-01-27 16:35:52,949 - INFO - [Success] BT: /smart-integration/error | Time: 16:08 | Errors: 7
+2026-01-27 16:35:55,139 - WARNING - ALERT SENT for /smart-integration/error: 7 errors at 16:08
+2026-01-27 16:35:55,148 - INFO - [Success] BT: /smart-integration/error | Time: 16:15 | Errors: 3
+2026-01-27 16:35:57,560 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:15
+2026-01-27 16:35:57,563 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:35:58,071 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:35:58,074 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:35:58,077 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:35:58,086 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:35:58,089 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:35:58,092 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:35:58,095 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:35:58,096 - INFO - Cycle Completed. Checked 30 BTs. Sent 15 Alerts. Waiting 5 minutes...
+2026-01-27 16:40:23,783 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 16:40:23,829 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:40:23,854 - INFO - [Success] BT: /smart-integration/users | Time: 16:05 | Errors: 1
+2026-01-27 16:40:29,021 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:05
+2026-01-27 16:40:29,023 - INFO - [Success] BT: /smart-integration/users | Time: 16:08 | Errors: 1
+2026-01-27 16:40:31,138 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:08
+2026-01-27 16:40:31,149 - INFO - [Success] BT: /smart-integration/users | Time: 16:21 | Errors: 1
+2026-01-27 16:40:39,497 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:21
+2026-01-27 16:40:39,499 - INFO - [Success] BT: /smart-integration/users | Time: 16:22 | Errors: 3
+2026-01-27 16:40:42,443 - WARNING - ALERT SENT for /smart-integration/users: 3 errors at 16:22
+2026-01-27 16:40:42,444 - INFO - [Success] BT: /smart-integration/users | Time: 16:23 | Errors: 2
+2026-01-27 16:40:44,535 - WARNING - ALERT SENT for /smart-integration/users: 2 errors at 16:23
+2026-01-27 16:40:44,536 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:40:45,043 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:40:45,053 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:40:45,078 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:40:45,088 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:40:45,094 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:40:45,106 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:40:45,135 - INFO - [Success] BT: /smart-integration/payment | Time: 16:01 | Errors: 3
+2026-01-27 16:40:47,123 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:01
+2026-01-27 16:40:47,124 - INFO - [Success] BT: /smart-integration/payment | Time: 16:02 | Errors: 1
+2026-01-27 16:40:48,953 - WARNING - ALERT SENT for /smart-integration/payment: 1 errors at 16:02
+2026-01-27 16:40:48,955 - INFO - [Success] BT: /smart-integration/payment | Time: 16:07 | Errors: 3
+2026-01-27 16:40:50,666 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:07
+2026-01-27 16:40:50,668 - INFO - [Success] BT: /smart-integration/payment | Time: 16:08 | Errors: 7
+2026-01-27 16:40:52,550 - WARNING - ALERT SENT for /smart-integration/payment: 7 errors at 16:08
+2026-01-27 16:40:52,552 - INFO - [Success] BT: /smart-integration/payment | Time: 16:15 | Errors: 3
+2026-01-27 16:40:54,797 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:15
+2026-01-27 16:40:54,829 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:40:55,332 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:40:55,334 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:40:55,337 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:40:55,349 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:40:55,366 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:40:55,374 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:40:55,384 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:40:55,390 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:40:55,394 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:40:55,396 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:40:55,400 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:40:55,407 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:40:55,416 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:40:55,427 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:40:55,434 - INFO - [Success] BT: /smart-integration/error | Time: 16:01 | Errors: 3
+2026-01-27 16:40:57,431 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:01
+2026-01-27 16:40:57,432 - INFO - [Success] BT: /smart-integration/error | Time: 16:02 | Errors: 1
+2026-01-27 16:40:59,327 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:02
+2026-01-27 16:40:59,328 - INFO - [Success] BT: /smart-integration/error | Time: 16:07 | Errors: 3
+2026-01-27 16:41:01,496 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:07
+2026-01-27 16:41:01,496 - INFO - [Success] BT: /smart-integration/error | Time: 16:08 | Errors: 7
+2026-01-27 16:41:03,429 - WARNING - ALERT SENT for /smart-integration/error: 7 errors at 16:08
+2026-01-27 16:41:03,435 - INFO - [Success] BT: /smart-integration/error | Time: 16:15 | Errors: 3
+2026-01-27 16:41:05,188 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:15
+2026-01-27 16:41:05,194 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:41:05,826 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:41:06,078 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:41:06,167 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:41:06,170 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:41:06,175 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:41:06,178 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:41:06,186 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:41:06,186 - INFO - Cycle Completed. Checked 30 BTs. Sent 15 Alerts. Waiting 5 minutes...
+2026-01-27 16:43:42,823 - INFO - Background Error Monitor Started (Checking All BTs every 5 minutes)...
+2026-01-27 16:43:42,840 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:43:42,854 - INFO - [Success] BT: /smart-integration/users | Time: 16:05 | Errors: 1
+2026-01-27 16:43:44,830 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:05
+2026-01-27 16:43:44,832 - INFO - [Success] BT: /smart-integration/users | Time: 16:08 | Errors: 1
+2026-01-27 16:43:47,233 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:08
+2026-01-27 16:43:47,236 - INFO - [Success] BT: /smart-integration/users | Time: 16:21 | Errors: 1
+2026-01-27 16:43:49,011 - WARNING - ALERT SENT for /smart-integration/users: 1 errors at 16:21
+2026-01-27 16:43:49,012 - INFO - [Success] BT: /smart-integration/users | Time: 16:22 | Errors: 3
+2026-01-27 16:43:51,025 - WARNING - ALERT SENT for /smart-integration/users: 3 errors at 16:22
+2026-01-27 16:43:51,027 - INFO - [Success] BT: /smart-integration/users | Time: 16:23 | Errors: 2
+2026-01-27 16:43:53,006 - WARNING - ALERT SENT for /smart-integration/users: 2 errors at 16:23
+2026-01-27 16:43:53,009 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:43:53,513 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:43:53,528 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:43:53,532 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:43:53,566 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:43:53,644 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:43:53,665 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:43:53,697 - INFO - [Success] BT: /smart-integration/payment | Time: 16:01 | Errors: 3
+2026-01-27 16:43:55,667 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:01
+2026-01-27 16:43:55,673 - INFO - [Success] BT: /smart-integration/payment | Time: 16:02 | Errors: 1
+2026-01-27 16:43:57,479 - WARNING - ALERT SENT for /smart-integration/payment: 1 errors at 16:02
+2026-01-27 16:43:57,504 - INFO - [Success] BT: /smart-integration/payment | Time: 16:07 | Errors: 3
+2026-01-27 16:43:59,599 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:07
+2026-01-27 16:43:59,601 - INFO - [Success] BT: /smart-integration/payment | Time: 16:08 | Errors: 7
+2026-01-27 16:44:01,677 - WARNING - ALERT SENT for /smart-integration/payment: 7 errors at 16:08
+2026-01-27 16:44:01,678 - INFO - [Success] BT: /smart-integration/payment | Time: 16:15 | Errors: 3
+2026-01-27 16:44:03,425 - WARNING - ALERT SENT for /smart-integration/payment: 3 errors at 16:15
+2026-01-27 16:44:03,429 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:44:03,936 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:44:03,940 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:44:03,952 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:44:03,961 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:44:03,968 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:44:03,971 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:44:03,976 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:44:03,982 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:44:03,985 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:44:03,988 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:44:03,991 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:44:03,999 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:44:04,005 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:44:04,009 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:44:04,037 - INFO - [Success] BT: /smart-integration/error | Time: 16:01 | Errors: 3
+2026-01-27 16:44:06,030 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:01
+2026-01-27 16:44:06,032 - INFO - [Success] BT: /smart-integration/error | Time: 16:02 | Errors: 1
+2026-01-27 16:44:07,899 - WARNING - ALERT SENT for /smart-integration/error: 1 errors at 16:02
+2026-01-27 16:44:07,901 - INFO - [Success] BT: /smart-integration/error | Time: 16:07 | Errors: 3
+2026-01-27 16:44:09,816 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:07
+2026-01-27 16:44:09,817 - INFO - [Success] BT: /smart-integration/error | Time: 16:08 | Errors: 7
+2026-01-27 16:44:11,914 - WARNING - ALERT SENT for /smart-integration/error: 7 errors at 16:08
+2026-01-27 16:44:11,917 - INFO - [Success] BT: /smart-integration/error | Time: 16:15 | Errors: 3
+2026-01-27 16:44:13,747 - WARNING - ALERT SENT for /smart-integration/error: 3 errors at 16:15
+2026-01-27 16:44:13,749 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:44:14,255 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:44:14,258 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:44:14,260 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:44:14,267 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:44:14,280 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:44:14,285 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:44:14,291 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:44:14,292 - INFO - Cycle Completed. Checked 30 BTs. Sent 15 Alerts. Waiting 5 minutes...
+2026-01-27 16:49:14,305 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:49:14,322 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:49:14,835 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:49:14,838 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:49:14,849 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:49:14,856 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:49:14,865 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:49:14,879 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:49:14,897 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:49:15,403 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:49:15,415 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:49:15,432 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:49:15,465 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:49:15,482 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:49:15,572 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:49:15,586 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:49:15,601 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:49:15,612 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:49:15,618 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:49:15,632 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:49:15,643 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:49:15,649 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:49:15,652 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:49:15,679 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:49:16,186 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:49:16,197 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:49:16,265 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:49:16,287 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:49:16,310 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:49:16,316 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:49:16,732 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:49:16,796 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 16:54:16,805 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:54:16,817 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:54:17,322 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:54:17,324 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:54:17,326 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:54:17,332 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:54:17,335 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:54:17,338 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:54:17,348 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:54:17,882 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:54:17,886 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:54:17,889 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:54:17,892 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:54:17,899 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:54:17,902 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:54:17,905 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:54:17,907 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:54:17,930 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:54:17,934 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:54:17,937 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:54:17,940 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:54:17,943 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:54:17,952 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:54:17,965 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:54:18,469 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:54:18,471 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:54:18,474 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:54:18,480 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:54:18,482 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:54:18,486 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:54:18,488 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:54:18,489 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 16:59:18,504 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 16:59:18,514 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 16:59:19,078 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 16:59:19,111 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 16:59:19,124 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 16:59:19,134 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 16:59:19,138 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 16:59:19,143 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 16:59:19,159 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:59:19,667 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 16:59:19,672 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 16:59:19,709 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 16:59:19,761 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 16:59:19,774 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 16:59:19,805 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 16:59:19,811 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 16:59:19,853 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 16:59:19,969 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 16:59:20,206 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 16:59:20,359 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 16:59:20,404 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 16:59:20,428 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 16:59:20,492 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 16:59:20,557 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 16:59:21,074 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 16:59:21,080 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 16:59:21,089 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 16:59:21,095 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 16:59:21,102 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 16:59:21,109 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 16:59:21,119 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 16:59:21,121 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...
+2026-01-27 17:04:21,147 - INFO - Starting Monitor Cycle: Checking 30 Business Transactions...
+2026-01-27 17:04:21,188 - INFO - [Heartbeat] /smart-integration/users checked up to 16:24 (Latest Value: 0)
+2026-01-27 17:04:21,769 - WARNING - [Empty Response] BT: /smart-integration/si | Tier: integration-service
+2026-01-27 17:04:21,856 - WARNING - [Empty Response] BT: /smart-integration/smart2 | Tier: integration-service
+2026-01-27 17:04:21,877 - WARNING - [Empty Response] BT: /smart-integration/email | Tier: integration-service
+2026-01-27 17:04:21,899 - WARNING - [Empty Response] BT: /smart-integration/spaj | Tier: integration-service
+2026-01-27 17:04:21,909 - WARNING - [Empty Response] BT: /smart-integration/aws | Tier: integration-service
+2026-01-27 17:04:21,960 - WARNING - [Empty Response] BT: /smart-integration/application | Tier: integration-service
+2026-01-27 17:04:22,001 - INFO - [Heartbeat] /smart-integration/payment checked up to 16:18 (Latest Value: 0)
+2026-01-27 17:04:22,734 - WARNING - [Empty Response] BT: /smart-integration/agent | Tier: integration-service
+2026-01-27 17:04:22,896 - WARNING - [Empty Response] BT: /smart-integration/dukcapli | Tier: integration-service
+2026-01-27 17:04:23,035 - WARNING - [Empty Response] BT: /smart-integration/blacklist | Tier: integration-service
+2026-01-27 17:04:23,393 - WARNING - [Empty Response] BT: /smart-integration/doc | Tier: integration-service
+2026-01-27 17:04:23,455 - WARNING - [Empty Response] BT: /remote-selling-service/v1 | Tier: remote-selling-service-deployment
+2026-01-27 17:04:23,569 - WARNING - [Empty Response] BT: /smart-integration/phone | Tier: integration-service
+2026-01-27 17:04:23,871 - WARNING - [Empty Response] BT: /smart-integration/otp | Tier: integration-service
+2026-01-27 17:04:23,973 - WARNING - [Empty Response] BT: /smart-integration/ocr | Tier: integration-service
+2026-01-27 17:04:24,354 - WARNING - [Empty Response] BT: /smart-integration/seojk | Tier: integration-service
+2026-01-27 17:04:24,833 - WARNING - [Empty Response] BT: /dynamic-letter/api | Tier: dynamic-letter-deployment
+2026-01-27 17:04:24,893 - WARNING - [Empty Response] BT: /smart-payment/pay | Tier: payment-service
+2026-01-27 17:04:24,948 - WARNING - [Empty Response] BT: /validation-ph-service/api | Tier: validation-ph-service-deployment
+2026-01-27 17:04:25,027 - WARNING - [Empty Response] BT: /smart-integration/crossSelling | Tier: integration-service
+2026-01-27 17:04:25,200 - WARNING - [Empty Response] BT: /smart-payment/doku | Tier: payment-service
+2026-01-27 17:04:25,335 - INFO - [Heartbeat] /smart-integration/error checked up to 16:18 (Latest Value: 0)
+2026-01-27 17:04:26,161 - WARNING - [Empty Response] BT: /remote-selling-service/error | Tier: remote-selling-service-deployment
+2026-01-27 17:04:26,460 - WARNING - [Empty Response] BT: /otp-smart2/otp | Tier: otp-smart2-deployment
+2026-01-27 17:04:26,600 - WARNING - [Empty Response] BT: /smart-integration/RemoteSellingVideo | Tier: integration-service
+2026-01-27 17:04:26,768 - WARNING - [Empty Response] BT: /smart-integration/tts | Tier: integration-service
+2026-01-27 17:04:26,778 - WARNING - [Empty Response] BT: /smart-payment/payment | Tier: payment-service
+2026-01-27 17:04:26,790 - WARNING - [Empty Response] BT: /otp-smart2/apps | Tier: otp-smart2-deployment
+2026-01-27 17:04:26,809 - WARNING - [Empty Response] BT: /smart-payment/error | Tier: payment-service
+2026-01-27 17:04:26,811 - INFO - Cycle Completed. Checked 30 BTs. Sent 0 Alerts. Waiting 5 minutes...

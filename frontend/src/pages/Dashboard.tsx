@@ -13,7 +13,6 @@ import InfoTooltip from "@/components/InfoTooltip"
 
 export default function Dashboard() {
     const [data, setData] = useState<DashboardData | null>(null)
-    const [period, setPeriod] = useState("60")
     const { toggleSidebar } = useSidebar()
     const tooltipStyles = useChartTooltipStyles()
     const { dateRange } = useDateRange()
@@ -21,7 +20,7 @@ export default function Dashboard() {
     useEffect(() => {
         const load = async () => {
             try {
-                const d = await fetchDashboardData(Number(period), undefined, undefined, dateRange.from, dateRange.to)
+                const d = await fetchDashboardData(60, undefined, undefined, dateRange.from, dateRange.to)
                 setData(d)
             } catch (e) {
                 console.error(e)
@@ -30,7 +29,7 @@ export default function Dashboard() {
         load()
         const interval = setInterval(load, 30000)
         return () => clearInterval(interval)
-    }, [period, dateRange])
+    }, [dateRange])
 
     // Prepare Chart Data
     const lineData = data?.timeline.map(t => {
@@ -56,15 +55,6 @@ export default function Dashboard() {
     const min = data && data.raw_values.length > 0 ? Math.min(...data.raw_values) : 0;
 
     // Dynamic subtitle based on period
-    const getPeriodLabel = (minutes: string) => {
-        switch (minutes) {
-            case "15": return "15 minutes";
-            case "60": return "1 hour";
-            case "360": return "6 hours";
-            case "1440": return "24 hours";
-            default: return `${minutes} minutes`;
-        }
-    };
 
     return (
         <div className="space-y-6">
@@ -87,7 +77,7 @@ export default function Dashboard() {
                     <div className="h-6 w-px bg-border"></div>
                     <div>
                         <h1 className="text-lg font-semibold">Dashboard</h1>
-                        <p className="text-xs text-muted-foreground">Trend for the last {getPeriodLabel(period)}</p>
+                        <p className="text-xs text-muted-foreground">{dateRange.from && dateRange.to ? "Analysis for Selected Period" : "Real-time performance trend"}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -96,17 +86,6 @@ export default function Dashboard() {
                         <Input type="search" placeholder="Search for something..." className="pl-8 w-[250px] bg-card" />
                     </div>
                     <DateRangePicker />
-                    <Select value={period} onValueChange={setPeriod}>
-                        <SelectTrigger className="w-[180px] bg-card">
-                            <SelectValue placeholder="Select period" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="15">Last 15 Minutes</SelectItem>
-                            <SelectItem value="60">Last 1 Hour</SelectItem>
-                            <SelectItem value="360">Last 6 Hours</SelectItem>
-                            <SelectItem value="1440">Last 24 Hours</SelectItem>
-                        </SelectContent>
-                    </Select>
                 </div>
             </div>
 
@@ -145,7 +124,7 @@ export default function Dashboard() {
                         <Card className="col-span-2 bg-card">
                             <CardHeader>
                                 <CardTitle className="text-base font-semibold">Response Time Trend</CardTitle>
-                                <p className="text-xs text-muted-foreground mt-1">Trend for the last {getPeriodLabel(period)}</p>
+                                <p className="text-xs text-muted-foreground mt-1">Timeline of average responsiveness</p>
                             </CardHeader>
                             <CardContent>
                                 <div className="h-[300px] w-full">

@@ -9,6 +9,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 interface SlowCallsData {
@@ -33,7 +34,6 @@ interface SlowCallsData {
 
 export default function SlowCallsAnalysis() {
   const [data, setData] = useState<SlowCallsData | null>(null)
-  const [timeframe, setTimeframe] = useState("7d")
   const [metricType, setMetricType] = useState("slow")
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
@@ -43,7 +43,7 @@ export default function SlowCallsAnalysis() {
   const fetchAnalysis = async () => {
     try {
       const params = new URLSearchParams({
-        timeframe,
+        timeframe: dateRange.timeframe,
         type: metricType,
         tier: selectedTier,
         bt: selectedTransaction
@@ -64,7 +64,7 @@ export default function SlowCallsAnalysis() {
   useEffect(() => {
     setData(null) // Reset data to trigger loading state
     fetchAnalysis()
-  }, [timeframe, metricType, selectedTier, selectedTransaction, dateRange])
+  }, [metricType, selectedTier, selectedTransaction, dateRange])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
 
@@ -77,10 +77,6 @@ export default function SlowCallsAnalysis() {
     { name: 'Business Hours (8-18)', value: data.impact['Business Hours (8-18)'], color: '#ef4444' },
     { name: 'Off-Hours', value: data.impact['Off-Hours'], color: '#94a3b8' }
   ] : []
-
-  const subtitle = metricType === 'veryslow'
-    ? 'Historical Analysis of "Very Slow Calls"'
-    : 'Historical Analysis of "Slow Calls"'
 
   return (
     <div className="space-y-6">
@@ -99,10 +95,11 @@ export default function SlowCallsAnalysis() {
           <div className="h-6 w-px bg-border"></div>
           <div>
             <h1 className="text-lg font-semibold">Business Transaction - Slow</h1>
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
+            <p className="text-xs text-muted-foreground">{dateRange.from && dateRange.to ? "Selected Period" : `Historical Analysis (Default View)`}</p>
           </div>
         </div>
         <div className="flex gap-3">
+          <GlobalSearch />
           <DateRangePicker />
           <Select value={metricType} onValueChange={setMetricType}>
             <SelectTrigger className="w-[200px] bg-card">
@@ -111,23 +108,6 @@ export default function SlowCallsAnalysis() {
             <SelectContent>
               <SelectItem value="slow">Slow Calls</SelectItem>
               <SelectItem value="veryslow">Very Slow Calls</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={timeframe} onValueChange={setTimeframe}>
-            <SelectTrigger className="w-[200px] bg-card">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5m">Last 5 Minutes</SelectItem>
-              <SelectItem value="15m">Last 15 Minutes</SelectItem>
-              <SelectItem value="1h">Last 1 Hour</SelectItem>
-              <SelectItem value="6h">Last 6 Hours</SelectItem>
-              <SelectItem value="24h">Last 24 Hours</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="6m">Last 6 Months</SelectItem>
-              <SelectItem value="1y">Last 1 Year</SelectItem>
-              <SelectItem value="all">All Time (Lifetime)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -248,11 +228,11 @@ export default function SlowCallsAnalysis() {
                   <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                      <span>{['5m', '15m'].includes(timeframe) ? 'Minute' : (timeframe === '1h' ? 'Minute Index' : 'Time of Day (Hour)')}</span>
+                      <span>{['5m', '15m'].includes(dateRange.timeframe) ? 'Minute' : (dateRange.timeframe === '1h' ? 'Minute Index' : 'Time of Day (Hour)')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                      <span>{timeframe === '24h' ? 'Date' : (['5m', '15m', '1h'].includes(timeframe) ? 'Current' : 'Day of the Week')}</span>
+                      <span>{dateRange.timeframe === '24h' ? 'Date' : (['5m', '15m', '1h'].includes(dateRange.timeframe) ? 'Current' : 'Day of the Week')}</span>
                     </div>
                   </div>
                 </div>

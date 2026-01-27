@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Search, PanelRight } from "lucide-react"
+import { PanelRight } from "lucide-react"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { fetchDashboardData, DashboardData } from "@/lib/api"
 import { useSidebar } from "@/components/SidebarContext"
@@ -10,11 +8,11 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 export default function ResponseTime() {
     const [data, setData] = useState<DashboardData | null>(null)
-    const [period, setPeriod] = useState("10080")
     const { toggleSidebar } = useSidebar()
     const tooltipStyles = useChartTooltipStyles()
     const { selectedTier, selectedTransaction } = useBusinessTransaction()
@@ -23,7 +21,7 @@ export default function ResponseTime() {
     useEffect(() => {
         const load = async () => {
             try {
-                const d = await fetchDashboardData(Number(period), selectedTier, selectedTransaction, dateRange.from, dateRange.to)
+                const d = await fetchDashboardData(10080, selectedTier, selectedTransaction, dateRange.from, dateRange.to)
                 setData(d)
             } catch (e) {
                 console.error(e)
@@ -32,7 +30,7 @@ export default function ResponseTime() {
         load()
         const interval = setInterval(load, 30000)
         return () => clearInterval(interval)
-    }, [period, selectedTier, selectedTransaction, dateRange])
+    }, [selectedTier, selectedTransaction, dateRange])
 
     // Prepare Chart Data
     const lineData = data?.timeline.map(t => {
@@ -73,20 +71,6 @@ export default function ResponseTime() {
 
 
     // Dynamic subtitle based on period
-    const getPeriodLabel = (minutes: string) => {
-        switch (minutes) {
-            case "15": return "15 minutes";
-            case "60": return "1 hour";
-            case "360": return "6 hours";
-            case "1440": return "24 hours";
-            case "10080": return "7 days";
-            case "43200": return "30 days";
-            case "262800": return "6 months";
-            case "525600": return "1 year";
-            case "2628000": return "All Time";
-            default: return `${minutes} minutes`;
-        }
-    };
 
     return (
         <div className="space-y-6">
@@ -109,32 +93,12 @@ export default function ResponseTime() {
                     <div className="h-6 w-px bg-border"></div>
                     <div>
                         <h1 className="text-lg font-semibold">Business Transaction - Response</h1>
-                        <p className="text-xs text-muted-foreground">Trend for the last {getPeriodLabel(period)}</p>
+                        <p className="text-xs text-muted-foreground">{dateRange.from && dateRange.to ? "Analysis for Selected Period" : "Real-time performance trend"}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input type="search" placeholder="Search for something..." className="pl-8 w-[250px] bg-card" />
-                    </div>
+                    <GlobalSearch />
                     <DateRangePicker />
-                    <Select value={period} onValueChange={setPeriod}>
-                        <SelectTrigger className="w-[180px] bg-card">
-                            <SelectValue placeholder="Select period" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="5">Last 5 Minutes</SelectItem>
-                            <SelectItem value="15">Last 15 Minutes</SelectItem>
-                            <SelectItem value="60">Last 1 Hour</SelectItem>
-                            <SelectItem value="360">Last 6 Hours</SelectItem>
-                            <SelectItem value="1440">Last 24 Hours</SelectItem>
-                            <SelectItem value="10080">Last 7 Days</SelectItem>
-                            <SelectItem value="43200">Last 30 Days</SelectItem>
-                            <SelectItem value="262800">Last 6 Months</SelectItem>
-                            <SelectItem value="525600">Last 1 Year</SelectItem>
-                            <SelectItem value="2628000">All Time (Lifetime)</SelectItem>
-                        </SelectContent>
-                    </Select>
                 </div>
             </div>
 
@@ -194,7 +158,7 @@ export default function ResponseTime() {
                         <Card className="col-span-2 bg-card">
                             <CardHeader>
                                 <CardTitle className="text-base font-semibold">Response Time Trend</CardTitle>
-                                <p className="text-xs text-muted-foreground mt-1">Trend for the last {getPeriodLabel(period)}</p>
+                                <p className="text-xs text-muted-foreground mt-1">Timeline of average responsiveness</p>
                             </CardHeader>
                             <CardContent>
                                 <div className="h-[300px] w-full">

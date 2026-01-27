@@ -163,7 +163,7 @@ export default function BusinessTransactions() {
           <div className="h-6 w-px bg-border"></div>
           <div>
             <h1 className="text-lg font-semibold">Business Transaction - Analysis</h1>
-            <p className="text-xs text-muted-foreground">Load, Response Time, Errors & Slow Calls</p>
+            <p className="text-xs text-muted-foreground">Historical Snapshot from Excel Report</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

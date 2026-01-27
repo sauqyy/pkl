@@ -91,8 +91,26 @@ export default function Forecasting() {
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const activeFetches = useRef<Set<string>>(new Set())
+  const isMounted = useRef(true)
+
+  const [selectedModel, setSelectedModel] = useState<string>('LSTM');
+
+  useEffect(() => {
+    isMounted.current = true
+    return () => { isMounted.current = false }
+  }, [])
+
+  // Refetch when model changes
+  useEffect(() => {
+    fetchAllForecasts(true)
+  }, [selectedModel])
 
   const fetchForecast = async (metric: MetricType, showLoading = true) => {
+    // Note: Removed activeFetches check for simplicity when switching models or re-add careful logic
+    if (activeFetches.current.has(metric)) return
+    activeFetches.current.add(metric)
+    
     try {
       if (showLoading) {
         setForecasts(prev => ({
@@ -101,38 +119,48 @@ export default function Forecasting() {
         }))
       }
       
-      const params = new URLSearchParams({ metric });
+      const params = new URLSearchParams({ metric, model: selectedModel });
       
       const response = await fetch(`/api/forecast?${params}`)
       const result = await response.json()
 
       if (result.status === 'training') {
-        setForecasts(prev => ({
-          ...prev,
-          [metric]: { data: null, loading: true, error: result.message || 'Training model...' }
-        }))
-        // Poll this specific metric again in 5 seconds
-        setTimeout(() => fetchForecast(metric, false), 5000)
+        if (isMounted.current) {
+          setForecasts(prev => ({
+            ...prev,
+            [metric]: { data: null, loading: true, error: result.message || 'Training model...' }
+          }))
+          // Poll this specific metric again in 5 seconds
+          setTimeout(() => {
+            if (isMounted.current) fetchForecast(metric, false)
+          }, 5000)
+        }
         return
       }
 
-      if (result.error) {
-        setForecasts(prev => ({
-          ...prev,
-          [metric]: { data: null, loading: false, error: result.error }
-        }))
-      } else {
-        setForecasts(prev => ({
-          ...prev,
-          [metric]: { data: result, loading: false, error: null }
-        }))
+      if (isMounted.current) {
+        if (result.error) {
+          setForecasts(prev => ({
+            ...prev,
+            [metric]: { data: null, loading: false, error: result.error }
+          }))
+        } else {
+          setForecasts(prev => ({
+            ...prev,
+            [metric]: { data: result, loading: false, error: null }
+          }))
+        }
       }
     } catch (e) {
       console.error(e)
-      setForecasts(prev => ({
-        ...prev,
-        [metric]: { data: null, loading: false, error: 'Failed to fetch forecast' }
-      }))
+      if (isMounted.current) {
+        setForecasts(prev => ({
+          ...prev,
+          [metric]: { data: null, loading: false, error: 'Failed to fetch forecast' }
+        }))
+      }
+    } finally {
+      activeFetches.current.delete(metric)
     }
   }
 
@@ -226,8 +254,20 @@ export default function Forecasting() {
           </button>
           <div className="h-6 w-px bg-border"></div>
           <div>
-            <h1 className="text-lg font-semibold">AI Performance Forecast</h1>
-            <p className="text-xs text-muted-foreground">LSTM Model • Auto-refreshes every 60s • Last 24h Actual vs Predicted + Next 24h Forecast</p>
+            <h1 className="text-lg font-semibold">Performance Forecast</h1>
+          </div>
+          
+          {/* Model Selector */}
+          <div className="ml-4">
+            <select 
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="h-8 px-2 text-xs rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+                <option value="LSTM">LSTM (Standard)</option>
+                <option value="ANN">ANN Autoencoder (Anomaly)</option>
+                <option value="GRU">GRU Autoencoder (Anomaly)</option>
+            </select>
           </div>
         </div>
 
@@ -399,42 +439,7 @@ export default function Forecasting() {
         })}
       </div>
 
-      {/* Accuracy Summary */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-        {METRICS.map(metric => {
-          const config = METRIC_CONFIG[metric]
-          const forecast = forecasts[metric]
-          const accuracy = getAccuracy(forecast.data)
-          const mae = forecast.data?.accuracy?.mae
-          const Icon = config.icon
 
-          return (
-            <Card key={`stat-${metric}`} className="bg-card">
-              <CardContent className="pt-4">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="p-2 rounded-lg"
-                    style={{ backgroundColor: `${config.color}20` }}
-                  >
-                    <Icon className="h-5 w-5" style={{ color: config.color }} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs text-muted-foreground">{config.label}</p>
-                    <p className="text-xl font-bold" style={{ color: config.color }}>
-                      {accuracy}
-                    </p>
-                    {mae !== undefined && (
-                      <p className="text-[10px] text-muted-foreground">
-                        MAE: {mae.toFixed(1)} {config.unit}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
     </div>
   )
 }

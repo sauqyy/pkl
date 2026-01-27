@@ -4,6 +4,7 @@ import { subDays, startOfDay, endOfDay } from "date-fns"
 export interface DateRange {
   from: Date | undefined
   to: Date | undefined
+  timeframe: string // Added to carry context of the selection (e.g., '5m', '1h', 'custom')
 }
 
 interface DateRangeContextType {
@@ -14,10 +15,11 @@ interface DateRangeContextType {
 
 const DateRangeContext = createContext<DateRangeContextType | undefined>(undefined)
 
-// Default: last 30 days
+// Default: last 7 days (updated from 30 to be more aligned with common usage)
 const getDefaultRange = (): DateRange => ({
-  from: startOfDay(subDays(new Date(), 30)),
-  to: endOfDay(new Date())
+  from: startOfDay(subDays(new Date(), 7)),
+  to: endOfDay(new Date()),
+  timeframe: '7d'
 })
 
 export function DateRangeProvider({ children }: { children: ReactNode }) {

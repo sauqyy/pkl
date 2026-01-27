@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { PanelRight } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { Heatmap } from "@/components/Heatmap"
@@ -9,6 +8,7 @@ import { useChartTooltipStyles } from "@/hooks/useChartTooltipStyles"
 import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useDateRange } from "@/components/DateRangeContext"
+import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 interface LoadAnalysisData {
@@ -25,7 +25,6 @@ interface LoadAnalysisData {
 
 export default function LoadAnalysis() {
   const [data, setData] = useState<LoadAnalysisData | null>(null)
-  const [timeframe, setTimeframe] = useState("7d")
   const { toggleSidebar } = useSidebar()
   const tooltipStyles = useChartTooltipStyles()
   const { selectedTier, selectedTransaction } = useBusinessTransaction()
@@ -34,7 +33,7 @@ export default function LoadAnalysis() {
   const fetchAnalysis = async () => {
     try {
       const params = new URLSearchParams({
-        timeframe,
+        timeframe: dateRange.timeframe,
         tier: selectedTier,
         bt: selectedTransaction
       })
@@ -54,7 +53,7 @@ export default function LoadAnalysis() {
   useEffect(() => {
     setData(null) // Reset data to trigger loading state
     fetchAnalysis()
-  }, [timeframe, selectedTier, selectedTransaction, dateRange])
+  }, [selectedTier, selectedTransaction, dateRange])
 
   const hourlyData = data?.hourly.map((count, i) => ({ hour: `${i}:00`, count })) || []
   const dailyData = data?.daily.map((count, i) => ({ day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i], count })) || []
@@ -76,28 +75,12 @@ export default function LoadAnalysis() {
           <div className="h-6 w-px bg-border"></div>
           <div>
             <h1 className="text-lg font-semibold">Business Transaction - Load</h1>
-            <p className="text-xs text-muted-foreground">Historical Analysis of "Calls per Minute" (Last 3 Years)</p>
+            <p className="text-xs text-muted-foreground">{dateRange.from && dateRange.to ? "Selected Period" : "Historical Analysis (Default View)"}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <GlobalSearch />
           <DateRangePicker />
-          <Select value={timeframe} onValueChange={setTimeframe}>
-            <SelectTrigger className="w-[200px] bg-card">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5m">Last 5 Minutes</SelectItem>
-              <SelectItem value="15m">Last 15 Minutes</SelectItem>
-              <SelectItem value="1h">Last 1 Hour</SelectItem>
-              <SelectItem value="6h">Last 6 Hours</SelectItem>
-              <SelectItem value="24h">Last 24 Hours</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="6m">Last 6 Months</SelectItem>
-              <SelectItem value="1y">Last 1 Year</SelectItem>
-              <SelectItem value="all">All Time (Lifetime)</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
 
@@ -156,11 +139,11 @@ export default function LoadAnalysis() {
                   <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">X</span>
-                      <span>{['5m', '15m'].includes(timeframe) ? 'Minute' : (timeframe === '1h' ? 'Minute Index' : 'Time of Day (Hour)')}</span>
+                      <span>{['5m', '15m'].includes(dateRange.timeframe) ? 'Minute' : (dateRange.timeframe === '1h' ? 'Minute Index' : 'Time of Day (Hour)')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="flex items-center justify-center w-5 h-5 rounded-md bg-muted font-mono text-xs font-bold text-foreground">Y</span>
-                      <span>{timeframe === '24h' ? 'Date' : (['5m', '15m', '1h'].includes(timeframe) ? 'Current' : 'Day of the Week')}</span>
+                      <span>{dateRange.timeframe === '24h' ? 'Date' : (['5m', '15m', '1h'].includes(dateRange.timeframe) ? 'Current' : 'Day of the Week')}</span>
                     </div>
                   </div>
                 </div>

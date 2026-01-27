@@ -204,8 +204,8 @@ export default function DatabaseAnalysis() {
                     </button>
                     <div className="h-6 w-px bg-border"></div>
                     <div>
-                        <h1 className="text-lg font-semibold">Database Analysis</h1>
-                        <p className="text-xs text-muted-foreground">Real-time Overview & Query Performance</p>
+                        <h1 className="text-lg font-semibold">Database Performance Analysis</h1>
+                        <p className="text-xs text-muted-foreground">{dateRange.from && dateRange.to ? "Deep dive for Selected Period" : "Real-time query and hardware health"}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">

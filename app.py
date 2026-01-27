@@ -99,6 +99,40 @@ def load_bt_csv():
         print(f"Error loading BT CSV: {e}")
         return pd.DataFrame()
 
+def get_time_params(default_duration=60):
+    """
+    Utility to get duration and start/end timestamps from request args.
+    Used consistently across all API endpoints.
+    """
+    duration = request.args.get('duration', default=default_duration, type=int)
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    start_time_ms = None
+    end_time_ms = None
+
+    if start_date_str and end_date_str:
+        try:
+            if start_date_str.endswith('Z'):
+                start_date_str = start_date_str.replace('Z', '+00:00')
+            if end_date_str.endswith('Z'):
+                end_date_str = end_date_str.replace('Z', '+00:00')
+                
+            s_dt = datetime.fromisoformat(start_date_str)
+            e_dt = datetime.fromisoformat(end_date_str)
+            
+            start_time_ms = int(s_dt.timestamp() * 1000)
+            end_time_ms = int(e_dt.timestamp() * 1000)
+            
+            diff = e_dt - s_dt
+            calculated_mins = int(diff.total_seconds() / 60)
+            if calculated_mins > 0:
+                duration = calculated_mins
+        except Exception as e:
+            print(f"Error parsing dates: {e}")
+            
+    return duration, start_time_ms, end_time_ms
+
 def get_bt_url(tier: str, bt: str, metric_type: str) -> str:
     """
     Look up the AppDynamics URL for a specific tier, business transaction, and metric type.
@@ -122,21 +156,49 @@ def get_bt_url(tier: str, bt: str, metric_type: str) -> str:
     
     return matches.iloc[0]['URL']
 
-def fetch_from_appdynamics(url: str, duration: int = None, allow_rollup: bool = False) -> list:
+def fetch_from_appdynamics(url: str, duration: int = None, start_time: int = None, end_time: int = None, allow_rollup: bool = False) -> list:
     """
     Fetch data from an AppDynamics URL.
-    Optionally override the duration-in-mins parameter.
+    Optionally override the duration-in-mins parameter OR use absolute start/end times (ms).
     Allow rollup for large datasets to improve performance.
     """
     if not url:
         return []
     
-    # Override duration if specified
-    if duration:
-        # Parse and update duration in URL
+    # Override time range if specified
+    if start_time and end_time:
+        # Use absolute time range
+        if 'time-range-type=' in url:
+            url = re.sub(r'time-range-type=[^&]+', 'time-range-type=BETWEEN_TIMES', url)
+        else:
+            url += '&time-range-type=BETWEEN_TIMES'
+            
+        if 'start-time=' in url:
+            url = re.sub(r'start-time=\d+', f'start-time={start_time}', url)
+        else:
+            url += f'&start-time={start_time}'
+            
+        if 'end-time=' in url:
+            url = re.sub(r'end-time=\d+', f'end-time={end_time}', url)
+        else:
+            url += f'&end-time={end_time}'
+            
+        # Remove duration if it exists to avoid confusion
+        url = re.sub(r'&duration-in-mins=\d+', '', url)
+        url = re.sub(r'duration-in-mins=\d+&?', '', url)
+
+    elif duration:
+        # Parse and update duration in URL (relative time)
         if 'duration-in-mins=' in url:
-            import re
             url = re.sub(r'duration-in-mins=\d+', f'duration-in-mins={duration}', url)
+        else:
+            url += f'&duration-in-mins={duration}'
+        
+        # Ensure it's BEFORE_NOW if duration is given without start/end
+        if 'time-range-type=' in url:
+            url = re.sub(r'time-range-type=[^&]+', 'time-range-type=BEFORE_NOW', url)
+    
+    print(f"DEBUG FETCH URL (Start={start_time}, End={end_time}, Duration={duration}): {url}")
     
     # Add output=JSON
     if 'output=JSON' not in url:
@@ -146,13 +208,6 @@ def fetch_from_appdynamics(url: str, duration: int = None, allow_rollup: bool = 
     if not allow_rollup:
         if 'rollup=false' not in url:
             url += '&rollup=false'
-    else:
-        # If allowing rollup, we don't enforce rollup=false.
-        # We can explicitly set rollup=true if needed, or rely on default.
-        # AppDynamics defaults to rolling up large durations.
-        pass
-    
-    print(f"DEBUG FETCH URL (Override={duration}, Rollup={allow_rollup}): {url}")
     
     # Caching Logic
     CACHE_DIR = 'cache'
@@ -165,6 +220,7 @@ def fetch_from_appdynamics(url: str, duration: int = None, allow_rollup: bool = 
     raw_data = None
     
     # Check cache
+    # Check cache
     if os.path.exists(cache_file):
         file_age = time.time() - os.path.getmtime(cache_file)
         
@@ -174,7 +230,7 @@ def fetch_from_appdynamics(url: str, duration: int = None, allow_rollup: bool = 
             ttl = 60 # 1 minute for short windows
             
         if file_age < ttl:
-            print(f"Loading from cache: {cache_file}")
+            # print(f"Loading from cache: {cache_file}")
             try:
                 with open(cache_file, 'r') as f:
                     raw_data = json.load(f)
@@ -183,6 +239,7 @@ def fetch_from_appdynamics(url: str, duration: int = None, allow_rollup: bool = 
 
     # Fetch from Network if no cache
     if raw_data is None:
+        # print(f"Fetching from AppDynamics: {url[:150]}...")
         req = urllib.request.Request(url)
         req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
         
@@ -202,6 +259,7 @@ def fetch_from_appdynamics(url: str, duration: int = None, allow_rollup: bool = 
             print(error_msg)
             # send_telegram_alert(error_msg) 
             return []
+
 
     # Flatten Data (Source of Truth for callers)
     # Callers expect a list of 'metricValues' objects, not the raw API response.
@@ -289,34 +347,9 @@ def response_time_dashboard():
 def get_summary_data():
     tier = request.args.get('tier', 'integration-service')
     bt = request.args.get('bt', '/smart-integration/users')
-    start_date_str = request.args.get('start_date')
-    end_date_str = request.args.get('end_date')
     
-    # Default duration: 7 Days (10080 minutes)
-    duration = 10080 
-    
-    # Calculate duration from dates if provided
-    if start_date_str and end_date_str:
-        try:
-            # Handle JS ISO string (e.g., 2026-01-26T00:00:00.000Z)
-            # Python fromisoformat handles 'Z' in 3.11+ (User is 3.13)
-            # If not, naive replace works for simple UTC assumption
-            if start_date_str.endswith('Z'):
-                start_date_str = start_date_str.replace('Z', '+00:00')
-            if end_date_str.endswith('Z'):
-                end_date_str = end_date_str.replace('Z', '+00:00')
-                
-            s_dt = datetime.fromisoformat(start_date_str)
-            e_dt = datetime.fromisoformat(end_date_str)
-            
-            diff = e_dt - s_dt
-            calculated_mins = int(diff.total_seconds() / 60)
-            if calculated_mins > 0:
-                duration = calculated_mins
-        except Exception as e:
-            print(f"Error parsing dates in get_summary: {e}")
-            # Fallback to default
-            pass
+    # Get time params using 7 days default for summary
+    duration, start_time_ms, end_time_ms = get_time_params(default_duration=10080)
     
     summary = {
         'response_time': 0,
@@ -329,18 +362,10 @@ def get_summary_data():
     try:
         url = get_bt_url(tier, bt, 'Response')
         if url:
-            # Use calculated duration instead of hardcoded 60
-            data = fetch_from_appdynamics(url, duration)
+            data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
             if data and isinstance(data, list) and len(data) > 0:
-                values = []
-                for item in data:
-                    if 'metricValues' in item:
-                        values.extend(item['metricValues'])
-                
-                if values:
-                    # Calculate average weighted by count if possible, or simple average of points
-                    # Simple average of points:
-                    summary['response_time'] = round(sum(v['value'] for v in values) / len(values))
+                # data is already flattened list of metric values
+                summary['response_time'] = round(sum(v.get('value', 0) for v in data) / len(data))
     except Exception as e:
         print(f"Summary Response Time Error: {e}")
 
@@ -348,13 +373,9 @@ def get_summary_data():
     try:
         url = get_bt_url(tier, bt, 'Error')
         if url:
-            data = fetch_from_appdynamics(url, duration)
+            data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
             if data and isinstance(data, list):
-                total = 0
-                for item in data:
-                    if 'metricValues' in item:
-                        for v in item['metricValues']:
-                            total += v.get('sum', v.get('value', 0))
+                total = sum(item.get('sum', item.get('value', 0)) for item in data)
                 summary['errors'] = int(total)
     except Exception as e:
         print(f"Summary Errors Error: {e}")
@@ -363,11 +384,9 @@ def get_summary_data():
     try:
         url = get_bt_url(tier, bt, 'Load')
         if url:
-            data = fetch_from_appdynamics(url, duration)
+            data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
             if data and isinstance(data, list):
-                total = 0
-                for item in data:
-                    total += item.get('sum', item.get('value', 0)) # Item is already flattened value
+                total = sum(item.get('sum', item.get('value', 0)) for item in data)
                 summary['load'] = int(total)
     except Exception as e:
         print(f"Summary Load Error: {e}")
@@ -376,11 +395,9 @@ def get_summary_data():
     try:
         url = get_bt_url(tier, bt, 'Slow')
         if url:
-            data = fetch_from_appdynamics(url, duration)
+            data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
             if data and isinstance(data, list):
-                total = 0
-                for item in data:
-                     total += item.get('sum', item.get('value', 0)) # Item is already flattened value
+                total = sum(item.get('sum', item.get('value', 0)) for item in data)
                 summary['slow_calls'] = int(total)
     except Exception as e:
         print(f"Summary Slow Calls Error: {e}")
@@ -393,17 +410,19 @@ def forecasting():
 
 @app.route('/api/data')
 def get_data():
-    duration = request.args.get('duration', default=60, type=int)
     tier = request.args.get('tier', 'integration-service')
     bt = request.args.get('bt', '/smart-integration/users')
     
+    # Get time params using 60 mins default
+    duration, start_time_ms, end_time_ms = get_time_params(default_duration=60)
+
     # Get URL and fetch data
     url = get_bt_url(tier, bt, 'Response')
     if not url:
         # Fallback to old method if no URL found
         raw_data = load_data(duration)
     else:
-        raw_data = fetch_from_appdynamics(url, duration)
+        raw_data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
     
     # Data structures for visualization
     response_times = []
@@ -425,7 +444,8 @@ def get_data():
                  time_str = dt_object.strftime("%H:%M")
                  
                  timeline.append({
-                     'timestamp': time_str,
+                     'timestamp': ts,  # Return raw timestamp in ms
+                     'time_str': time_str,
                      'value': ms,
                      'full_date': dt_object.isoformat()
                  })
@@ -478,23 +498,24 @@ class LSTMModel(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
 
-from train_model import train_metric_model, get_model_paths
+from train_model import train_metric_model, get_model_paths, ANNAutoencoder, GRUAutoencoder
 
-def get_trained_model(metric_name='response'):
-    """Load the trained LSTM model and scaler for a specific metric."""
-    model_path, scaler_path = get_model_paths(metric_name)
+def get_trained_model(metric_name='response', model_type='LSTM'):
+    """Load the trained model and scaler for a specific metric and type."""
+    model_path, scaler_path = get_model_paths(metric_name, model_type)
     
     if not os.path.exists(model_path) or not os.path.exists(scaler_path):
         return None, None
         
     try:
-        # Load Model
-        input_size = 1
-        hidden_size = 50
-        num_layers = 2
-        output_size = 1
-        
-        model = LSTMModel(input_size, hidden_size, num_layers, output_size)
+        # Load Model based on type
+        if model_type == 'ANN':
+            model = ANNAutoencoder(input_dim=60)
+        elif model_type == 'GRU':
+            model = GRUAutoencoder(input_size=1, hidden_size=16, seq_len=60)
+        else: # LSTM
+            model = LSTMModel(input_size=1, hidden_size=50, num_layers=2, output_size=1)
+            
         model.load_state_dict(torch.load(model_path))
         model.eval()
         
@@ -502,29 +523,49 @@ def get_trained_model(metric_name='response'):
         scaler = joblib.load(scaler_path)
         return model, scaler
     except Exception as e:
-        print(f"Error loading model for {metric_name}: {e}")
+        print(f"Error loading {model_type} model for {metric_name}: {e}")
         return None, None
 
 @app.route('/api/forecast')
 def get_forecast():
     metric = request.args.get('metric', 'Response')  # Load, Response, Error, Slow
+    model_type = request.args.get('model', 'LSTM') # LSTM, ANN, GRU
     tier = request.args.get('tier', 'integration-service')
     bt = request.args.get('bt', '/smart-integration/users')
     
-    # Validate metric type
+    # ... (date validation remains same)
     valid_metrics = ['Load', 'Response', 'Error', 'Slow']
     if metric not in valid_metrics:
         return jsonify({'error': f'Invalid metric type. Must be one of: {valid_metrics}'})
     
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    start_time = None
+    end_time = None
+    
+    if start_date and end_date:
+        try:
+            dt_start = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+            dt_end = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+            start_time = int(dt_start.timestamp() * 1000)
+            end_time = int(dt_end.timestamp() * 1000)
+        except ValueError:
+            pass
+
     try:
-        # Fetch historical data from AppDynamics (last 30 days for hourly data)
-        duration = 30 * 24 * 60  # 30 days in minutes
+        # Fetch historical data from AppDynamics (usually 30 days for training/context)
+        # But if the user selects a custom range, we use that.
+        # Fallback duration for forecast: 30 days
+        duration, start_time_ms, end_time_ms = get_time_params(default_duration=43200)
+
         url = get_bt_url(tier, bt, metric)
         
         if not url:
             return jsonify({'error': f'No URL configured for metric: {metric}'})
         
-        raw_data = fetch_from_appdynamics(url, duration)
+        # Use our updated central function
+        raw_data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
         
         if not raw_data:
             return jsonify({'error': f'Failed to fetch {metric} data from AppDynamics'})
@@ -567,13 +608,23 @@ def get_forecast():
         
         # Use LSTM for ALL metrics
         # Try to get specific model for this metric
-        model, _ = get_trained_model(metric)
+        # Try to get specific model for this metric
+        model, _ = get_trained_model(metric, model_type)
         
         lock_file = f'training_{metric}.lock'
         
         # Check if currently training
         if os.path.exists(lock_file):
-             return jsonify({'status': 'training', 'message': f'Model for {metric} is currently training...'})
+             # Check lock file age
+             lock_age = time.time() - os.path.getmtime(lock_file)
+             if lock_age > 600: # 10 minutes timeout
+                 try:
+                     os.remove(lock_file)
+                     print(f"Removed stale lock for {metric}")
+                 except:
+                     pass
+             else:
+                 return jsonify({'status': 'training', 'message': f'{model_type} model for {metric} is currently training...'})
              
         # If no model exists and not training, trigger background training
         if not model and len(history_values) >= 100:
@@ -583,15 +634,15 @@ def get_forecast():
              training_data = [{'startTimeInMillis': ts, 'value': val} 
                               for ts, val in zip(history_timestamps, history_values)]
                               
-             def run_training_background(data, m_name):
-                 print(f"Background training started for {m_name}...")
-                 train_metric_model(data, m_name)
+             def run_training_background(data, m_name, m_type):
+                 print(f"Background training started for {m_name} ({m_type})...")
+                 train_metric_model(data, m_name, m_type)
                  print(f"Background training finished for {m_name}")
                  
-             thread = threading.Thread(target=run_training_background, args=(training_data, metric))
+             thread = threading.Thread(target=run_training_background, args=(training_data, metric, model_type))
              thread.start()
              
-             return jsonify({'status': 'training', 'message': f'Started training model for {metric}'})
+             return jsonify({'status': 'training', 'message': f'Started training {model_type} model for {metric}'})
         
         if model and len(history_values) >= 84:  # Need 60 for input + 24 for comparison
             try:
@@ -602,83 +653,126 @@ def get_forecast():
                 input_data = history_values.reshape(-1, 1)
                 metric_scaler.fit(input_data)  # Fit on all history
                 
-                # --- BACKTESTING: Compare what we predicted vs what actually happened ---
-                # Use data from 24 hours ago to predict, then compare with actual
-                backtest_start = len(history_values) - 84  # 60 for input + 24 for comparison
-                backtest_input = history_values[backtest_start:backtest_start + 60].reshape(-1, 1)
-                scaled_backtest = metric_scaler.transform(backtest_input)
-                X_backtest = torch.tensor(scaled_backtest, dtype=torch.float32).unsqueeze(0)
-                
-                # Generate backtested predictions (what we would have predicted 24h ago)
-                backtest_preds = []
-                current_input = X_backtest
-                for _ in range(24):
-                    with torch.no_grad():
-                        pred = model(current_input)
-                    backtest_preds.append(pred.item())
-                    new_step = pred.unsqueeze(1)
-                    current_input = torch.cat((current_input[:, 1:, :], new_step), dim=1)
-                
-                backtest_preds = np.array(backtest_preds).reshape(-1, 1)
-                backtest_inv = metric_scaler.inverse_transform(backtest_preds).flatten()
-                
-                # Get actual values for comparison (last 24 hours)
-                actual_24h = history_values[-24:]
-                actual_timestamps = history_timestamps[-24:]
-                
-                # Build comparison data (actual vs predicted for same timepoints)
-                comparison = []
-                for i in range(24):
-                    comparison.append({
-                        'timestamp': actual_timestamps[i],
-                        'actual': float(actual_24h[i]),
-                        'predicted': float(max(0, backtest_inv[i]))
-                    })
-                
-                # --- FUTURE FORECAST: Predict next 24 hours ---
-                last_60 = history_values[-60:].reshape(-1, 1)
-                scaled_input = metric_scaler.transform(last_60)
-                X_tensor = torch.tensor(scaled_input, dtype=torch.float32).unsqueeze(0)
-                
-                forecasts = []
-                current_input = X_tensor
-                
-                for _ in range(24):
-                    with torch.no_grad():
-                        pred = model(current_input)
-                    forecasts.append(pred.item())
-                    new_step = pred.unsqueeze(1)
-                    current_input = torch.cat((current_input[:, 1:, :], new_step), dim=1)
-                
-                forecasts = np.array(forecasts).reshape(-1, 1)
-                inv_forecasts = metric_scaler.inverse_transform(forecasts).flatten()
-                
-                # Prepare future forecast response
-                last_ts = history_timestamps[-1]
-                hour_ms = 3600000
-                
-                forecast_response = []
-                for val in inv_forecasts:
-                    last_ts += hour_ms
-                    # Round count-based metrics to integers
-                    final_val = float(max(0, val))
-                    if metric in ['Load', 'Error', 'Slow']:
-                        final_val = int(round(final_val))
-                    forecast_response.append({'timestamp': last_ts, 'value': final_val})
-                
-                # Calculate accuracy metrics
-                if np.mean(actual_24h) > 0:
-                    # Round backtested predictions for counts too
-                    predicted_backtest = backtest_inv
-                    if metric in ['Load', 'Error', 'Slow']:
-                        predicted_backtest = np.round(np.maximum(0, backtest_inv))
+                if model_type == 'LSTM':
+                    # --- BACKTESTING: Compare what we predicted vs what actually happened ---
+                    # Use data from 24 hours ago to predict, then compare with actual
+                    backtest_start = len(history_values) - 84  # 60 for input + 24 for comparison
+                    backtest_input = history_values[backtest_start:backtest_start + 60].reshape(-1, 1)
+                    scaled_backtest = metric_scaler.transform(backtest_input)
+                    X_backtest = torch.tensor(scaled_backtest, dtype=torch.float32).unsqueeze(0)
                     
-                    mae = np.mean(np.abs(actual_24h - predicted_backtest))
-                    den = np.mean(actual_24h)
+                    # Generate backtested predictions (what we would have predicted 24h ago)
+                    backtest_preds = []
+                    current_input = X_backtest
+                    for _ in range(24):
+                        with torch.no_grad():
+                            pred = model(current_input)
+                        backtest_preds.append(pred.item())
+                        new_step = pred.unsqueeze(1)
+                        current_input = torch.cat((current_input[:, 1:, :], new_step), dim=1)
+                    
+                    backtest_preds = np.array(backtest_preds).reshape(-1, 1)
+                    backtest_inv = metric_scaler.inverse_transform(backtest_preds).flatten()
+                    
+                    # Get actual values for comparison (last 24 hours)
+                    actual_24h = history_values[-24:]
+                    actual_timestamps = history_timestamps[-24:]
+                    
+                    # Build comparison data (actual vs predicted for same timepoints)
+                    comparison = []
+                    for i in range(24):
+                        comparison.append({
+                            'timestamp': actual_timestamps[i],
+                            'actual': float(actual_24h[i]),
+                            'predicted': float(max(0, backtest_inv[i]))
+                        })
+                    
+                    # --- FUTURE FORECAST: Predict next 24 hours ---
+                    last_60 = history_values[-60:].reshape(-1, 1)
+                    scaled_input = metric_scaler.transform(last_60)
+                    X_tensor = torch.tensor(scaled_input, dtype=torch.float32).unsqueeze(0)
+                    
+                    forecasts = []
+                    current_input = X_tensor
+                    
+                    for _ in range(24):
+                        with torch.no_grad():
+                            pred = model(current_input)
+                        forecasts.append(pred.item())
+                        new_step = pred.unsqueeze(1)
+                        current_input = torch.cat((current_input[:, 1:, :], new_step), dim=1)
+                    
+                    forecasts = np.array(forecasts).reshape(-1, 1)
+                    inv_forecasts = metric_scaler.inverse_transform(forecasts).flatten()
+                    
+                    # Prepare future forecast response
+                    last_ts = history_timestamps[-1]
+                    hour_ms = 3600000
+                    
+                    forecast_response = []
+                    for val in inv_forecasts:
+                        last_ts += hour_ms
+                        # Round count-based metrics to integers
+                        final_val = float(max(0, val))
+                        if metric in ['Load', 'Error', 'Slow']:
+                            final_val = int(round(final_val))
+                        forecast_response.append({'timestamp': last_ts, 'value': final_val})
+                    
+                    # Calculate accuracy metrics
+                    if np.mean(actual_24h) > 0:
+                        # Round backtested predictions for counts too
+                        predicted_backtest = backtest_inv
+                        if metric in ['Load', 'Error', 'Slow']:
+                            predicted_backtest = np.round(np.maximum(0, backtest_inv))
+                        
+                        mae = np.mean(np.abs(actual_24h - predicted_backtest))
+                        den = np.mean(actual_24h)
+                        mape = (mae / den) * 100 if den > 0 else 0
+                    else:
+                        mae = 0
+                        mape = 0
+
+                else: # ANN / GRU Autoencoder
+                    # Anomaly Detection / Reconstruction View
+                    last_60_vals = history_values[-60:]
+                    last_60_ts = history_timestamps[-60:]
+                    
+                    last_60_reshaped = last_60_vals.reshape(-1, 1)
+                    scaled_input = metric_scaler.transform(last_60_reshaped)
+                    X_tensor = torch.tensor(scaled_input, dtype=torch.float32).unsqueeze(0) # (1, 60, 1)
+                    
+                    with torch.no_grad():
+                         reconstruction = model(X_tensor) # (1, 60, 1)
+                    
+                    reconstruction_np = reconstruction.squeeze(0).numpy()
+                    reconstructed_vals = metric_scaler.inverse_transform(reconstruction_np).flatten()
+                    
+                    comparison = []
+                    # Last 24 points are indices -24 to end
+                    for i in range(36, 60): # 60 - 24 = 36
+                         comparison.append({
+                             'timestamp': last_60_ts[i],
+                             'actual': float(last_60_vals[i]),
+                             'predicted': float(max(0, reconstructed_vals[i]))
+                         })
+                    
+                    # Error metric: Reconstruction Error (MAE)
+                    diff = np.abs(last_60_vals[-24:] - reconstructed_vals[-24:])
+                    mae = np.mean(diff)
+                    den = np.mean(last_60_vals[-24:])
                     mape = (mae / den) * 100 if den > 0 else 0
-                else:
-                    mae = 0
-                    mape = 0
+                    
+                    forecast_response = []
+                
+                return jsonify({
+                    'comparison': comparison,
+                    'forecast': forecast_response,
+                    'model': model_type,
+                    'accuracy': {
+                        'mae': float(mae),
+                        'mape': float(mape)
+                    }
+                })
                 
                 # Update comparison data with rounded values
                 comparison = []
@@ -799,29 +893,22 @@ def get_error_analysis():
     bt = request.args.get('bt', '/smart-integration/users')
     timeframe = request.args.get('timeframe', 'all')
     
-    # Calculate duration in minutes based on timeframe
+    # Calculate duration in minutes based on timeframe as fallback
     duration_map = {
-        '1h': 60,
-        '6h': 360,
-        '24h': 24 * 60,
-        '7d': 7 * 24 * 60,
-        '30d': 30 * 24 * 60,
-        '6m': 180 * 24 * 60,
-        '1y': 365 * 24 * 60,
-        'all': 43200,  # 30 days default for 'all'
-        '5m': 30, # Buffer to 30m
-        '15m': 30 # Buffer to 30m
+        '1h': 60, '6h': 360, '24h': 1440, '7d': 10080, '30d': 43200,
+        '6m': 259200, '1y': 525600, 'all': 43200, '5m': 30, '15m': 30
     }
-    duration = duration_map.get(timeframe, 43200)
+    default_duration = duration_map.get(timeframe, 43200)
+    
+    # Get official time parameters (reads start_date/end_date)
+    duration, start_time_ms, end_time_ms = get_time_params(default_duration=default_duration)
     
     # Get URL and fetch data
     url = get_bt_url(tier, bt, 'Error')
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Error', 'total': 0})
     
-    # Optimize: Allow rollup? No, because rollup=True gives 1 point which breaks Heatmaps.
-    # We must fetch detailed data (rollup=False) to get daily distribution.
-    raw_data = fetch_from_appdynamics(url, duration)
+    raw_data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
@@ -986,29 +1073,22 @@ def get_load_analysis():
     bt = request.args.get('bt', '/smart-integration/users')
     timeframe = request.args.get('timeframe', 'all')
     
-    # Calculate duration in minutes based on timeframe
+    # Calculate duration in minutes based on timeframe as fallback
     duration_map = {
-        '1h': 60,
-        '6h': 360,
-        '24h': 24 * 60,
-        '7d': 7 * 24 * 60,
-        '30d': 30 * 24 * 60,
-        '6m': 180 * 24 * 60,
-        '1y': 365 * 24 * 60,
-        'all': 2628000,  # 5 Years (approx) - effectively Lifetime
-        '5m': 30, # Buffer to 30m
-        '15m': 30 # Buffer to 30m
+        '1h': 60, '6h': 360, '24h': 1440, '7d': 10080, '30d': 43200,
+        '6m': 259200, '1y': 525600, 'all': 43200, '5m': 30, '15m': 30
     }
-    duration = duration_map.get(timeframe, 43200)
+    default_duration = duration_map.get(timeframe, 43200)
+
+    # Get official time parameters (reads start_date/end_date)
+    duration, start_time_ms, end_time_ms = get_time_params(default_duration=default_duration)
     
     # Get URL and fetch data
     url = get_bt_url(tier, bt, 'Load')
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type=Load', 'total': 0})
     
-    # Optimize: Allow rollup? No, because rollup=True gives 1 point which breaks Heatmaps.
-    # We must fetch detailed data (rollup=False) to get daily distribution.
-    raw_data = fetch_from_appdynamics(url, duration)
+    raw_data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
@@ -1164,20 +1244,15 @@ def get_slow_calls_analysis():
     timeframe = request.args.get('timeframe', 'all')
     metric_type = request.args.get('type', 'slow')  # 'slow' or 'veryslow'
     
-    # Calculate duration in minutes based on timeframe
+    # Calculate duration in minutes based on timeframe as fallback
     duration_map = {
-        '1h': 60,
-        '6h': 360,
-        '24h': 24 * 60,
-        '7d': 7 * 24 * 60,
-        '30d': 30 * 24 * 60,
-        '6m': 180 * 24 * 60,
-        '1y': 365 * 24 * 60,
-        'all': 43200,  # 30 days default for 'all'
-        '5m': 30, # Buffer to 30m
-        '15m': 30 # Buffer to 30m
+        '1h': 60, '6h': 360, '24h': 1440, '7d': 10080, '30d': 43200,
+        '6m': 259200, '1y': 525600, 'all': 43200, '5m': 30, '15m': 30
     }
-    duration = duration_map.get(timeframe, 43200)
+    default_duration = duration_map.get(timeframe, 43200)
+
+    # Get official time parameters (reads start_date/end_date)
+    duration, start_time_ms, end_time_ms = get_time_params(default_duration=default_duration)
     
     # Map metric type to CSV metric name
     metric_name = 'Very Slow' if metric_type == 'veryslow' else 'Slow'
@@ -1187,9 +1262,7 @@ def get_slow_calls_analysis():
     if not url:
         return jsonify({'error': f'No URL found for tier={tier}, bt={bt}, metric_type={metric_name}', 'total': 0})
     
-    # Optimize: Allow rollup? No, because rollup=True gives 1 point which breaks Heatmaps.
-    # We must fetch detailed data (rollup=False) to get daily distribution.
-    raw_data = fetch_from_appdynamics(url, duration)
+    raw_data = fetch_from_appdynamics(url, duration, start_time=start_time_ms, end_time=end_time_ms)
     
     if not raw_data:
         return jsonify({'error': 'Failed to fetch data from AppDynamics', 'total': 0})
@@ -1358,7 +1431,8 @@ def jvm_health_page():
 
 @app.route('/api/jvm-data')
 def get_jvm_data():
-    duration = request.args.get('duration', default=60, type=int)
+    # Get time params using 60 mins default
+    duration, start_time_ms, end_time_ms = get_time_params(default_duration=60)
     tier = request.args.get('tier', 'integration-service')
     
     # Map tier names to their node identifiers (from the user's tier URLs)
@@ -1386,41 +1460,26 @@ def get_jvm_data():
     
     results = {}
     
-    def fetch_metric_flexible(metric_path, duration_mins):
-        encoded_metric = urllib.parse.quote(metric_path)
+    # Helper to fetch data using central logic
+    def fetch_metric_flexible(metric_path):
         target_app = "Smart2"
+        encoded_metric = urllib.parse.quote(metric_path)
+        base_url = f"{BASE_URL}/controller/rest/applications/{target_app}/metric-data?metric-path={encoded_metric}"
         
-        url = (
-            f"{BASE_URL}/controller/rest/applications/{target_app}/metric-data?"
-            f"metric-path={encoded_metric}&"
-            f"time-range-type=BEFORE_NOW&"
-            f"duration-in-mins={duration_mins}&"
-            f"output=JSON&"
-            f"rollup=false"
-        )
-        req = urllib.request.Request(url)
-        req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
-        try:
-            with urllib.request.urlopen(req, timeout=30) as response:
-                return json.loads(response.read().decode())
-        except Exception as e:
-            print(f"Error fetching {metric_path}: {e}")
-            return []
+        return fetch_from_appdynamics(base_url, duration, start_time=start_time_ms, end_time=end_time_ms)
 
     # Fetch all metrics
     for key, path in METRICS.items():
-        data = fetch_metric_flexible(path, duration)
+        data = fetch_metric_flexible(path)
         
         # Process data into simple Time/Value pairs
         series = []
         if data and isinstance(data, list):
-            for item in data:
-                if 'metricValues' in item:
-                    for val in item['metricValues']:
-                        series.append({
-                            't': val.get('startTimeInMillis', 0),
-                            'v': val.get('value', 0)
-                        })
+            for val in data:
+                series.append({
+                    't': val.get('startTimeInMillis', 0),
+                    'v': val.get('value', 0)
+                })
         results[key] = series
 
     # --- Generate Insights ---
@@ -1505,7 +1564,6 @@ def get_business_transactions():
              return jsonify({'error': 'Could not locate header row with "Name" and "Response Time (ms)" columns.'})
 
         # Reload or slice
-        # Slicing is faster
         df = df_raw.iloc[header_idx + 1:].copy()
         df.columns = [str(x).strip() for x in df_raw.iloc[header_idx]]
         
@@ -1547,16 +1605,14 @@ def get_business_transactions():
         top_errors = df[df['% Errors'] > 0].nlargest(10, '% Errors')[['Name', '% Errors']]
         
         # 5. Scatter Data: Calls vs Response Time (with Health)
-        # Handle NaN in Health just in case
         df['Health'] = df['Health'].fillna('Unknown')
         scatter_data = df[['Name', 'Calls', 'Response Time (ms)', 'Health']].to_dict(orient='records')
 
-
-        # 6. Table Data - include Tier column if it exists
+        # 6. Table Data
         table_cols = ['Name', 'Health', 'Response Time (ms)', 'Calls', '% Errors']
         if 'Tier' in df.columns:
             table_cols.append('Tier')
-        table_data = df[table_cols].head(50).to_dict(orient='records')
+        table_data = df[table_cols].to_dict(orient='records')
 
         return jsonify({
             'health_counts': health_counts,
@@ -1576,7 +1632,6 @@ def get_business_transactions():
             'table': table_data
         })
 
-
     except Exception as e:
         print(f"Error processing stats: {e}")
         return jsonify({'error': str(e)})
@@ -1588,8 +1643,8 @@ def database_analysis_page():
 @app.route('/api/database-analysis')
 def get_database_analysis():
     # 1. Fetch Data
-    duration = request.args.get('duration', default=60, type=int)
-    
+    duration, start_time_ms, end_time_ms = get_time_params(default_duration=60)
+
     # Metric Paths
     metric_time_spent = "Databases|C2L_DMS|KPI|Time Spent in Executions (s)"
     metric_load = "Databases|C2L_DMS|KPI|Calls per Minute"
@@ -1597,26 +1652,12 @@ def get_database_analysis():
     
     # Helper to fetch data
     def fetch_metric(m_path):
-        encoded_metric = urllib.parse.quote(m_path)
         target_app = "Database Monitoring"
-        url = (
-            f"{BASE_URL}/controller/rest/applications/{urllib.parse.quote(target_app)}/metric-data?"
-            f"metric-path={encoded_metric}&"
-            f"time-range-type=BEFORE_NOW&"
-            f"duration-in-mins={duration}&"
-            f"output=JSON&"
-            f"rollup=false"
-        )
-        req = urllib.request.Request(url)
-        req.add_header("Authorization", f"Bearer {ACCESS_TOKEN}")
-        try:
-            with urllib.request.urlopen(req) as response:
-                raw = json.loads(response.read().decode())
-                if raw and len(raw) > 0 and 'metricValues' in raw[0]:
-                    return raw[0]['metricValues']
-        except Exception as e:
-            print(f"Fetch Error ({m_path}): {e}")
-        return []
+        encoded_metric = urllib.parse.quote(m_path)
+        base_url = f"{BASE_URL}/controller/rest/applications/{urllib.parse.quote(target_app)}/metric-data?metric-path={encoded_metric}"
+        
+        # Use our updated central function
+        return fetch_from_appdynamics(base_url, duration, start_time=start_time_ms, end_time=end_time_ms)
 
     # helper to parse queries.csv
     def get_top_queries():

@@ -73,7 +73,7 @@ export function Heatmap({ data, colorScheme = 'blue' }: HeatmapProps) {
                   key={`cell-${i}-${h}`}
                   className="group aspect-square rounded flex items-center justify-center text-[8px] hover:scale-110 hover:z-10 transition-all cursor-pointer border border-border/50"
                   style={{ backgroundColor: bgColor }}
-                  style={{ backgroundColor: bgColor }}
+
                   title={`${day} - ${colLabels[h] ? colLabels[h] : (columnsCount === 60 ? 'Minute ' + h : h + ':00')} - ${val} ${colorScheme === 'blue' ? 'Calls' : 'Errors'}`}
                 >
                   {/* Only show text if there is space (not too many columns) or if it is an outlier */}

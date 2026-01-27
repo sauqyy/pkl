@@ -71,7 +71,7 @@ export default function ExecutiveDashboard() {
           <div className="h-6 w-px bg-border"></div>
           <div>
             <h1 className="text-lg font-semibold">System Overview</h1>
-            <p className="text-xs text-muted-foreground">Real-time dashboard of system health metrics</p>
+            <p className="text-xs text-muted-foreground">{dateRange.from && dateRange.to ? "Summary for Selected Period" : "Real-time dashboard (Default View)"}</p>
           </div>
         </div>
         <DateRangePicker />
