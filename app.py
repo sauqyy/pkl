@@ -499,6 +499,7 @@ class LSTMModel(nn.Module):
         return out
 
 from train_model import train_metric_model, get_model_paths, ANNAutoencoder, GRUAutoencoder
+import prophet_model
 
 def get_trained_model(metric_name='response', model_type='LSTM'):
     """Load the trained model and scaler for a specific metric and type."""
@@ -570,15 +571,14 @@ def get_forecast():
         if not raw_data:
             return jsonify({'error': f'Failed to fetch {metric} data from AppDynamics'})
         
-        # Extract metric values
+        # Extract metric values - raw_data is already a flattened list of metric values
+        # from fetch_from_appdynamics, so we just need to extract timestamp and value
         all_values = []
-        for item in raw_data:
-            if 'metricValues' in item:
-                for val in item['metricValues']:
-                    all_values.append({
-                        'timestamp': val.get('startTimeInMillis', 0),
-                        'value': val.get('value', val.get('sum', 0))
-                    })
+        for val in raw_data:
+            all_values.append({
+                'timestamp': val.get('startTimeInMillis', 0),
+                'value': val.get('value', val.get('sum', 0))
+            })
         
         if len(all_values) < 24:
             return jsonify({'error': f'Not enough historical data for {metric} forecast'})
@@ -608,13 +608,14 @@ def get_forecast():
         
         # Use LSTM for ALL metrics
         # Try to get specific model for this metric
-        # Try to get specific model for this metric
-        model, _ = get_trained_model(metric, model_type)
+        model = None
+        if model_type != 'Prophet':
+            model, _ = get_trained_model(metric, model_type)
         
         lock_file = f'training_{metric}.lock'
         
         # Check if currently training
-        if os.path.exists(lock_file):
+        if model_type != 'Prophet' and os.path.exists(lock_file):
              # Check lock file age
              lock_age = time.time() - os.path.getmtime(lock_file)
              if lock_age > 600: # 10 minutes timeout
@@ -627,7 +628,7 @@ def get_forecast():
                  return jsonify({'status': 'training', 'message': f'{model_type} model for {metric} is currently training...'})
              
         # If no model exists and not training, trigger background training
-        if not model and len(history_values) >= 100:
+        if model_type != 'Prophet' and not model and len(history_values) >= 100:
              import threading
              
              # Prepare data list for training
@@ -644,6 +645,18 @@ def get_forecast():
              
              return jsonify({'status': 'training', 'message': f'Started training {model_type} model for {metric}'})
         
+        if model_type == 'Prophet':
+            try:
+                # Prophet handles its own training/fitting on the fly usually, or we can save/load models.
+                # Given strict time constraint or "live" feel, we might retrain on history every time or use a cached model.
+                # For this implementation, we will train on the fly as Prophet is relatively fast for small data (720 points).
+                
+                result = prophet_model.train_predict(history_values, history_timestamps, forecast_days=7, metric_name=metric)
+                return jsonify(result)
+            except Exception as e:
+                print(f"Prophet error: {e}")
+                return jsonify({'error': f'Prophet model failed: {str(e)}'})
+
         if model and len(history_values) >= 84:  # Need 60 for input + 24 for comparison
             try:
                 from sklearn.preprocessing import MinMaxScaler

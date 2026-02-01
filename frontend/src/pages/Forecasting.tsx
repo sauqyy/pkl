@@ -94,7 +94,7 @@ export default function Forecasting() {
   const activeFetches = useRef<Set<string>>(new Set())
   const isMounted = useRef(true)
 
-  const [selectedModel, setSelectedModel] = useState<string>('LSTM');
+
 
   useEffect(() => {
     isMounted.current = true
@@ -104,7 +104,7 @@ export default function Forecasting() {
   // Refetch when model changes
   useEffect(() => {
     fetchAllForecasts(true)
-  }, [selectedModel])
+  }, [])
 
   const fetchForecast = async (metric: MetricType, showLoading = true) => {
     // Note: Removed activeFetches check for simplicity when switching models or re-add careful logic
@@ -119,7 +119,7 @@ export default function Forecasting() {
         }))
       }
       
-      const params = new URLSearchParams({ metric, model: selectedModel });
+      const params = new URLSearchParams({ metric, model: 'Prophet' });
       
       const response = await fetch(`/api/forecast?${params}`)
       const result = await response.json()
@@ -189,7 +189,7 @@ export default function Forecasting() {
 
     // Comparison data (last 24h: actual vs predicted side by side)
     const comparisonData = data.comparison.map(d => ({
-      time: new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: new Date(d.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
       actual: d.actual,
       predicted: d.predicted,
       type: 'comparison'
@@ -202,7 +202,7 @@ export default function Forecasting() {
     if (data.comparison.length > 0) {
         const lastActual = data.comparison[data.comparison.length - 1]
         forecastData.push({
-            time: new Date(lastActual.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            time: new Date(lastActual.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
             actual: lastActual.actual,
             predicted: lastActual.predicted,
             forecast: lastActual.actual,
@@ -211,7 +211,7 @@ export default function Forecasting() {
     }
 
     forecastData.push(...data.forecast.map(d => ({
-        time: new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: new Date(d.timestamp).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
         actual: null as number | null,
         predicted: null as number | null,
         forecast: d.value,
@@ -257,17 +257,9 @@ export default function Forecasting() {
             <h1 className="text-lg font-semibold">Performance Forecast</h1>
           </div>
           
-          {/* Model Selector */}
+          {/* Model Selector REMOVED */}
           <div className="ml-4">
-            <select 
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="h-8 px-2 text-xs rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            >
-                <option value="LSTM">LSTM (Standard)</option>
-                <option value="ANN">ANN Autoencoder (Anomaly)</option>
-                <option value="GRU">GRU Autoencoder (Anomaly)</option>
-            </select>
+            {/* Empty placeholder */}
           </div>
         </div>
 
@@ -284,7 +276,7 @@ export default function Forecasting() {
           const forecast = forecasts[metric]
           const chartData = getChartData(forecast.data)
           const trend = getTrend(forecast.data)
-          const accuracy = getAccuracy(forecast.data)
+
           const Icon = config.icon
 
           return (
@@ -303,8 +295,7 @@ export default function Forecasting() {
                       <InfoTooltip content={config.description} />
                     </CardTitle>
                     <p className="text-xs text-muted-foreground">
-                      Accuracy: <span className="font-medium" style={{ color: config.color }}>{accuracy}</span>
-                      {forecast.data?.model && <span className="ml-2">• {forecast.data.model}</span>}
+                      {/* Accuracy & Model Info Removed */}
                     </p>
                   </div>
                 </div>
@@ -365,32 +356,33 @@ export default function Forecasting() {
                             return [`${value.toFixed(1)} ${config.unit}`, name]
                           }}
                         />
+                        {/* Legend Simplified */}
                         <Legend
                           verticalAlign="top"
                           height={36}
                           content={({ payload }) => (
-                            <div className="flex items-center justify-center gap-4 text-xs mb-2">
-                              {payload?.map((entry, index) => {
-                                const isActual = entry.value === 'Actual';
-                                const isForecast = entry.value === 'Forecast';
-
-                                return (
-                                  <div key={`legend-${index}`} className="flex items-center gap-1.5">
-                                    <div className="flex items-center" style={{ width: 24, height: 12 }}>
-                                      <div
-                                        className="w-full h-0.5"
-                                        style={{
-                                          backgroundColor: isActual ? entry.color : 'transparent',
-                                          borderTop: isActual ? undefined : `2px ${isForecast ? 'dotted' : 'dashed'} ${entry.color}`,
-                                          height: isActual ? 2.5 : 0
-                                        }}
-                                      />
-                                    </div>
-                                    <span style={{ color: entry.color }}>{entry.value}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                             <div className="flex items-center justify-center gap-4 text-xs mb-2">
+                               {payload?.map((entry, index) => {
+                                 if (entry.value === 'Predicted') return null; // Hide Predicted
+                                 const isActual = entry.value === 'Actual';
+                                 
+                                 return (
+                                   <div key={`legend-${index}`} className="flex items-center gap-1.5">
+                                      <div className="flex items-center" style={{ width: 24, height: 12 }}>
+                                        <div
+                                            className="w-full h-0.5"
+                                            style={{
+                                              backgroundColor: isActual ? entry.color : 'transparent',
+                                              borderTop: isActual ? undefined : `2px dashed ${entry.color}`,
+                                              height: isActual ? 2.5 : 0
+                                            }}
+                                        />
+                                      </div>
+                                      <span style={{ color: entry.color }}>{entry.value}</span>
+                                   </div>
+                                 )
+                               })}
+                             </div>
                           )}
                         />
                         {/* Actual - Solid thick line */}
@@ -404,18 +396,7 @@ export default function Forecasting() {
                           name="Actual"
                           isAnimationActive={false}
                         />
-                        {/* Predicted (backtested) - Dashed line */}
-                        <Line
-                          type="monotone"
-                          dataKey="predicted"
-                          stroke={config.predictedColor}
-                          strokeWidth={2}
-                          strokeDasharray="5 5"
-                          dot={false}
-                          connectNulls={false}
-                          name="Predicted"
-                          isAnimationActive={false}
-                        />
+                        {/* Predicted (backtested) - REMOVED per user request */}
                         {/* Future Forecast - Dotted line in purple */}
                         <Line
                           type="monotone"

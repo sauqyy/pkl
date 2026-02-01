@@ -1,0 +1,9 @@
+prophet
+pandas
+numpy
+flask
+flask-cors
+torch
+scikit-learn
+joblib
+requests
