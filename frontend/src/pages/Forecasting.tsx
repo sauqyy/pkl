@@ -81,6 +81,10 @@ const METRIC_CONFIG: Record<MetricType, {
 const METRICS: MetricType[] = ['Load', 'Response', 'Error', 'Slow'];
 const REFRESH_INTERVAL = 60000; // 60 seconds
 
+import { useBusinessTransaction } from "@/components/BusinessTransactionContext"
+
+// ... (existing code)
+
 export default function Forecasting() {
   const [forecasts, setForecasts] = useState<Record<MetricType, MetricForecast>>({
     Load: { data: null, loading: true, error: null },
@@ -89,11 +93,11 @@ export default function Forecasting() {
     Slow: { data: null, loading: true, error: null }
   })
   const { toggleSidebar } = useSidebar()
+  const { selectedTier, selectedTransaction } = useBusinessTransaction()
   const tooltipStyles = useChartTooltipStyles()
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const activeFetches = useRef<Set<string>>(new Set())
   const isMounted = useRef(true)
-
 
 
   useEffect(() => {
@@ -101,10 +105,10 @@ export default function Forecasting() {
     return () => { isMounted.current = false }
   }, [])
 
-  // Refetch when model changes
+  // Refetch when model or BT/Tier changes
   useEffect(() => {
     fetchAllForecasts(true)
-  }, [])
+  }, [selectedTier, selectedTransaction])
 
   const fetchForecast = async (metric: MetricType, showLoading = true) => {
     // Note: Removed activeFetches check for simplicity when switching models or re-add careful logic
@@ -119,7 +123,12 @@ export default function Forecasting() {
         }))
       }
       
-      const params = new URLSearchParams({ metric, model: 'Prophet' });
+      const params = new URLSearchParams({ 
+        metric, 
+        model: 'Prophet',
+        tier: selectedTier,
+        bt: selectedTransaction
+      });
       
       const response = await fetch(`/api/forecast?${params}`)
       const result = await response.json()
