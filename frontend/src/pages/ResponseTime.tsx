@@ -50,7 +50,7 @@ export default function ResponseTime() {
     // Process buckets to match UI expectations (Aggregating Fast + Normal)
     const normalCount = (data?.buckets['Fast (<500ms)'] || 0) + (data?.buckets['Normal (500-1000ms)'] || 0) + (data?.buckets['Normal'] || 0);
     const slowCount = (data?.buckets['Slow (>1000ms)'] || 0) + (data?.buckets['Slow'] || 0);
-    
+
     // Create pieData ensuring explicit order/keys for coloring
     const pieData = [
         { name: 'Normal', value: normalCount },
@@ -111,7 +111,7 @@ export default function ResponseTime() {
 
             {data ? (
                 <>
-                    <div className="grid gap-4 grid-cols-4">
+                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                         <Card className="bg-card">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
@@ -121,6 +121,28 @@ export default function ResponseTime() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{data.raw_values.length}</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-card">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                                    Min Response
+                                    <InfoTooltip content="Fastest response time recorded." />
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-green-500">{data.min} ms</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-card">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                                    Max Response
+                                    <InfoTooltip content="Slowest response time recorded." />
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-red-500">{data.max} ms</div>
                             </CardContent>
                         </Card>
                         <Card className="bg-card">

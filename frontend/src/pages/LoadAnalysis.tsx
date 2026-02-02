@@ -17,6 +17,8 @@ interface LoadAnalysisData {
   peak_day: string;
   hourly: number[];
   daily: number[];
+  min: number;
+  max: number;
   heatmap: {
     index: string[];
     data: number[][];
@@ -90,38 +92,60 @@ export default function LoadAnalysis() {
         data ? (
           <>
             {/* Stats Grid */}
-            <div className="grid gap-4 grid-cols-3">
+            <div className="grid gap-4 grid-cols-5">
               <Card className="bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                    Total Calls Processed
-                    <InfoTooltip content="Total number of HTTP requests processed by the application." />
+                    Total Calls
+                    <InfoTooltip content="Total number of HTTP requests processed." />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold">{data.total.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{data.total.toLocaleString()}</div>
                 </CardContent>
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                    Peak Load Time
-                    <InfoTooltip content="Hour of the day with the highest traffic volume." />
+                    Min Load
+                    <InfoTooltip content="Lowest recorded calls per minute/hour." />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-blue-400">{data.peak_hour}</div>
+                  <div className="text-2xl font-bold text-gray-400">{data.min.toLocaleString()}</div>
                 </CardContent>
               </Card>
               <Card className="bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                    Highest Load Day
+                    Max Load
+                    <InfoTooltip content="Highest recorded calls per minute/hour." />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-blue-400">{data.max.toLocaleString()}</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Peak Time
+                    <InfoTooltip content="Time with the highest traffic volume." />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl font-bold text-orange-400 truncate" title={data.peak_hour}>{data.peak_hour}</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Peak Day
                     <InfoTooltip content="Day of the week with the most traffic." />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-green-400">{data.peak_day}</div>
+                  <div className="text-xl font-bold text-green-400 truncate" title={data.peak_day}>{data.peak_day}</div>
                 </CardContent>
               </Card>
             </div>

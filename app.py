@@ -468,11 +468,16 @@ def get_data():
     # 3. Sort timeline by timestamp
     timeline.sort(key=lambda x: x['timestamp'])
 
+    min_response = min([x for x in response_times if x > 0]) if any(x > 0 for x in response_times) else 0
+    max_response = max(response_times) if response_times else 0
+
     return jsonify({
         'frequency': sorted_freq,
         'timeline': timeline,
         'buckets': buckets,
-        'raw_values': response_times
+        'raw_values': response_times,
+        'min': min_response,
+        'max': max_response
     })
 
 # --- Prediction Logic ---
@@ -1068,7 +1073,9 @@ def get_error_analysis():
             'daily': daily_dist,
             'total': total_errors,
             'peak_hour': peak_hour,
-            'peak_day': peak_day
+            'peak_day': peak_day,
+            'min': int(df[df[value_col] > 0][value_col].min()) if not df[df[value_col] > 0].empty else 0,
+            'max': int(df[value_col].max())
         })
         
     except Exception as e:
@@ -1238,7 +1245,9 @@ def get_load_analysis():
             'daily': daily_dist,
             'total': total_load,
             'peak_hour': peak_hour,
-            'peak_day': peak_day
+            'peak_day': peak_day,
+            'min': int(df[df[value_col] > 0][value_col].min()) if not df[df[value_col] > 0].empty else 0,
+            'max': int(df[value_col].max())
         })
         
     except Exception as e:
@@ -1431,7 +1440,9 @@ def get_slow_calls_analysis():
             'peak_hour': peak_hour,
             'peak_day': peak_day,
             'trend': trend_data,
-            'impact': impact_data
+            'impact': impact_data,
+            'min': int(df[df[value_col] > 0][value_col].min()) if not df[df[value_col] > 0].empty else 0,
+            'max': int(df[value_col].max()) if not df.empty else 0
         })
         
     except Exception as e:
@@ -1762,6 +1773,18 @@ def get_database_analysis():
         # Analysis: Time Spent > Load
         if t_val > l_val:
             inefficiency_count += 1
+            
+    # Spike Detection (Statistical: > Mean + 2*StdDev)
+    import numpy as np
+    spike_count = 0
+    if values_time:
+        mean_time = np.mean(values_time)
+        std_time = np.std(values_time)
+        threshold = mean_time + (2 * std_time)
+        # minimal threshold to avoid noise in low-latency environments
+        threshold = max(threshold, 0.5) 
+         
+        spike_count = sum(1 for v in values_time if v > threshold)
 
     if total_points == 0:
         return jsonify({'error': 'No data received from AppDynamics'})
@@ -1774,6 +1797,7 @@ def get_database_analysis():
             'cpu': values_cpu
         },
         'inefficiency_count': inefficiency_count,
+        'spike_count': spike_count,
         'total_points': total_points,
         'queries': queries_data
     })
