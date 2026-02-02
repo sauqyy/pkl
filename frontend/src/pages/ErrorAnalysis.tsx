@@ -17,6 +17,8 @@ interface ErrorAnalysisData {
   peak_day: string;
   hourly: number[];
   daily: number[];
+  min: number;
+  max: number;
   heatmap: {
     index: string[];
     data: number[][];
@@ -91,7 +93,7 @@ export default function ErrorAnalysis() {
         data ? (
           <>
             {/* Stats Grid */}
-            <div className="grid gap-4 grid-cols-3">
+            <div className="grid gap-4 grid-cols-5">
               <Card className="bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
@@ -106,12 +108,34 @@ export default function ErrorAnalysis() {
               <Card className="bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Min Errors
+                    <InfoTooltip content="Lowest recorded error count per interval." />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-gray-400">{data.min.toLocaleString()}</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
+                    Max Errors
+                    <InfoTooltip content="Highest recorded error count per interval." />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-bold text-red-500">{data.max.toLocaleString()}</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-card">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
                     Peak Error Time
                     <InfoTooltip content="The hour of the day with the highest frequency of errors." />
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-red-400">{data.peak_hour}</div>
+                  <div className="text-3xl font-bold text-red-400 truncate" title={data.peak_hour}>{data.peak_hour}</div>
                 </CardContent>
               </Card>
               <Card className="bg-card">
@@ -122,7 +146,7 @@ export default function ErrorAnalysis() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-orange-400">{data.peak_day}</div>
+                  <div className="text-3xl font-bold text-orange-400 truncate" title={data.peak_day}>{data.peak_day}</div>
                 </CardContent>
               </Card>
             </div>

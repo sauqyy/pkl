@@ -31,6 +31,7 @@ interface QueryData {
 interface DatabaseData {
     chart_data: ChartDataDetails
     inefficiency_count: number
+    spike_count?: number
     total_points: number
     queries: QueryData[]
 }
@@ -72,10 +73,10 @@ export default function DatabaseAnalysis() {
     const loadVals = data.chart_data.load || []
     const cpuVals = data.chart_data.cpu || []
 
-    const avgTime = timeVals.length ? (timeVals.reduce((a, b) => a + b, 0) / timeVals.length).toFixed(1) : "0"
-    const avgLoad = loadVals.length ? (loadVals.reduce((a, b) => a + b, 0) / loadVals.length).toFixed(0) : "0"
-    const avgCpu = cpuVals.length ? (cpuVals.reduce((a, b) => a + b, 0) / cpuVals.length).toFixed(1) : "0"
-    const maxTime = timeVals.length ? Math.max(...timeVals).toFixed(1) : "0"
+    const avgTime = timeVals.length ? (timeVals.reduce((a, b) => a + b, 0) / timeVals.length) : 0
+    const avgLoad = loadVals.length ? (loadVals.reduce((a, b) => a + b, 0) / loadVals.length) : 0
+    const avgCpu = cpuVals.length ? (cpuVals.reduce((a, b) => a + b, 0) / cpuVals.length) : 0
+    const maxTime = timeVals.length ? Math.max(...timeVals) : 0
 
     // -- Charts --
     const timestamps = data.chart_data.timestamps.map(ts => new Date(ts))
@@ -150,19 +151,19 @@ export default function DatabaseAnalysis() {
         plugins: { legend: { display: false } },
         scales: {
             x: { type: 'time', time: { unit: 'minute' }, grid: { display: false } },
-            y: { beginAtZero: true, max: 100, title: { display: true, text: 'Percent (%)' } }
+            y: {
+                type: 'linear', min: 0, max: 100,
+                title: { display: true, text: 'CPU (%)', color: '#0ea5e9' },
+                grid: { color: 'rgba(200,200,200,0.1)' }
+            }
         }
     }
 
     // Efficiency Donut
-    const inefficient = data.inefficiency_count
-    const total = data.total_points || 1
-    const efficient = Math.max(0, total - inefficient)
-
     const donutData = {
-        labels: ['Efficient (Load ≥ Time)', 'Inefficient (Time > Load)'],
+        labels: ['Efficient', 'Inefficient'],
         datasets: [{
-            data: [efficient, inefficient],
+            data: [data.total_points - data.inefficiency_count, data.inefficiency_count],
             backgroundColor: ['#22c55e', '#ef4444'],
             borderWidth: 0
         }]
@@ -188,14 +189,14 @@ export default function DatabaseAnalysis() {
     const donutOptions: ChartOptions<'doughnut'> = {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: '60%',
         plugins: {
-            legend: { position: 'right', labels: { boxWidth: 12, usePointStyle: true } }
-        },
-        cutout: '65%'
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, color: '#9ca3af' } }
+        }
     }
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col space-y-4 p-4 overflow-auto bg-background text-foreground animate-in fade-in duration-500">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -215,37 +216,49 @@ export default function DatabaseAnalysis() {
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid gap-4 grid-cols-5">
+            <div className="grid gap-4 grid-cols-6">
                 <Card className="bg-card">
                     <CardContent className="p-4">
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Avg Time Spent</div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">
+                            Avg Time Spent
+                            <InfoTooltip content="Average time spent in database executions per minute." />
+                        </div>
                         <div className="flex items-baseline gap-1">
-                            <div className="text-2xl font-bold text-blue-500">{avgTime}</div>
+                            <div className="text-2xl font-bold text-blue-500">{avgTime.toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
                             <span className="text-xs text-muted-foreground">s</span>
                         </div>
                     </CardContent>
                 </Card>
                 <Card className="bg-card">
                     <CardContent className="p-4">
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Avg Load</div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">
+                            Avg Load
+                            <InfoTooltip content="Average number of database calls per minute (CPM)." />
+                        </div>
                         <div className="flex items-baseline gap-1">
-                            <div className="text-2xl font-bold">{Number(avgLoad).toLocaleString()}</div>
+                            <div className="text-2xl font-bold">{avgLoad.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                             <span className="text-xs text-muted-foreground">cpm</span>
                         </div>
                     </CardContent>
                 </Card>
                 <Card className="bg-card">
                     <CardContent className="p-4">
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Max Latency</div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">
+                            Max Time Spent
+                            <InfoTooltip content="Highest recorded total execution time in a single interval (not single query latency)." />
+                        </div>
                         <div className="flex items-baseline gap-1">
-                            <div className="text-2xl font-bold text-red-500">{maxTime}</div>
+                            <div className="text-2xl font-bold text-red-500">{maxTime.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                             <span className="text-xs text-muted-foreground">s</span>
                         </div>
                     </CardContent>
                 </Card>
                 <Card className="bg-card">
                     <CardContent className="p-4">
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Inefficient Events</div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">
+                            Inefficient Events
+                            <InfoTooltip content="Number of intervals where Time Spent (s) > Load (CPM)." />
+                        </div>
                         <div className="flex items-baseline gap-1">
                             <div className="text-2xl font-bold text-orange-500">{data.inefficiency_count}</div>
                             <span className="text-xs text-muted-foreground">times</span>
@@ -254,9 +267,24 @@ export default function DatabaseAnalysis() {
                 </Card>
                 <Card className="bg-card">
                     <CardContent className="p-4">
-                        <div className="text-xs font-medium text-muted-foreground mb-1">Avg CPU</div>
+                        <div className="text-xs font-medium text-muted-foreground mb-1">
+                            Latency Spikes
+                            <InfoTooltip content="Statistical Spikes: Time Spent > Mean + 2*StdDev (min 0.5s)." />
+                        </div>
                         <div className="flex items-baseline gap-1">
-                            <div className="text-2xl font-bold">{avgCpu}</div>
+                            <div className="text-2xl font-bold text-red-600">{data.spike_count || 0}</div>
+                            <span className="text-xs text-muted-foreground">events</span>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="bg-card">
+                    <CardContent className="p-4">
+                        <div className="text-xs font-medium text-muted-foreground mb-1">
+                            Avg CPU
+                            <InfoTooltip content="Average CPU utilization percentage of the database." />
+                        </div>
+                        <div className="flex items-baseline gap-1">
+                            <div className="text-2xl font-bold">{avgCpu.toLocaleString(undefined, { maximumFractionDigits: 1 })}</div>
                             <span className="text-xs text-muted-foreground">%</span>
                         </div>
                     </CardContent>
@@ -285,7 +313,14 @@ export default function DatabaseAnalysis() {
                     <CardHeader>
                         <CardTitle className="text-base font-semibold flex items-center">
                             Efficiency Distribution
-                            <InfoTooltip content="Proportion of queries executing efficiently versus inefficiently." />
+                            <InfoTooltip content="
+                                Proportion of queries executing efficiently versus inefficiently.
+
+                                Formula Details:
+                                1. Efficient: Load (CPM) ≥ Time Spent (s)
+                                2. Inefficient: Time Spent (s) > Load (CPM)
+                                3. Spike: Time Spent > Mean + 2*StdDev (min 0.5s)
+                            " />
                         </CardTitle>
                     </CardHeader>
                     <CardContent>

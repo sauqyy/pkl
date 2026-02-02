@@ -9,11 +9,13 @@ export interface DashboardData {
     timeline: MetricValue[];
     buckets: Record<string, number>;
     raw_values: number[];
+    min: number;
+    max: number;
 }
 
 export const fetchDashboardData = async (
-    duration: number = 60, 
-    tier?: string, 
+    duration: number = 60,
+    tier?: string,
     bt?: string,
     startDate?: Date,
     endDate?: Date
