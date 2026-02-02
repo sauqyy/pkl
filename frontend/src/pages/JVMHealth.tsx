@@ -68,8 +68,10 @@ export default function JVMHealth() {
   const getAvailability = () => {
     if (!data.data.availability || data.data.availability.length === 0) return { percent: 'N/A', isHealthy: false }
     const avg = data.data.availability.reduce((sum, d) => sum + d.v, 0) / data.data.availability.length
-    const pct = (avg * 100).toFixed(2)
-    return { percent: `${pct}%`, isHealthy: avg >= 0.99 }
+    // Normalize: if > 1 (multi-node aggregation), treat as 100%
+    const normalizedAvg = avg > 1 ? 1 : avg
+    const pct = (normalizedAvg * 100).toFixed(2)
+    return { percent: `${pct}%`, isHealthy: normalizedAvg >= 0.99 }
   }
 
   const availability = getAvailability()

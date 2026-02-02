@@ -1614,6 +1614,21 @@ def get_business_transactions():
         df['Calls'] = df['Calls'].apply(clean_numeric)
         df['% Errors'] = df['% Errors'].apply(clean_numeric)
         
+        # 0. Recalculate Health based on new thresholds (to match Frontend Legend)
+        # Normal: < 1000ms, < 1% Errors
+        # Warning: 1000ms-5000ms, 1-10% Errors
+        # Critical: > 5000ms, > 10% Errors
+        def calculate_health(row):
+            t = row['Response Time (ms)']
+            e = row['% Errors']
+            if t > 5000 or e > 10:
+                return 'Critical'
+            if t >= 1000 or e >= 1:
+                return 'Warning'
+            return 'Normal'
+        
+        df['Health'] = df.apply(calculate_health, axis=1)
+        
         # Aggregations / Visualizations Data
         
         # 1. Health Distribution
