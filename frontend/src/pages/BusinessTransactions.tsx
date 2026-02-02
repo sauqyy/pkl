@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { PanelRight, FileSpreadsheet } from "lucide-react"
 import { Bar, Doughnut, Scatter } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend, ChartOptions } from 'chart.js'
@@ -67,7 +74,7 @@ export default function BusinessTransactions() {
   const doughnutOptions: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom' } }
+    plugins: { legend: { display: false } }
   }
 
   const slowestChartData = {
@@ -162,16 +169,30 @@ export default function BusinessTransactions() {
           </button>
           <div className="h-6 w-px bg-border"></div>
           <div>
-            <h1 className="text-lg font-semibold">Business Transaction - Analysis</h1>
-            <p className="text-xs text-muted-foreground">Historical Snapshot from Excel Report</p>
+            <h1 className="text-lg font-semibold">Business Transaction Report</h1>
           </div>
         </div>
+
         <div className="flex items-center gap-2">
           <GlobalSearch />
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/50 rounded-md border border-border text-xs font-medium text-muted-foreground">
-            <FileSpreadsheet className="h-3.5 w-3.5" />
-            Static Snapshot
-          </div>
+          <TooltipProvider>
+            <UITooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="gap-2 font-normal hover:bg-muted"
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  Static
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  Historical Snapshot from Excel Report <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vR9zFQBOuHIAG4a54fZ98I1ml8_3G2rLtZpXmFuqxnFnCR1mm1bL4IrXOOPTNQmbt-t7xCaztWHkkVw/pubhtml?gid=848526325&single=true" target="_blank" rel="noopener noreferrer" className="font-semibold underline">here</a>
+                </p>
+              </TooltipContent>
+            </UITooltip>
+          </TooltipProvider>
         </div>
       </div>
 
@@ -192,7 +213,21 @@ export default function BusinessTransactions() {
             <p className="text-xs text-muted-foreground mt-1">Transaction health categories</p>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]"><Doughnut data={healthChartData} options={doughnutOptions} /></div>
+            <div className="h-[250px]"><Doughnut data={healthChartData} options={doughnutOptions} /></div>
+            <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-md">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                <span className="font-medium text-foreground">Normal:</span> &lt; 1s Response time, &lt; 1% Errors
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                <span className="font-medium text-foreground">Warning:</span> 1s - 5s Response time, 1-10% Errors
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                <span className="font-medium text-foreground">Critical:</span> &gt; 5s Response time, &gt; 10% Errors
+              </div>
+            </div>
           </CardContent>
         </Card>
 

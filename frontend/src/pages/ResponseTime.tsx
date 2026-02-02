@@ -148,8 +148,8 @@ export default function ResponseTime() {
                         <Card className="bg-card">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                                    Error Rate
-                                    <InfoTooltip content="Percentage of transactions that resulted in an error or were slow." />
+                                    Slow Rate
+                                    <InfoTooltip content="Percentage of transactions that were slow (>1s)." />
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -266,7 +266,7 @@ export default function ResponseTime() {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <div className="w-3 h-3 rounded-full bg-[#ef4444]" />
-                                            <span>Slow / Error</span>
+                                            <span>Slow</span>
                                         </div>
                                     </div>
                                 </div>

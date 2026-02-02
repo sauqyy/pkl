@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { PanelRight } from "lucide-react"
 import { Line, Doughnut } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ChartOptions, TimeScale, ArcElement } from 'chart.js'
@@ -11,6 +12,7 @@ import { GlobalSearch } from "@/components/GlobalSearch"
 import InfoTooltip from "@/components/InfoTooltip"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale, ArcElement)
+import Papa from "papaparse"
 
 interface ChartDataDetails {
     timestamps: number[]
@@ -215,6 +217,8 @@ export default function DatabaseAnalysis() {
             </div>
 
             {/* Metrics Grid */}
+
+
             <div className="grid gap-4 grid-cols-5">
                 <Card className="bg-card">
                     <CardContent className="p-4">
@@ -314,11 +318,65 @@ export default function DatabaseAnalysis() {
                 </CardContent>
             </Card>
 
+            <div className="border-t border-border pt-4 mt-6 flex justify-end items-center gap-2 mb-2">
+                <span className="text-sm font-medium text-muted-foreground">Upload Custom Data:</span>
+                <div className="w-[300px]">
+                    <Input
+                        type="file"
+                        accept=".csv"
+                        className="cursor-pointer"
+                        onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                                const reader = new FileReader()
+                                reader.onload = (event) => {
+                                    const text = event.target?.result as string
+                                    if (!text) return
+
+                                    // Find the line number where headers start (look for "Query Id")
+                                    const lines = text.split('\n')
+                                    const headerRowIndex = lines.findIndex(line => line.includes('Query Id'))
+                                    
+                                    if (headerRowIndex === -1) {
+                                        console.error("Could not find header row in CSV")
+                                        return
+                                    }
+
+                                    // Extract content starting from the header row
+                                    const csvContent = lines.slice(headerRowIndex).join('\n')
+
+                                    Papa.parse(csvContent, {
+                                        header: true,
+                                        skipEmptyLines: true,
+                                        complete: (results) => {
+                                            const parsedQueries = results.data.map((row: any) => ({
+                                                id: row['Query Id'] || 'N/A',
+                                                query: row['Query'] || 'N/A',
+                                                elapsed_time: row['Elapsed Time'] || '0',
+                                                executions: row['Number of Executions'] || '0',
+                                                avg_response: row['Average Response Time'] || '0',
+                                                weight: parseFloat((row['Weight (%)'] || '0').replace('%', ''))
+                                            })).sort((a: any, b: any) => b.weight - a.weight)
+                                            
+                                            setData(prev => prev ? { ...prev, queries: parsedQueries } : null)
+                                        }
+                                    })
+                                }
+                                reader.readAsText(file)
+                            }
+                        }}
+                    />
+                </div>
+            </div>
+
             {/* Top 5 Queries Table */}
             <Card className="bg-card">
                 <CardHeader>
                     <CardTitle className="text-base font-semibold flex items-center">
                         Top 5 Heavy Queries (by Weight)
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                            ({dateRange.from && dateRange.to ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}` : "Last 60 Minutes"})
+                        </span>
                         <InfoTooltip content="Queries consuming the most database resources based on execution time and frequency." />
                     </CardTitle>
                 </CardHeader>
@@ -365,6 +423,9 @@ export default function DatabaseAnalysis() {
                 <CardHeader>
                     <CardTitle className="text-base font-semibold flex items-center">
                         Top 10 Query Weight Distribution
+                        <span className="ml-2 text-xs font-normal text-muted-foreground">
+                            ({dateRange.from && dateRange.to ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}` : "Last 60 Minutes"})
+                        </span>
                         <InfoTooltip content="Visual breakdown of resource consumption by top queries." />
                     </CardTitle>
                 </CardHeader>
