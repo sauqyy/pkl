@@ -47,18 +47,25 @@ export default function ResponseTime() {
         count
     })).sort((a, b) => a.ms - b.ms) : [];
 
-    const pieData = data ? Object.entries(data.buckets).map(([name, value]) => ({ name, value })) : [];
-    /* 
-       Update Colors for Normal (Green) vs Slow (Red)
-       Normal = #22c55e (Green-500)
-       Slow = #ef4444 (Red-500) - acting as warning/error
-    */
-    const COLORS = ['#22c55e', '#ef4444'];
+    // Process buckets to match UI expectations (Aggregating Fast + Normal)
+    const normalCount = (data?.buckets['Fast (<500ms)'] || 0) + (data?.buckets['Normal (500-1000ms)'] || 0) + (data?.buckets['Normal'] || 0);
+    const slowCount = (data?.buckets['Slow (>1000ms)'] || 0) + (data?.buckets['Slow'] || 0);
+    
+    // Create pieData ensuring explicit order/keys for coloring
+    const pieData = [
+        { name: 'Normal', value: normalCount },
+        { name: 'Slow', value: slowCount }
+    ].filter(item => item.value > 0);
+
+    const COLOR_MAP: Record<string, string> = {
+        'Normal': '#22c55e',
+        'Slow': '#ef4444'
+    };
 
     // Calculate percentage of Normal transactions
-    const totalCount = data ? (data.buckets['Normal'] || 0) + (data.buckets['Slow'] || 0) : 0;
+    const totalCount = normalCount + slowCount;
     const normalPercentage = totalCount > 0
-        ? ((data!.buckets['Normal'] || 0) / totalCount * 100).toFixed(0)
+        ? ((normalCount / totalCount) * 100).toFixed(0)
         : 0;
 
     // Calculate stats
@@ -147,7 +154,7 @@ export default function ResponseTime() {
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-red-400">
-                                    {data.buckets['Slow'] > 0 ? ((data.buckets['Slow'] / data.raw_values.length) * 100).toFixed(1) : 0}%
+                                    {slowCount > 0 && data?.raw_values.length ? ((slowCount / data.raw_values.length) * 100).toFixed(1) : 0}%
                                 </div>
                             </CardContent>
                         </Card>
@@ -238,7 +245,7 @@ export default function ResponseTime() {
                                                 stroke="none"
                                             >
                                                 {pieData.map((entry, index) => (
-                                                    <Cell key={`cell-${entry.name}-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                    <Cell key={`cell-${entry.name}-${index}`} fill={COLOR_MAP[entry.name]} />
                                                 ))}
                                             </Pie>
                                             <Tooltip contentStyle={tooltipStyles.contentStyle} />

@@ -455,15 +455,15 @@ def get_data():
     sorted_freq = dict(sorted(frequency.items()))
     
     # 2. Performance Buckets (Doughnut Chart)
-    # Fast: < 50ms, Normal: 50-100ms, Slow: > 100ms
-    buckets = {'Fast (<50ms)': 0, 'Normal (50-100ms)': 0, 'Slow (>100ms)': 0}
+    # Fast: < 500ms, Normal: 500-1000ms, Slow: > 1000ms
+    buckets = {'Fast (<500ms)': 0, 'Normal (500-1000ms)': 0, 'Slow (>1000ms)': 0}
     for t in response_times:
-        if t < 50:
-            buckets['Fast (<50ms)'] += 1
-        elif t <= 100:
-            buckets['Normal (50-100ms)'] += 1
+        if t < 500:
+            buckets['Fast (<500ms)'] += 1
+        elif t <= 1000:
+            buckets['Normal (500-1000ms)'] += 1
         else:
-            buckets['Slow (>100ms)'] += 1
+            buckets['Slow (>1000ms)'] += 1
 
     # 3. Sort timeline by timestamp
     timeline.sort(key=lambda x: x['timestamp'])
