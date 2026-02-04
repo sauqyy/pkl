@@ -264,6 +264,7 @@ export default function Forecasting() {
           <div className="h-6 w-px bg-border"></div>
           <div>
             <h1 className="text-lg font-semibold">Performance Forecast</h1>
+            <p className="text-xs text-muted-foreground">Forecasting for the next 7 days</p>
           </div>
           
           {/* Model Selector REMOVED */}
