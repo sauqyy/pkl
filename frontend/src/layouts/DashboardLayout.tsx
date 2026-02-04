@@ -1,6 +1,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { SidebarProvider, useSidebar } from "@/components/SidebarContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Chatbot } from "@/components/Chatbot";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { collapsed, toggleSidebar } = useSidebar();
@@ -12,6 +13,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <main className="flex-1 p-8 overflow-y-auto h-screen bg-background">
         {children}
       </main>
+      <Chatbot />
     </div>
   );
 }

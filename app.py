@@ -1946,6 +1946,67 @@ def background_error_monitor():
             time.sleep(60) # Wait before retry on crash
             time.sleep(60) # wait before retrying
 
+# --- Chatbot API ---
+OLLAMA_CLOUD_API_KEY = "57d7e79dce114353b97f35b43dd46ad3.mKbkdHCSAGwKs2m6_tKlzh7v"
+OLLAMA_CLOUD_URL = "https://ollama.com/api/chat"
+OLLAMA_MODEL = "gpt-oss:120b-cloud"
+
+@app.route('/api/ask-bot', methods=['POST'])
+def ask_bot():
+    try:
+        data = request.json
+        question = data.get('question')
+        html_content = data.get('html_content', '')
+
+        if not question:
+            return jsonify({'error': 'Question is required'}), 400
+
+        # Truncate content if too massive (128k context avail, let's limit to 50k chars)
+        context = html_content[:50000]
+
+        system_prompt = (
+            "Kamu adalah 'Hana', asisten analisis data cerdas dari Handalin AI. "
+            "Tugasmu adalah membantu pengguna memahami data yang ditampilkan di halaman dashboard. "
+            "Gunakan Bahasa Indonesia yang profesional namun ramah. "
+            "Berikut adalah konteks HTML dari halaman yang sedang dilihat pengguna: \n\n"
+            "{context}\n\n"
+            "Jawablah pertanyaan pengguna berdasarkan data tersebut dengan **SINGKAT, PADAT, dan JELAS (Compact)**. "
+            "**JANGAN GUNAKAN TABEL**. Gunakan poin-poin (bullet points) atau paragraf pendek saja."
+        )
+
+        messages = [
+            {"role": "system", "content": system_prompt.format(context=context)},
+            {"role": "user", "content": question}
+        ]
+
+        headers = {
+            "Authorization": f"Bearer {OLLAMA_CLOUD_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": OLLAMA_MODEL,
+            "messages": messages,
+            "stream": False
+        }
+
+        print(f"Sending request to Ollama Cloud ({OLLAMA_MODEL})...")
+        response = requests.post(OLLAMA_CLOUD_URL, headers=headers, json=payload, timeout=60)
+        
+        if response.status_code != 200:
+            print(f"Ollama API Error: {response.text}")
+            return jsonify({'answer': 'Sorry, I encountered an issue connecting to the AI service.'}), 500
+
+        result = response.json()
+        # print(result)
+        answer = result.get('message', {}).get('content', "I couldn't generate an answer.")
+        
+        return jsonify({'answer': answer})
+
+    except Exception as e:
+        print(f"Chatbot Error: {e}")
+        return jsonify({'answer': 'An error occurred while processing your request.'}), 500
+
 if __name__ == '__main__':
     # Ensure thread starts only once (Flask reloader protection)
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
