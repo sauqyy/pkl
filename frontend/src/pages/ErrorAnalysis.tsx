@@ -189,7 +189,7 @@ export default function ErrorAnalysis() {
                         <XAxis dataKey="hour" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                         <Tooltip contentStyle={tooltipStyles.contentStyle} />
-                        <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="count" fill="#ef4444" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -222,7 +222,7 @@ export default function ErrorAnalysis() {
                         <XAxis type="number" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                         <YAxis type="category" dataKey="day" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
                         <Tooltip contentStyle={tooltipStyles.contentStyle} />
-                        <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="count" fill="#ef4444" radius={[0, 4, 4, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
